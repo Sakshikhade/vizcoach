@@ -2,24 +2,41 @@ import Pocketbase from 'pocketbase';
 import { StudentGroup, User } from './types';
 
 class PocketbaseClient {
-  readonly client: Pocketbase;
+  readonly pb: Pocketbase;
 
   constructor() {
-    this.client = new Pocketbase(process.env.REACT_APP_POCKETBASE_URL);
+    this.pb = new Pocketbase(process.env.REACT_APP_POCKETBASE_URL);
+  }
+
+  async authWithPassword(email: string, password: string): Promise<void> {
+    try {
+      await this.pb.collection('users').authWithPassword(email, password);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  clearAuthStore(): void {
+    this.pb.authStore.clear();
   }
 
   getUser(): User | null {
-    if (!this.client.authStore.isValid) return null;
+    if (!this.pb.authStore.isValid) return null;
     return {
-      ...this.client.authStore.model,
-      token: this.client.authStore.token,
+      ...this.pb.authStore.model,
+      token: this.pb.authStore.token,
     } as User;
   }
 
   async getStudentGroups(): Promise<StudentGroup[]> {
-    return (await this.client
-      .collection('groups')
-      .getFullList()) as StudentGroup[];
+    try {
+      return (await this.pb
+        .collection('groups')
+        .getFullList()) as StudentGroup[];
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
   }
 }
 

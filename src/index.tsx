@@ -3,20 +3,20 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-
-import Dashboard from 'pages/Dashboard';
-import Login from 'pages/Login';
-import NotFound from 'pages/NotFound';
 import { AuthProvider } from 'context';
+import { PrivateRoutes } from 'routes';
+import { Dashboard, Login, NotFound } from 'pages';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="dashboard" element={<Dashboard />} />
           <Route path="login" element={<Login />} />
-          <Route path="" element={<Navigate to="/dashboard" />} />
+          <Route element={<PrivateRoutes />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="" element={<Navigate to="/dashboard" />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>

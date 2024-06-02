@@ -1,4 +1,5 @@
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Avatar,
@@ -13,33 +14,7 @@ import {
 } from '@mui/material';
 import { AccountBox, BarChart, Group, Logout } from '@mui/icons-material';
 import { VizCoachLogo } from '.';
-
-interface NavigationButton {
-  title: string;
-  icon: ReactNode;
-}
-
-const pages: NavigationButton[] = [
-  {
-    title: 'Activities',
-    icon: <BarChart />,
-  },
-  {
-    title: 'Student Groups',
-    icon: <Group />,
-  },
-];
-
-const settings: NavigationButton[] = [
-  {
-    title: 'Profile',
-    icon: <AccountBox />,
-  },
-  {
-    title: 'logout',
-    icon: <Logout />,
-  },
-];
+import { useAuth } from 'hooks';
 
 export const NavigationBar = () => {
   return (
@@ -67,27 +42,40 @@ export const NavigationBar = () => {
 const NavigationPages = () => {
   return (
     <>
-      {pages.map((page) => (
-        <Button
-          key={page.title}
-          size="small"
-          variant="text"
-          startIcon={page.icon}
-          sx={{ color: 'white' }}
-        >
-          {page.title}
-        </Button>
-      ))}
+      <Button
+        size="small"
+        variant="text"
+        startIcon={<BarChart />}
+        sx={{ color: 'white' }}
+      >
+        Activities
+      </Button>
+      <Button
+        size="small"
+        variant="text"
+        startIcon={<Group />}
+        sx={{ color: 'white' }}
+      >
+        Student Groups
+      </Button>
     </>
   );
 };
 
 const NavigationProfile = () => {
   const [profileMenuEl, setProfileMenuEl] = useState<HTMLElement | null>(null);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   const closeProfileMenu = () => setProfileMenuEl(null);
   const openProfileMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setProfileMenuEl(event.currentTarget);
+  };
+
+  const onLogoutClick = () => {
+    logout();
+    closeProfileMenu();
+    navigate('/login');
   };
 
   return (
@@ -103,16 +91,20 @@ const NavigationProfile = () => {
         open={Boolean(profileMenuEl)}
         onClose={closeProfileMenu}
       >
-        {settings.map((setting) => (
-          <MenuItem
-            key={setting.title}
-            onClick={closeProfileMenu}
-            sx={{ display: 'flex', columnGap: '.5rem' }}
-          >
-            {setting.icon}
-            <Typography textAlign="center">{setting.title}</Typography>
-          </MenuItem>
-        ))}
+        <MenuItem
+          onClick={closeProfileMenu}
+          sx={{ display: 'flex', columnGap: '.5rem' }}
+        >
+          <AccountBox />
+          <Typography textAlign="center">Profile</Typography>
+        </MenuItem>
+        <MenuItem
+          onClick={onLogoutClick}
+          sx={{ display: 'flex', columnGap: '.5rem' }}
+        >
+          <Logout />
+          <Typography textAlign="center">Logout</Typography>
+        </MenuItem>
       </Menu>
     </>
   );
