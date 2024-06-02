@@ -42,20 +42,10 @@ export const NavigationBar = () => {
 const NavigationPages = () => {
   return (
     <>
-      <Button
-        size="small"
-        variant="text"
-        startIcon={<BarChart />}
-        sx={{ color: 'white' }}
-      >
+      <Button variant="text" startIcon={<BarChart />} sx={{ color: 'white' }}>
         Activities
       </Button>
-      <Button
-        size="small"
-        variant="text"
-        startIcon={<Group />}
-        sx={{ color: 'white' }}
-      >
+      <Button variant="text" startIcon={<Group />} sx={{ color: 'white' }}>
         Student Groups
       </Button>
     </>
@@ -64,7 +54,7 @@ const NavigationPages = () => {
 
 const NavigationProfile = () => {
   const [profileMenuEl, setProfileMenuEl] = useState<HTMLElement | null>(null);
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const closeProfileMenu = () => setProfileMenuEl(null);
@@ -80,12 +70,14 @@ const NavigationProfile = () => {
 
   return (
     <>
-      <IconButton onClick={openProfileMenu} sx={{ p: 0 }}>
-        <Avatar
-          alt="Chris Bryan"
-          src="https://ca.slack-edge.com/EBY1XTCCR-WFMHSL6MP-b74f7340ae4a-512"
-        />
-      </IconButton>
+      <Button
+        variant="outlined"
+        startIcon={<Avatar alt={user?.name} src={user?.avatar} />}
+        onClick={openProfileMenu}
+        sx={{ p: 0, color: 'white' }}
+      >
+        <Typography textAlign="center">{user?.name}</Typography>
+      </Button>
       <Menu
         anchorEl={profileMenuEl}
         open={Boolean(profileMenuEl)}
