@@ -9,6 +9,8 @@ export interface User {
   token: string;
 }
 
-export interface StudentGroup extends RecordModel {
-  name: string;
+export interface Group extends RecordModel {
+  course: string;
+  semester: string;
+  year: number;
 }

@@ -1,5 +1,5 @@
 import Pocketbase from 'pocketbase';
-import { StudentGroup, User } from './types';
+import { Group, User } from './types';
 
 class PocketbaseClient {
   readonly pb: Pocketbase;
@@ -28,11 +28,9 @@ class PocketbaseClient {
     } as User;
   }
 
-  async getStudentGroups(): Promise<StudentGroup[]> {
+  async getGroups(): Promise<Group[]> {
     try {
-      return (await this.pb
-        .collection('groups')
-        .getFullList()) as StudentGroup[];
+      return (await this.pb.collection('groups').getFullList()) as Group[];
     } catch (error) {
       console.error(error);
       return [];
