@@ -39,12 +39,23 @@ export const NavigationBar = () => {
 };
 
 const NavigationPages = () => {
+  const navigate = useNavigate();
   return (
     <>
-      <Button variant="text" startIcon={<BarChart />} sx={{ color: 'white' }}>
+      <Button
+        variant="text"
+        startIcon={<BarChart />}
+        sx={{ color: 'white' }}
+        onClick={() => navigate('activities')}
+      >
         Activities
       </Button>
-      <Button variant="text" startIcon={<Group />} sx={{ color: 'white' }}>
+      <Button
+        variant="text"
+        startIcon={<Group />}
+        sx={{ color: 'white' }}
+        onClick={() => navigate('groups')}
+      >
         Student Groups
       </Button>
     </>

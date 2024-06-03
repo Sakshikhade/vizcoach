@@ -1,3 +1,4 @@
+export * from './Activities';
 export * from './Dashboard';
 export * from './Groups';
 export * from './Login';
