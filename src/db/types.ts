@@ -6,6 +6,7 @@ export interface User {
   name: string;
   email: string;
   username: string;
+  role: 'Teacher' | 'Student';
   token: string;
 }
 

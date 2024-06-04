@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from 'context';
-import { PrivateRoutes } from 'routes';
+import { PrivateRoutes, TeacherRoutes } from 'routes';
 import { Activities, Dashboard, Groups, Login, NotFound } from 'pages';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
@@ -16,7 +16,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
           <Route element={<PrivateRoutes />}>
             <Route path="dashboard" element={<Dashboard />}>
               <Route path="activities" element={<Activities />} />
-              <Route path="groups" element={<Groups />} />
+              <Route element={<TeacherRoutes navigateTo="activities" />}>
+                <Route path="groups" element={<Groups />} />
+              </Route>
               <Route path="" element={<Navigate to="activities" />} />
               <Route path="*" element={<NotFound />} />
             </Route>

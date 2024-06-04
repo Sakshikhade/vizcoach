@@ -16,6 +16,7 @@ import { VizCoachLogo } from '.';
 import { useAuth } from 'hooks';
 
 export const NavigationBar = () => {
+  const { user } = useAuth();
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
@@ -26,7 +27,7 @@ export const NavigationBar = () => {
           <Box sx={{ display: 'flex' }}>
             <VizCoachLogo />
             <Box sx={{ display: 'flex', ml: '4rem', columnGap: '2rem' }}>
-              <NavigationPages />
+              {user?.role === 'Teacher' && <NavigationPages />}
             </Box>
           </Box>
           <Box>
