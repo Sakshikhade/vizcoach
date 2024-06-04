@@ -1,26 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Group, User } from 'db/types';
+import { User } from 'db/types';
 import client from 'db/client';
 
 type StudentMap = {
   [key: string]: User[];
 };
 
-export const useStudents = (group: Group) => {
+export const useStudents = (groupId: string) => {
   const [map, setMap] = useState<StudentMap>({});
 
   useEffect(() => {
-    client.getStudents(group).then((students) => {
+    client.getStudents(groupId).then((students) => {
       setMap((prevState: StudentMap) => {
         return {
           ...prevState,
-          [group.id]: students,
+          [groupId]: students,
         };
       });
     });
-  }, [group]);
+  }, [groupId]);
 
   return {
-    students: map[group.id] || [],
+    students: map[groupId] || [],
   };
 };

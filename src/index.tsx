@@ -5,7 +5,14 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from 'context';
 import { PrivateRoutes, TeacherRoutes } from 'routes';
-import { Activities, Dashboard, Groups, Login, NotFound } from 'pages';
+import {
+  Activities,
+  Dashboard,
+  Groups,
+  Login,
+  NotFound,
+  Students,
+} from 'pages';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -18,6 +25,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
               <Route path="activities" element={<Activities />} />
               <Route element={<TeacherRoutes navigateTo="activities" />}>
                 <Route path="groups" element={<Groups />} />
+                <Route path="groups/:groupId" element={<Students />} />
               </Route>
               <Route path="" element={<Navigate to="activities" />} />
               <Route path="*" element={<NotFound />} />

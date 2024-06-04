@@ -8,7 +8,8 @@ import {
 } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import { Group } from 'db/types';
-import { useStudents } from 'hooks';
+import { useStudentsCount } from 'hooks';
+import { useNavigate } from 'react-router-dom';
 
 interface GroupCardProps {
   group: Group;
@@ -16,10 +17,11 @@ interface GroupCardProps {
 
 export const GroupCard = ({ group }: GroupCardProps) => {
   const { course, semester, year } = group;
-  const { students } = useStudents(group);
+  const { count } = useStudentsCount(group.id);
+  const navigate = useNavigate();
   return (
     <Card variant="outlined">
-      <CardActionArea>
+      <CardActionArea onClick={() => navigate(group.id)}>
         <CardContent>
           <Typography gutterBottom variant="h6" component="div">
             {`${course}-${semester}-${year}`}
@@ -32,7 +34,7 @@ export const GroupCard = ({ group }: GroupCardProps) => {
             <Chip
               variant="outlined"
               color="primary"
-              label={`${students.length} student${students.length > 1 ? 's' : ''}`}
+              label={`${count} student${count > 1 ? 's' : ''}`}
             />
             <ArrowForward />
           </Stack>

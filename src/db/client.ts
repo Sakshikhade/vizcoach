@@ -38,11 +38,23 @@ class PocketbaseClient {
     }
   }
 
-  async getStudents(group: Group): Promise<User[]> {
+  async getStudentsCount(groupId: string): Promise<number> {
+    try {
+      const response = await this.pb.collection('usergroups').getList(1, 1, {
+        filter: `group='${groupId}' && user.role='Student'`,
+      });
+      return response.totalItems;
+    } catch (error) {
+      console.error(error);
+      return Promise.resolve(-1);
+    }
+  }
+
+  async getStudents(groupId: string): Promise<User[]> {
     try {
       const userGroups = await this.pb.collection('usergroups').getFullList({
         expand: 'user',
-        filter: `group='${group.id}' && user.role='Student'`,
+        filter: `group='${groupId}' && user.role='Student'`,
       });
       return userGroups
         .map(({ expand }) => expand?.user)
