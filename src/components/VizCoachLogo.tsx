@@ -1,9 +1,9 @@
 import { SsidChart } from '@mui/icons-material';
-import { Box, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 
 export const VizCoachLogo = () => {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+    <Stack direction="row" alignItems="center">
       <SsidChart sx={{ mr: 1 }} />
       <Typography
         variant="h6"
@@ -19,6 +19,6 @@ export const VizCoachLogo = () => {
       >
         VIZCOACH
       </Typography>
-    </Box>
+    </Stack>
   );
 };

@@ -1,9 +1,9 @@
 import {
-  Box,
   Card,
   CardActionArea,
   CardContent,
   Chip,
+  Stack,
   Typography,
 } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
@@ -24,12 +24,10 @@ export const GroupCard = ({ group }: GroupCardProps) => {
           <Typography gutterBottom variant="h6" component="div">
             {`${course}-${semester}-${year}`}
           </Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
           >
             <Chip
               variant="outlined"
@@ -37,7 +35,7 @@ export const GroupCard = ({ group }: GroupCardProps) => {
               label={`${students.length} student${students.length > 1 ? 's' : ''}`}
             />
             <ArrowForward />
-          </Box>
+          </Stack>
         </CardContent>
       </CardActionArea>
     </Card>

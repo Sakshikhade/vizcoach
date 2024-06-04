@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Avatar,
-  Box,
   Button,
   Container,
   Menu,
   MenuItem,
+  Stack,
   Toolbar,
   Typography,
 } from '@mui/material';
@@ -24,15 +24,13 @@ export const NavigationBar = () => {
           disableGutters
           sx={{ display: 'flex', justifyContent: 'space-between' }}
         >
-          <Box sx={{ display: 'flex' }}>
+          <Stack direction="row">
             <VizCoachLogo />
-            <Box sx={{ display: 'flex', ml: '4rem', columnGap: '2rem' }}>
+            <Stack direction="row" columnGap={2} sx={{ ml: 4 }}>
               {user?.role === 'Teacher' && <NavigationPages />}
-            </Box>
-          </Box>
-          <Box>
-            <NavigationProfile />
-          </Box>
+            </Stack>
+          </Stack>
+          <NavigationProfile />
         </Toolbar>
       </Container>
     </AppBar>

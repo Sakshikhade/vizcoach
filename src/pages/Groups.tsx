@@ -10,6 +10,7 @@ import {
   OutlinedInput,
   Select,
   SelectChangeEvent,
+  Stack,
   Typography,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
@@ -47,19 +48,21 @@ export const Groups = () => {
 
   return (
     <>
-      <Box
-        sx={{ mt: 8, mb: 4, display: 'flex', justifyContent: 'space-between' }}
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        sx={{ mt: 8, mb: 4 }}
       >
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Stack>
+          <Stack direction="row" alignItems="center">
             <Group sx={{ mr: 1 }} />
             <Typography variant="h5">Student Groups</Typography>
-          </Box>
+          </Stack>
           <Typography variant="subtitle1">
             Create, Manage, and Track Student Groups.
           </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', columnGap: 1, alignItems: 'center' }}>
+        </Stack>
+        <Stack direction="row" alignItems="center" spacing={1}>
           <FormControl>
             <InputLabel id="filter-select-label">Filter</InputLabel>
             <Select
@@ -88,8 +91,8 @@ export const Groups = () => {
           <IconButton color="primary" sx={{ height: 'fit-content' }}>
             <GroupAdd />
           </IconButton>
-        </Box>
-      </Box>
+        </Stack>
+      </Stack>
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {filteredGroups.map((group) => {
           return (
