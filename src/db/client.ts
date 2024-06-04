@@ -6,6 +6,7 @@ class PocketbaseClient {
 
   constructor() {
     this.pb = new Pocketbase(process.env.REACT_APP_POCKETBASE_URL);
+    this.pb.autoCancellation(process.env.NODE_ENV !== 'development');
   }
 
   async authWithPassword(email: string, password: string): Promise<void> {
@@ -33,7 +34,22 @@ class PocketbaseClient {
       return (await this.pb.collection('groups').getFullList()) as Group[];
     } catch (error) {
       console.error(error);
-      return [];
+      return Promise.resolve([]);
+    }
+  }
+
+  async getStudents(group: Group): Promise<User[]> {
+    try {
+      const userGroups = await this.pb.collection('usergroups').getFullList({
+        expand: 'user',
+        filter: `group='${group.id}' && user.role='Student'`,
+      });
+      return userGroups
+        .map(({ expand }) => expand?.user)
+        .filter((user) => !!user);
+    } catch (error) {
+      console.error(error);
+      return Promise.resolve([]);
     }
   }
 }
