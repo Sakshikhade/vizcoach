@@ -1,2 +1,3 @@
-export * from './PrivateRoutes';
-export * from './TeacherRoutes';
+export * from './AppRouter';
+export * from './AuthenticatedRoute';
+export * from './AuthorizedRoute';

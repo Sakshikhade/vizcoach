@@ -1,5 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Group, GroupAdd, Home, NavigateNext } from '@mui/icons-material';
+import { useLoaderData } from 'react-router-dom';
+import {
+  Group as GroupIcon,
+  GroupAdd,
+  Home,
+  NavigateNext,
+} from '@mui/icons-material';
 import {
   Box,
   Breadcrumbs,
@@ -19,12 +25,26 @@ import {
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { GroupCard } from 'components';
-import { useGroups } from 'hooks';
+import { Group } from 'db';
 
 const ALL_STUDENT_GROUPS = 'All Student Groups';
 
 export const Groups = () => {
-  const { groups, courses, semesters, years } = useGroups();
+  const groups = useLoaderData() as Group[];
+
+  const courses = useMemo(
+    () => [...new Set(groups.map(({ course }) => course))],
+    [groups],
+  );
+  const semesters = useMemo(
+    () => [...new Set(groups.map(({ semester }) => semester))],
+    [groups],
+  );
+  const years = useMemo(
+    () => [...new Set(groups.map(({ year }) => year))],
+    [groups],
+  );
+
   const [selectedFilters, setSelectedFilters] = useState<(string | number)[]>([
     ALL_STUDENT_GROUPS,
   ]);
@@ -33,11 +53,11 @@ export const Groups = () => {
     if (selectedFilters.includes(ALL_STUDENT_GROUPS)) {
       return groups;
     }
-    return groups.filter((group) => {
+    return groups.filter(({ course, semester, year }) => {
       return (
-        selectedFilters.includes(group.course) ||
-        selectedFilters.includes(group.semester) ||
-        selectedFilters.includes(group.year)
+        selectedFilters.includes(course) ||
+        selectedFilters.includes(semester) ||
+        selectedFilters.includes(year)
       );
     });
   }, [selectedFilters, groups]);
@@ -107,7 +127,7 @@ export const Groups = () => {
       <SpeedDial
         ariaLabel="Groups SpeedDial"
         sx={{ position: 'absolute', bottom: '2rem', right: '2rem' }}
-        icon={<SpeedDialIcon openIcon={<Group />} />}
+        icon={<SpeedDialIcon openIcon={<GroupIcon />} />}
       >
         <SpeedDialAction
           key={1}

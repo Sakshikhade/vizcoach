@@ -2,40 +2,15 @@ import './index.scss';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from 'context';
-import { PrivateRoutes, TeacherRoutes } from 'routes';
-import {
-  Activities,
-  Dashboard,
-  Groups,
-  Login,
-  NotFound,
-  Students,
-} from 'pages';
+import { router } from 'routes';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="login" element={<Login />} />
-          <Route element={<PrivateRoutes />}>
-            <Route path="dashboard" element={<Dashboard />}>
-              <Route path="activities" element={<Activities />} />
-              <Route element={<TeacherRoutes navigateTo="activities" />}>
-                <Route path="groups" element={<Groups />} />
-                <Route path="groups/:groupId" element={<Students />} />
-              </Route>
-              <Route path="" element={<Navigate to="activities" />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-            <Route path="" element={<Navigate to="dashboard" />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </React.StrictMode>,
 );
 

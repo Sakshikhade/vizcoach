@@ -1,6 +1,5 @@
-import { createContext, useEffect, useState } from 'react';
-import { User } from 'db/types';
-import client from 'db/client';
+import { PropsWithChildren, createContext, useState } from 'react';
+import client, { User } from 'db';
 
 interface AuthContextValue {
   user: User | null;
@@ -14,12 +13,8 @@ const defaultAuthContextValue: AuthContextValue = {
   logout: () => {},
 };
 
-export const AuthProvider = ({ children }: any) => {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    setUser(client.getUser());
-  }, []);
+export const AuthProvider = ({ children }: PropsWithChildren) => {
+  const [user, setUser] = useState<User | null>(client.getUser());
 
   const value: AuthContextValue = {
     user,

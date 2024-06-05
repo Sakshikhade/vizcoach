@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardActionArea,
@@ -7,24 +8,21 @@ import {
   Typography,
 } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
-import { Group } from 'db/types';
-import { useStudentsCount } from 'hooks';
-import { useNavigate } from 'react-router-dom';
+import { Group } from 'db';
 
 interface GroupCardProps {
   group: Group;
 }
 
 export const GroupCard = ({ group }: GroupCardProps) => {
-  const { course, semester, year } = group;
-  const { count } = useStudentsCount(group.id);
+  const { title, studentsCount } = group;
   const navigate = useNavigate();
   return (
     <Card variant="outlined">
       <CardActionArea onClick={() => navigate(group.id)}>
         <CardContent>
           <Typography gutterBottom variant="h6" component="div">
-            {`${course}-${semester}-${year}`}
+            {group.title}
           </Typography>
           <Stack
             direction="row"
@@ -34,7 +32,7 @@ export const GroupCard = ({ group }: GroupCardProps) => {
             <Chip
               variant="outlined"
               color="primary"
-              label={`${count} student${count > 1 ? 's' : ''}`}
+              label={`${studentsCount} student${(studentsCount || 0) > 1 ? 's' : ''}`}
             />
             <ArrowForward />
           </Stack>

@@ -1,5 +1,5 @@
 import { Avatar, Card, CardContent, Stack, Typography } from '@mui/material';
-import { User } from 'db/types';
+import { User } from 'db';
 
 interface StudentCardProps {
   student: User;

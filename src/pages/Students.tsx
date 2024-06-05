@@ -1,3 +1,4 @@
+import { useLoaderData } from 'react-router-dom';
 import { Home, NavigateNext } from '@mui/icons-material';
 import {
   Breadcrumbs,
@@ -10,13 +11,13 @@ import {
   Typography,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { useParams } from 'react-router-dom';
-import { useStudents } from 'hooks';
 import { StudentCard } from 'components';
+import { GetStudentsResponse } from 'db';
 
 export const Students = () => {
-  const { groupId } = useParams();
-  const { students } = useStudents(groupId || '');
+  const { students, group } = useLoaderData() as GetStudentsResponse;
+  const title = group.title || 'Unknown';
+  const studentsCount = group.studentsCount || 0;
   return (
     <Stack spacing={4} marginY={4}>
       <Breadcrumbs separator={<NavigateNext fontSize="small" />}>
@@ -30,13 +31,14 @@ export const Students = () => {
         <Link underline="hover" color="inherit" href="/dashboard/groups">
           Student Groups
         </Link>
-        <Typography color="text.primary">{groupId}</Typography>
+        <Typography color="text.primary">{title}</Typography>
       </Breadcrumbs>
       <Stack direction="row" justifyContent="space-between">
         <Stack>
-          <Typography variant="h5">{groupId}</Typography>
+          <Typography variant="h5">{title}</Typography>
           <Typography variant="subtitle1">
-            View {groupId}'s Students.
+            {studentsCount} student{studentsCount > 1 ? 's' : ''} in {title}'s
+            Student Group.
           </Typography>
         </Stack>
         <FormControl>

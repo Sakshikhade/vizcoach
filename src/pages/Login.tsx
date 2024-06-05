@@ -15,20 +15,20 @@ export const Login = () => {
 
   useEffect(() => {
     if (!!user) {
-      navigate(getReturnRoute());
+      navigate(getReturnRoute(), { replace: true });
     }
   }, [user, navigate, getReturnRoute]);
 
   const teacherLogin = async () => {
     const email = process.env.REACT_APP_TEACHER_EMAIL || '';
     const password = process.env.REACT_APP_TEACHER_PASSWORD || '';
-    login(email, password, () => navigate(getReturnRoute()));
+    login(email, password, () => navigate(getReturnRoute(), { replace: true }));
   };
 
   const studentLogin = async () => {
     const email = process.env.REACT_APP_STUDENT_EMAIL || '';
     const password = process.env.REACT_APP_STUDENT_PASSWORD || '';
-    login(email, password, () => navigate(getReturnRoute()));
+    login(email, password, () => navigate(getReturnRoute(), { replace: true }));
   };
 
   return (
