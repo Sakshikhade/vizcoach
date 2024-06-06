@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import {
   Group as GroupIcon,
@@ -31,7 +31,61 @@ const ALL_STUDENT_GROUPS = 'All Student Groups';
 
 export const Groups = () => {
   const groups = useLoaderData() as Group[];
+  const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
+  return (
+    <Stack spacing={4} marginY={4}>
+      <GroupsBreadcrumbs />
+      <Stack direction="row" justifyContent="space-between">
+        <Stack>
+          <Typography variant="h5">Student Groups</Typography>
+          <Typography variant="subtitle1">
+            Create, Manage, and Track Student Groups.
+          </Typography>
+        </Stack>
+        <GroupsFilterControl
+          groups={groups}
+          setFilteredGroups={setFilteredGroups}
+        />
+      </Stack>
+      <Grid2 container rowSpacing={1} columnSpacing={1}>
+        {filteredGroups.map((group) => {
+          return (
+            <Grid2 key={group.id} xs={6} md={4} lg={3}>
+              <GroupCard group={group} />
+            </Grid2>
+          );
+        })}
+      </Grid2>
+      <GroupsSpeedDial />
+    </Stack>
+  );
+};
 
+const GroupsSpeedDial = () => {
+  return (
+    <SpeedDial
+      ariaLabel="Groups SpeedDial"
+      sx={{ position: 'absolute', bottom: '2rem', right: '2rem' }}
+      icon={<SpeedDialIcon openIcon={<GroupIcon />} />}
+    >
+      <SpeedDialAction
+        key={1}
+        icon={<GroupAdd />}
+        tooltipTitle="Add Student Group"
+      />
+    </SpeedDial>
+  );
+};
+
+interface GroupsFilterControlProps {
+  groups: Group[];
+  setFilteredGroups: (groups: Group[]) => void;
+}
+
+const GroupsFilterControl = ({
+  groups,
+  setFilteredGroups,
+}: GroupsFilterControlProps) => {
   const courses = useMemo(
     () => [...new Set(groups.map(({ course }) => course))],
     [groups],
@@ -49,18 +103,20 @@ export const Groups = () => {
     ALL_STUDENT_GROUPS,
   ]);
 
-  const filteredGroups = useMemo(() => {
+  useEffect(() => {
     if (selectedFilters.includes(ALL_STUDENT_GROUPS)) {
-      return groups;
+      setFilteredGroups(groups);
+    } else {
+      const filteredGroups = groups.filter(({ course, semester, year }) => {
+        return (
+          selectedFilters.includes(course) ||
+          selectedFilters.includes(semester) ||
+          selectedFilters.includes(year)
+        );
+      });
+      setFilteredGroups(filteredGroups);
     }
-    return groups.filter(({ course, semester, year }) => {
-      return (
-        selectedFilters.includes(course) ||
-        selectedFilters.includes(semester) ||
-        selectedFilters.includes(year)
-      );
-    });
-  }, [selectedFilters, groups]);
+  }, [groups, selectedFilters, setFilteredGroups]);
 
   const onFilterChange = (event: SelectChangeEvent<typeof selectedFilters>) => {
     const { value } = event.target;
@@ -71,70 +127,45 @@ export const Groups = () => {
   };
 
   return (
-    <Stack spacing={4} marginY={4}>
-      <Breadcrumbs separator={<NavigateNext fontSize="small" />}>
-        <Link
-          underline="none"
-          color="inherit"
-          sx={{ display: 'flex', alignItems: 'center' }}
-        >
-          <Home fontSize="inherit" />
-        </Link>
-        <Typography color="text.primary">Student Groups</Typography>
-      </Breadcrumbs>
-      <Stack direction="row" justifyContent="space-between">
-        <Stack>
-          <Typography variant="h5">Student Groups</Typography>
-          <Typography variant="subtitle1">
-            Create, Manage, and Track Student Groups.
-          </Typography>
-        </Stack>
-        <FormControl>
-          <InputLabel id="filter-select-label">Filter</InputLabel>
-          <Select
-            labelId="filter-select-label"
-            multiple
-            value={selectedFilters}
-            input={<OutlinedInput id="filter-select" label="Chip" />}
-            onChange={onFilterChange}
-            renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map((value) => (
-                  <Chip key={value} label={value} />
-                ))}
-              </Box>
-            )}
-          >
-            {[...courses, ...semesters, ...years].map((value) => {
-              return (
-                <MenuItem key={value} value={value}>
-                  {value}
-                </MenuItem>
-              );
-            })}
-          </Select>
-        </FormControl>
-      </Stack>
-      <Grid2 container rowSpacing={1} columnSpacing={1}>
-        {filteredGroups.map((group) => {
+    <FormControl>
+      <InputLabel id="filter-select-label">Filter</InputLabel>
+      <Select
+        labelId="filter-select-label"
+        multiple
+        value={selectedFilters}
+        input={<OutlinedInput id="filter-select" label="Chip" />}
+        onChange={onFilterChange}
+        renderValue={(selected) => (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {selected.map((value) => (
+              <Chip key={value} label={value} />
+            ))}
+          </Box>
+        )}
+      >
+        {[...courses, ...semesters, ...years].map((value) => {
           return (
-            <Grid2 key={group.id} xs={6} md={4} lg={3}>
-              <GroupCard group={group} />
-            </Grid2>
+            <MenuItem key={value} value={value}>
+              {value}
+            </MenuItem>
           );
         })}
-      </Grid2>
-      <SpeedDial
-        ariaLabel="Groups SpeedDial"
-        sx={{ position: 'absolute', bottom: '2rem', right: '2rem' }}
-        icon={<SpeedDialIcon openIcon={<GroupIcon />} />}
+      </Select>
+    </FormControl>
+  );
+};
+
+const GroupsBreadcrumbs = () => {
+  return (
+    <Breadcrumbs separator={<NavigateNext fontSize="small" />}>
+      <Link
+        underline="none"
+        color="inherit"
+        sx={{ display: 'flex', alignItems: 'center' }}
       >
-        <SpeedDialAction
-          key={1}
-          icon={<GroupAdd />}
-          tooltipTitle="Add Student Group"
-        />
-      </SpeedDial>
-    </Stack>
+        <Home fontSize="inherit" />
+      </Link>
+      <Typography color="text.primary">Student Groups</Typography>
+    </Breadcrumbs>
   );
 };

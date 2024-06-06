@@ -1,17 +1,8 @@
 import { useLoaderData } from 'react-router-dom';
 import { Home, NavigateNext } from '@mui/icons-material';
-import {
-  Breadcrumbs,
-  FormControl,
-  InputLabel,
-  Link,
-  OutlinedInput,
-  Select,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Breadcrumbs, Link, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { StudentCard } from 'components';
+import { ButtonLink, StudentCard } from 'components';
 import { GetStudentsResponse } from 'db';
 
 export const Students = () => {
@@ -20,35 +11,13 @@ export const Students = () => {
   const studentsCount = group.studentsCount || 0;
   return (
     <Stack spacing={4} marginY={4}>
-      <Breadcrumbs separator={<NavigateNext fontSize="small" />}>
-        <Link
-          underline="none"
-          color="inherit"
-          sx={{ display: 'flex', alignItems: 'center' }}
-        >
-          <Home fontSize="inherit" />
-        </Link>
-        <Link underline="hover" color="inherit" href="/dashboard/groups">
-          Student Groups
-        </Link>
-        <Typography color="text.primary">{title}</Typography>
-      </Breadcrumbs>
-      <Stack direction="row" justifyContent="space-between">
-        <Stack>
-          <Typography variant="h5">{title}</Typography>
-          <Typography variant="subtitle1">
-            {studentsCount} student{studentsCount > 1 ? 's' : ''} in {title}'s
-            Student Group.
-          </Typography>
-        </Stack>
-        <FormControl>
-          <InputLabel id="filter-select-label">Filter</InputLabel>
-          <Select
-            labelId="filter-select-label"
-            multiple
-            input={<OutlinedInput id="filter-select" label="Chip" />}
-          ></Select>
-        </FormControl>
+      <StudentsBreadcrumbs title={title} />
+      <Stack>
+        <Typography variant="h5">{title}</Typography>
+        <Typography variant="subtitle1">
+          {studentsCount} student{studentsCount > 1 ? 's' : ''} in {title}'s
+          Student Group.
+        </Typography>
       </Stack>
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {students.map((student) => {
@@ -60,5 +29,27 @@ export const Students = () => {
         })}
       </Grid2>
     </Stack>
+  );
+};
+
+interface StudentsBreadcrumbsProps {
+  title: string;
+}
+
+const StudentsBreadcrumbs = ({ title }: StudentsBreadcrumbsProps) => {
+  return (
+    <Breadcrumbs separator={<NavigateNext fontSize="small" />}>
+      <Link
+        underline="none"
+        color="inherit"
+        sx={{ display: 'flex', alignItems: 'center' }}
+      >
+        <Home fontSize="inherit" />
+      </Link>
+      <ButtonLink color="inherit" href="/dashboard/groups">
+        Student Groups
+      </ButtonLink>
+      <Typography color="text.primary">{title}</Typography>
+    </Breadcrumbs>
   );
 };
