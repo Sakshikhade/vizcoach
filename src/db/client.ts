@@ -47,7 +47,11 @@ class PocketbaseClient {
     return response.totalItems;
   }
 
-  async getStudents(groupId: string): Promise<GetStudentsResponse> {
+  async getStudents(groupId: string): Promise<GetStudentsResponse | null> {
+    // Checking if requesting user has permissions
+    const user = this.getUser();
+    if (!user || user.role !== 'Teacher') return null;
+
     const userGroups = await this.pb.collection('usergroups').getFullList({
       expand: 'user,group',
       filter: `group='${groupId}' && user.role='Student'`,
