@@ -1,4 +1,4 @@
-import Pocketbase from 'pocketbase';
+import Pocketbase, { RecordModel } from 'pocketbase';
 import { GetStudentsResponse, Group, User } from '.';
 
 class PocketbaseClient {
@@ -22,27 +22,22 @@ class PocketbaseClient {
   }
 
   getUser(): User | null {
-    if (!this.pb.authStore.isValid) return null;
-    return {
-      ...this.pb.authStore.model,
-      token: this.pb.authStore.token,
-    } as User;
+    const { isValid, model } = this.pb.authStore;
+    return isValid ? (model as User) : null;
   }
 
   async getGroups(): Promise<Group[]> {
-    const groups = (await this.pb
-      .collection('groups')
-      .getFullList()) as Group[];
-    for (const group of groups) {
-      group.title = this.getGroupTitle(group);
-      group.studentsCount = await this.getStudentsCount(group.id);
+    const records = await this.pb.collection('groups').getFullList();
+    const groups: Group[] = [];
+    for (const record of records) {
+      groups.push(new Group(record, await this.getStudentsCount(record.id)));
     }
     return groups;
   }
 
   async getStudentsCount(groupId: string): Promise<number> {
     const response = await this.pb.collection('usergroups').getList(1, 1, {
-      filter: `group='${groupId}' && user.role='Student'`,
+      filter: `groupId='${groupId}' && userId.role='Student'`,
     });
     return response.totalItems;
   }
@@ -53,30 +48,24 @@ class PocketbaseClient {
     if (!user || user.role !== 'Teacher') return null;
 
     const userGroups = await this.pb.collection('usergroups').getFullList({
-      expand: 'user,group',
-      filter: `group='${groupId}' && user.role='Student'`,
+      expand: 'userId,groupId',
+      filter: `groupId='${groupId}' && userId.role='Student'`,
     });
 
     // Extracting user from the expanded collection
     const students = userGroups
-      .map(({ expand }) => expand?.user)
+      .map(({ expand }) => expand?.userId)
       .filter((user) => !!user);
 
     // Getting group from either the expanded collection or fetching new one
-    const group: Group = userGroups.length
-      ? userGroups[0].expand?.group
+    const record: RecordModel = userGroups.length
+      ? userGroups[0].expand?.groupId
       : await this.pb.collection('groups').getOne(groupId);
-    group.title = this.getGroupTitle(group);
-    group.studentsCount = students.length;
 
     return {
-      group,
+      group: new Group(record, students.length),
       students,
     };
-  }
-
-  private getGroupTitle({ course, semester, year }: Group): string {
-    return `${course}-${semester}-${year}`;
   }
 }
 
