@@ -1,5 +1,5 @@
 import Pocketbase, { RecordModel } from 'pocketbase';
-import { GetStudentsResponse, Group, User } from '.';
+import { Activity, GetStudentsResponse, Group, User } from '.';
 
 class PocketbaseClient {
   readonly pb: Pocketbase;
@@ -27,10 +27,12 @@ class PocketbaseClient {
   }
 
   async getGroups(): Promise<Group[]> {
-    const records = await this.pb.collection('groups').getFullList();
+    const models = await this.pb.collection('groups').getFullList({
+      sort: '-created',
+    });
     const groups: Group[] = [];
-    for (const record of records) {
-      groups.push(new Group(record, await this.getStudentsCount(record.id)));
+    for (const model of models) {
+      groups.push(new Group(model, await this.getStudentsCount(model.id)));
     }
     return groups;
   }
@@ -66,6 +68,26 @@ class PocketbaseClient {
       group: new Group(record, students.length),
       students,
     };
+  }
+
+  async getActivities(): Promise<Activity[]> {
+    const user = this.getUser();
+    if (!user) return [];
+
+    const activities: Activity[] = [];
+    const models = await this.pb.collection('activities').getFullList({
+      sort: '-created',
+      expand: user.role === 'Teacher' ? 'groupId' : '',
+      filter:
+        user.role === 'Student'
+          ? [
+              `groupId.usergroups_via_groupId.userId='${user.id}'`,
+              `(scheduled='' || scheduled<'${new Date().toISOString()}')`,
+            ].join(' && ')
+          : '',
+    });
+    activities.push(...models.map((model: RecordModel) => new Activity(model)));
+    return activities;
   }
 }
 

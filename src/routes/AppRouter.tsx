@@ -9,7 +9,7 @@ import {
 } from 'pages';
 import { AuthenticatedRoute } from './AuthenticatedRoute';
 import { AuthorizedRoute } from './AuthorizedRoute';
-import { groupsLoader, studentsLoader } from 'db';
+import { activitiesLoader, groupsLoader, studentsLoader } from 'db';
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +27,7 @@ export const router = createBrowserRouter([
       {
         path: 'activities',
         element: <Activities />,
+        loader: activitiesLoader,
       },
       {
         path: 'groups',
