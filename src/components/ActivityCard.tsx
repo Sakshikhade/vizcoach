@@ -27,7 +27,7 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
           }}
         >
           <Stack>
-            <Typography gutterBottom variant="h6" component="div">
+            <Typography gutterBottom variant="h6">
               {title}
             </Typography>
             <Typography

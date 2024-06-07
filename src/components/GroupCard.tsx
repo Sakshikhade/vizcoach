@@ -21,7 +21,7 @@ export const GroupCard = ({ group }: GroupCardProps) => {
     <Card variant="outlined">
       <CardActionArea onClick={() => navigate(group.id)}>
         <CardContent>
-          <Typography gutterBottom variant="h6" component="div">
+          <Typography gutterBottom variant="h6">
             {title}
           </Typography>
           <Stack

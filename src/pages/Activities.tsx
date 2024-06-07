@@ -1,9 +1,7 @@
 import { ChangeEvent, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import {
-  Breadcrumbs,
   FormControl,
-  Link,
   SpeedDial,
   SpeedDialAction,
   SpeedDialIcon,
@@ -11,9 +9,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { Addchart, BarChart, Home, NavigateNext } from '@mui/icons-material';
+import { Addchart, BarChart } from '@mui/icons-material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { ActivityCard } from 'components';
+import { ActivityCard, DashboardBreadcrumbs } from 'components';
 import { Activity } from 'db';
 import { useAuth } from 'hooks';
 
@@ -24,7 +22,7 @@ export const Activities = () => {
   const { user } = useAuth();
   return (
     <Stack spacing={4} marginY={4}>
-      <ActivitiesBreadcrumbs />
+      <DashboardBreadcrumbs title="Activities" />
       <Stack direction="row" justifyContent="space-between">
         <Stack>
           <Typography variant="h5">Activities</Typography>
@@ -104,20 +102,5 @@ const ActivitiesFilterControl = ({
         onChange={onFilterChange}
       />
     </FormControl>
-  );
-};
-
-const ActivitiesBreadcrumbs = () => {
-  return (
-    <Breadcrumbs separator={<NavigateNext fontSize="small" />}>
-      <Link
-        underline="none"
-        color="inherit"
-        sx={{ display: 'flex', alignItems: 'center' }}
-      >
-        <Home fontSize="inherit" />
-      </Link>
-      <Typography color="text.primary">Activities</Typography>
-    </Breadcrumbs>
   );
 };

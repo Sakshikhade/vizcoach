@@ -11,9 +11,7 @@ export const StudentCard = ({ student }: StudentCardProps) => {
       <CardContent>
         <Stack direction="row" alignItems="center" spacing={1}>
           <Avatar alt={student.name} src={student.avatar} />
-          <Typography variant="h6" component="div">
-            {student.name}
-          </Typography>
+          <Typography variant="h6">{student.name}</Typography>
         </Stack>
       </CardContent>
     </Card>

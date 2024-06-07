@@ -1,18 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
-import {
-  Group as GroupIcon,
-  GroupAdd,
-  Home,
-  NavigateNext,
-} from '@mui/icons-material';
+import { Group as GroupIcon, GroupAdd } from '@mui/icons-material';
 import {
   Box,
-  Breadcrumbs,
   Chip,
   FormControl,
   InputLabel,
-  Link,
   MenuItem,
   OutlinedInput,
   Select,
@@ -24,7 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { GroupCard } from 'components';
+import { DashboardBreadcrumbs, GroupCard } from 'components';
 import { Group } from 'db';
 
 const ALL_STUDENT_GROUPS = 'All Student Groups';
@@ -34,7 +27,7 @@ export const Groups = () => {
   const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
   return (
     <Stack spacing={4} marginY={4}>
-      <GroupsBreadcrumbs />
+      <DashboardBreadcrumbs title="Student Groups" />
       <Stack direction="row" justifyContent="space-between">
         <Stack>
           <Typography variant="h5">Student Groups</Typography>
@@ -152,20 +145,5 @@ const GroupsFilterControl = ({
         })}
       </Select>
     </FormControl>
-  );
-};
-
-const GroupsBreadcrumbs = () => {
-  return (
-    <Breadcrumbs separator={<NavigateNext fontSize="small" />}>
-      <Link
-        underline="none"
-        color="inherit"
-        sx={{ display: 'flex', alignItems: 'center' }}
-      >
-        <Home fontSize="inherit" />
-      </Link>
-      <Typography color="text.primary">Student Groups</Typography>
-    </Breadcrumbs>
   );
 };

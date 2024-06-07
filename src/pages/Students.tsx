@@ -1,8 +1,7 @@
 import { useLoaderData } from 'react-router-dom';
-import { Home, NavigateNext } from '@mui/icons-material';
-import { Breadcrumbs, Link, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { ButtonLink, StudentCard } from 'components';
+import { DashboardBreadcrumbs, StudentCard } from 'components';
 import { GetStudentsResponse } from 'db';
 
 export const Students = () => {
@@ -11,7 +10,15 @@ export const Students = () => {
   const studentsCount = group.studentsCount || 0;
   return (
     <Stack spacing={4} marginY={4}>
-      <StudentsBreadcrumbs title={title} />
+      <DashboardBreadcrumbs
+        title={title}
+        links={[
+          {
+            href: '/dashboard/groups',
+            children: 'Student Groups',
+          },
+        ]}
+      />
       <Stack>
         <Typography variant="h5">{title}</Typography>
         <Typography variant="subtitle1">
@@ -29,27 +36,5 @@ export const Students = () => {
         })}
       </Grid2>
     </Stack>
-  );
-};
-
-interface StudentsBreadcrumbsProps {
-  title: string;
-}
-
-const StudentsBreadcrumbs = ({ title }: StudentsBreadcrumbsProps) => {
-  return (
-    <Breadcrumbs separator={<NavigateNext fontSize="small" />}>
-      <Link
-        underline="none"
-        color="inherit"
-        sx={{ display: 'flex', alignItems: 'center' }}
-      >
-        <Home fontSize="inherit" />
-      </Link>
-      <ButtonLink color="inherit" href="/dashboard/groups">
-        Student Groups
-      </ButtonLink>
-      <Typography color="text.primary">{title}</Typography>
-    </Breadcrumbs>
   );
 };
