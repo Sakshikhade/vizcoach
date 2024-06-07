@@ -2,6 +2,7 @@ export * from './ActivityCard';
 export * from './ButtonLink';
 export * from './DashboardBreadcrumbs';
 export * from './DashboardHeader';
+export * from './DashboardLayout';
 export * from './DashboardSpeedDial';
 export * from './GroupCard';
 export * from './NavigationBar';

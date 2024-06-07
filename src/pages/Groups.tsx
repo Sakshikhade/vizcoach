@@ -10,12 +10,12 @@ import {
   OutlinedInput,
   Select,
   SelectChangeEvent,
-  Stack,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   DashboardBreadcrumbs,
   DashboardHeader,
+  DashboardLayout,
   DashboardSpeedDial,
   GroupCard,
 } from 'components';
@@ -27,38 +27,44 @@ export const Groups = () => {
   const groups = useLoaderData() as Group[];
   const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
   return (
-    <Stack spacing={4} marginY={4}>
-      <DashboardBreadcrumbs title="Student Groups" />
-      <DashboardHeader
-        heading="Student Groups"
-        subtitle="Create, manage, and track student groups."
-        filterComponent={
-          <GroupsFilterControl
-            groups={groups}
-            setFilteredGroups={setFilteredGroups}
-          />
-        }
-      />
-      <Grid2 container rowSpacing={1} columnSpacing={1}>
-        {filteredGroups.map((group) => {
-          return (
-            <Grid2 key={group.id} xs={6} md={4} lg={3}>
-              <GroupCard group={group} />
-            </Grid2>
-          );
-        })}
-      </Grid2>
-      <DashboardSpeedDial
-        ariaLabel="Groups SpeedDial"
-        openIcon={<GroupIcon />}
-        actions={[
-          {
-            icon: <GroupAdd />,
-            tooltipTitle: 'Add Student Group',
-          },
-        ]}
-      />
-    </Stack>
+    <DashboardLayout
+      breadcrumbs={<DashboardBreadcrumbs title="Student Groups" />}
+      header={
+        <DashboardHeader
+          heading="Student Groups"
+          subtitle="Create, manage, and track student groups."
+          filterComponent={
+            <GroupsFilterControl
+              groups={groups}
+              setFilteredGroups={setFilteredGroups}
+            />
+          }
+        />
+      }
+      content={
+        <Grid2 container rowSpacing={1} columnSpacing={1}>
+          {filteredGroups.map((group) => {
+            return (
+              <Grid2 key={group.id} xs={6} md={4} lg={3}>
+                <GroupCard group={group} />
+              </Grid2>
+            );
+          })}
+        </Grid2>
+      }
+      speedDial={
+        <DashboardSpeedDial
+          ariaLabel="Groups SpeedDial"
+          openIcon={<GroupIcon />}
+          actions={[
+            {
+              icon: <GroupAdd />,
+              tooltipTitle: 'Add Student Group',
+            },
+          ]}
+        />
+      }
+    />
   );
 };
 

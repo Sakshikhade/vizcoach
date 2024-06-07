@@ -27,7 +27,7 @@ export const DashboardBreadcrumbs = ({
       </Link>
       {(links || []).map(({ href, children }) => {
         return (
-          <ButtonLink color="inherit" href={href}>
+          <ButtonLink key={children} color="inherit" href={href}>
             {children}
           </ButtonLink>
         );
