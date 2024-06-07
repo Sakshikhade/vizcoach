@@ -1,6 +1,7 @@
 export * from './ActivityCard';
 export * from './ButtonLink';
 export * from './DashboardBreadcrumbs';
+export * from './DashboardHeader';
 export * from './GroupCard';
 export * from './NavigationBar';
 export * from './StudentCard';

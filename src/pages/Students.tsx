@@ -1,7 +1,7 @@
 import { useLoaderData } from 'react-router-dom';
-import { Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { DashboardBreadcrumbs, StudentCard } from 'components';
+import { DashboardBreadcrumbs, DashboardHeader, StudentCard } from 'components';
 import { GetStudentsResponse } from 'db';
 
 export const Students = () => {
@@ -19,13 +19,10 @@ export const Students = () => {
           },
         ]}
       />
-      <Stack>
-        <Typography variant="h5">{title}</Typography>
-        <Typography variant="subtitle1">
-          {studentsCount} student{studentsCount > 1 ? 's' : ''} in {title}'s
-          Student Group.
-        </Typography>
-      </Stack>
+      <DashboardHeader
+        heading={title}
+        subtitle={`${studentsCount} student${studentsCount > 1 ? 's' : ''} in ${title}'s student group.`}
+      />
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {students.map((student) => {
           return (

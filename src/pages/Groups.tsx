@@ -14,10 +14,9 @@ import {
   SpeedDialAction,
   SpeedDialIcon,
   Stack,
-  Typography,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { DashboardBreadcrumbs, GroupCard } from 'components';
+import { DashboardBreadcrumbs, DashboardHeader, GroupCard } from 'components';
 import { Group } from 'db';
 
 const ALL_STUDENT_GROUPS = 'All Student Groups';
@@ -28,18 +27,16 @@ export const Groups = () => {
   return (
     <Stack spacing={4} marginY={4}>
       <DashboardBreadcrumbs title="Student Groups" />
-      <Stack direction="row" justifyContent="space-between">
-        <Stack>
-          <Typography variant="h5">Student Groups</Typography>
-          <Typography variant="subtitle1">
-            Create, Manage, and Track Student Groups.
-          </Typography>
-        </Stack>
-        <GroupsFilterControl
-          groups={groups}
-          setFilteredGroups={setFilteredGroups}
-        />
-      </Stack>
+      <DashboardHeader
+        heading="Student Groups"
+        subtitle="Create, manage, and track student groups."
+        filterComponent={
+          <GroupsFilterControl
+            groups={groups}
+            setFilteredGroups={setFilteredGroups}
+          />
+        }
+      />
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {filteredGroups.map((group) => {
           return (

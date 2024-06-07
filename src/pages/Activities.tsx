@@ -7,11 +7,14 @@ import {
   SpeedDialIcon,
   Stack,
   TextField,
-  Typography,
 } from '@mui/material';
 import { Addchart, BarChart } from '@mui/icons-material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { ActivityCard, DashboardBreadcrumbs } from 'components';
+import {
+  ActivityCard,
+  DashboardBreadcrumbs,
+  DashboardHeader,
+} from 'components';
 import { Activity } from 'db';
 import { useAuth } from 'hooks';
 
@@ -23,20 +26,20 @@ export const Activities = () => {
   return (
     <Stack spacing={4} marginY={4}>
       <DashboardBreadcrumbs title="Activities" />
-      <Stack direction="row" justifyContent="space-between">
-        <Stack>
-          <Typography variant="h5">Activities</Typography>
-          <Typography variant="subtitle1">
-            {user?.role === 'Teacher'
-              ? `Create, manage, and track activities.`
-              : 'Welcome, track you assigned activities.'}
-          </Typography>
-        </Stack>
-        <ActivitiesFilterControl
-          activities={activities}
-          setFilteredActivities={setFilteredActivities}
-        />
-      </Stack>
+      <DashboardHeader
+        heading="Activities"
+        subtitle={
+          user?.role === 'Teacher'
+            ? `Create, manage, and track activities.`
+            : 'Welcome, track you assigned activities.'
+        }
+        filterComponent={
+          <ActivitiesFilterControl
+            activities={activities}
+            setFilteredActivities={setFilteredActivities}
+          />
+        }
+      />
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {filteredActivities.map((activity) => {
           return (
