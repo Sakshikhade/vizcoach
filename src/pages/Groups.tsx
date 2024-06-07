@@ -10,13 +10,15 @@ import {
   OutlinedInput,
   Select,
   SelectChangeEvent,
-  SpeedDial,
-  SpeedDialAction,
-  SpeedDialIcon,
   Stack,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { DashboardBreadcrumbs, DashboardHeader, GroupCard } from 'components';
+import {
+  DashboardBreadcrumbs,
+  DashboardHeader,
+  DashboardSpeedDial,
+  GroupCard,
+} from 'components';
 import { Group } from 'db';
 
 const ALL_STUDENT_GROUPS = 'All Student Groups';
@@ -46,24 +48,17 @@ export const Groups = () => {
           );
         })}
       </Grid2>
-      <GroupsSpeedDial />
-    </Stack>
-  );
-};
-
-const GroupsSpeedDial = () => {
-  return (
-    <SpeedDial
-      ariaLabel="Groups SpeedDial"
-      sx={{ position: 'absolute', bottom: '2rem', right: '2rem' }}
-      icon={<SpeedDialIcon openIcon={<GroupIcon />} />}
-    >
-      <SpeedDialAction
-        key={1}
-        icon={<GroupAdd />}
-        tooltipTitle="Add Student Group"
+      <DashboardSpeedDial
+        ariaLabel="Groups SpeedDial"
+        openIcon={<GroupIcon />}
+        actions={[
+          {
+            icon: <GroupAdd />,
+            tooltipTitle: 'Add Student Group',
+          },
+        ]}
       />
-    </SpeedDial>
+    </Stack>
   );
 };
 

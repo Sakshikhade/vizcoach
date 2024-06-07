@@ -1,19 +1,13 @@
 import { ChangeEvent, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
-import {
-  FormControl,
-  SpeedDial,
-  SpeedDialAction,
-  SpeedDialIcon,
-  Stack,
-  TextField,
-} from '@mui/material';
+import { FormControl, Stack, TextField } from '@mui/material';
 import { Addchart, BarChart } from '@mui/icons-material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   ActivityCard,
   DashboardBreadcrumbs,
   DashboardHeader,
+  DashboardSpeedDial,
 } from 'components';
 import { Activity } from 'db';
 import { useAuth } from 'hooks';
@@ -49,24 +43,17 @@ export const Activities = () => {
           );
         })}
       </Grid2>
-      <ActivitiesSpeedDial />
-    </Stack>
-  );
-};
-
-const ActivitiesSpeedDial = () => {
-  return (
-    <SpeedDial
-      ariaLabel="Groups SpeedDial"
-      sx={{ position: 'absolute', bottom: '2rem', right: '2rem' }}
-      icon={<SpeedDialIcon openIcon={<BarChart />} />}
-    >
-      <SpeedDialAction
-        key={1}
-        icon={<Addchart />}
-        tooltipTitle="Add Activity"
+      <DashboardSpeedDial
+        ariaLabel="Activities SpeedDial"
+        openIcon={<BarChart />}
+        actions={[
+          {
+            icon: <Addchart />,
+            tooltipTitle: 'Add Activity',
+          },
+        ]}
       />
-    </SpeedDial>
+    </Stack>
   );
 };
 
