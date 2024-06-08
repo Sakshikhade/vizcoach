@@ -49,16 +49,18 @@ export const Activities = () => {
         </Grid2>
       }
       speedDial={
-        <DashboardSpeedDial
-          ariaLabel="Activities SpeedDial"
-          openIcon={<BarChart />}
-          actions={[
-            {
-              icon: <Addchart />,
-              tooltipTitle: 'Add Activity',
-            },
-          ]}
-        />
+        user?.role === 'Teacher' && (
+          <DashboardSpeedDial
+            ariaLabel="Activities SpeedDial"
+            openIcon={<BarChart />}
+            actions={[
+              {
+                icon: <Addchart />,
+                tooltipTitle: 'Add Activity',
+              },
+            ]}
+          />
+        )
       }
     />
   );

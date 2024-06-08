@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+import { Container, Stack } from '@mui/material';
 import { ReactNode } from 'react';
 
 interface DashboardLayoutProps {
@@ -15,11 +15,13 @@ export const DashboardLayout = ({
   speedDial,
 }: DashboardLayoutProps) => {
   return (
-    <Stack spacing={4} marginY={4}>
-      {breadcrumbs}
-      {header}
-      {content}
-      {speedDial}
-    </Stack>
+    <Container>
+      <Stack spacing={4} marginY={4}>
+        {breadcrumbs}
+        {header}
+        {content}
+        {speedDial}
+      </Stack>
+    </Container>
   );
 };
