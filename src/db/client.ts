@@ -86,8 +86,18 @@ class PocketbaseClient {
             ].join(' && ')
           : '',
     });
-    activities.push(...models.map((model: RecordModel) => new Activity(model)));
+    for (const model of models) {
+      activities.push(new Activity(model, await this.getUnitsCount(model.id)));
+    }
+    console.log(activities);
     return activities;
+  }
+
+  async getUnitsCount(activityId: string): Promise<number> {
+    const response = await this.pb.collection('units').getList(1, 1, {
+      filter: `activityId='${activityId}'`,
+    });
+    return response.totalItems;
   }
 }
 

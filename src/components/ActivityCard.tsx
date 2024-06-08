@@ -1,4 +1,9 @@
-import { ArrowForward, Group as GroupIcon, Update } from '@mui/icons-material';
+import {
+  ArrowForward,
+  ChecklistRounded,
+  GroupRounded,
+  Update,
+} from '@mui/icons-material';
 import {
   Card,
   CardActionArea,
@@ -26,21 +31,31 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
             justifyContent: 'space-between',
           }}
         >
-          <Stack>
-            <Typography gutterBottom variant="h6">
-              {title}
-            </Typography>
-            <Typography
-              variant="subtitle2"
-              dangerouslySetInnerHTML={{ __html: activity.description }}
-              sx={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: '3',
-                WebkitBoxOrient: 'vertical',
-              }}
-            ></Typography>
+          <Stack direction="row" justifyContent="space-between">
+            <Stack>
+              <Typography gutterBottom variant="h6">
+                {title}
+              </Typography>
+              <Typography
+                variant="subtitle2"
+                dangerouslySetInnerHTML={{ __html: activity.description }}
+                sx={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: '3',
+                  WebkitBoxOrient: 'vertical',
+                }}
+              ></Typography>
+            </Stack>
+            {activity.isScheduled && (
+              <Chip
+                variant="outlined"
+                color="warning"
+                icon={<Update />}
+                label={activity.scheduled.toLocaleDateString()}
+              />
+            )}
           </Stack>
           <ActivityCardFooter activity={activity} />
         </CardContent>
@@ -54,24 +69,22 @@ interface ActivityCardFooterProps {
 }
 
 const ActivityCardFooter = ({ activity }: ActivityCardFooterProps) => {
-  const { group } = activity;
+  const { group, unitsCount } = activity;
   return (
     <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
       <Stack direction="row" spacing={1}>
-        {activity.isScheduled && (
-          <Chip
-            variant="outlined"
-            color="warning"
-            icon={<Update />}
-            label={activity.scheduled.toLocaleDateString()}
-          />
-        )}
         {group.valid && (
           <Chip
             variant="outlined"
-            color="primary"
-            icon={<GroupIcon />}
+            icon={<GroupRounded />}
             label={group.title}
+          />
+        )}
+        {unitsCount > 0 && (
+          <Chip
+            variant="outlined"
+            icon={<ChecklistRounded />}
+            label={`${unitsCount} Unit${unitsCount > 1 ? 's' : ''}`}
           />
         )}
       </Stack>

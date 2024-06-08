@@ -49,7 +49,10 @@ export interface GetStudentsResponse {
 }
 
 export class Activity {
-  constructor(readonly model: RecordModel) {}
+  constructor(
+    readonly model: RecordModel,
+    readonly unitsCount: number = -1,
+  ) {}
 
   get id(): string {
     return this.model.id;
