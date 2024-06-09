@@ -78,3 +78,44 @@ export class Activity {
     return new Group(this.model.expand?.groupId);
   }
 }
+
+export interface Unit extends RecordModel {
+  title: string;
+  description: string;
+  datasets: string[];
+  order: number;
+}
+
+export class Submission {
+  constructor(readonly model: RecordModel) {}
+
+  get id(): string {
+    return this.model.id;
+  }
+
+  get json(): object {
+    return this.model.json;
+  }
+
+  get student(): User {
+    return this.model.expand?.userId;
+  }
+
+  get state(): 'help' | 'submitted' {
+    return this.model.state;
+  }
+
+  get updated(): Date {
+    return new Date(this.model.updated);
+  }
+
+  get unit(): Unit {
+    return this.model.expand?.unitId;
+  }
+}
+
+export interface GetSubmissionsResponse {
+  activity: Activity;
+  units: Unit[];
+  submissions: Submission[];
+}

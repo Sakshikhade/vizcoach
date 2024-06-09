@@ -43,14 +43,29 @@ Follow these steps to setup Pocketbase database for the application.
         @request.auth.id = @collection.activities.groupId.usergroups_via_groupId.userId
 
 23. Create a new collection called `units`.
-24. Add fields `title`, `description`, `datasets`, and `activityId` to the `units` collection.
+24. Add fields `title`, `description`, `datasets`, `order`, and `activityId` to the `units` collection.
 25. The field `title` in the `units` collection is of type `Plain Text`. This field should be set to `non-empty`.
 26. The field `description` in the `units` collection is of type `Rich Text`. This field should be set to `non-empty`.
 27. The field `datasets` in the `units` collection is of type `File`. This field should be set to `non-empty`, `protected`, and `multi-valued`. Allowed mime types include `text/csv`.
-28. The field `activityId` in the `units` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `activities` collection.
-29. Update the `List/Search Rule` and `View rule` in the `API Rules` for the `units` collection to the following value. This step will ensure that only teachers and associated students can view activities.
+28. The field `order` in the `units` collection is of type `Number`. This field should be set to `non-zero` and `no-decimals`. Values should be between `1` and `5`.
+29. The field `activityId` in the `units` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `activities` collection.
+30. Update the `List/Search Rule` and `View rule` in the `API Rules` for the `units` collection to the following value. This step will ensure that only teachers and associated students can view activities.
 
         // Teacher can access all the units
         @request.auth.role = 'Teacher' ||
         // Students should have only access if associated with activity
         @request.auth.id = @collection.units.activityId.groupId.usergroups_via_groupId.userId
+
+31. Create a new collection called `submissions`.
+32. Add fields `json`, `unitId`, `userId`, and `state` to the `submissions` collection.
+33. The field `json` in the `submissions` collection is of type `JSON`. This field should be set to `non-empty`. Value of this field will store student's Vegalite solution.
+34. The field `unitId` in the `submissions` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `units` collection.
+35. The field `userId` in the `submissions` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `users` collection.
+36. The field `state` in the `submissions` collection is of type `Select`. Values for the select `help` and `submitted`. An `empty` state means that student is working on thier submission.
+37. Add an unique constraint on fields `userId` and `unitId`, ensuring one submission per unit per student.
+38. Update the `List/Search Rule` and `View rule` in the `API Rules` for the `submissions` collection to the following value. This step will ensure that only teachers and owning students can view submissions.
+
+        // Teacher can access all the submissions
+        @request.auth.role = 'Teacher' ||
+        // Students should have only access their submissions
+        @request.auth.id = @collection.submissions.userId

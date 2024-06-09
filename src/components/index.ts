@@ -7,4 +7,5 @@ export * from './DashboardSpeedDial';
 export * from './GroupCard';
 export * from './NavigationBar';
 export * from './StudentCard';
+export * from './SubmissionCard';
 export * from './VizCoachLogo';

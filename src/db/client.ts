@@ -1,5 +1,13 @@
 import Pocketbase, { RecordModel } from 'pocketbase';
-import { Activity, GetStudentsResponse, Group, User } from '.';
+import {
+  Activity,
+  GetStudentsResponse,
+  GetSubmissionsResponse,
+  Group,
+  Submission,
+  Unit,
+  User,
+} from '.';
 
 class PocketbaseClient {
   readonly pb: Pocketbase;
@@ -45,7 +53,6 @@ class PocketbaseClient {
   }
 
   async getStudents(groupId: string): Promise<GetStudentsResponse | null> {
-    // Checking if requesting user has permissions
     const user = this.getUser();
     if (!user || user.role !== 'Teacher') return null;
 
@@ -89,7 +96,6 @@ class PocketbaseClient {
     for (const model of models) {
       activities.push(new Activity(model, await this.getUnitsCount(model.id)));
     }
-    console.log(activities);
     return activities;
   }
 
@@ -98,6 +104,45 @@ class PocketbaseClient {
       filter: `activityId='${activityId}'`,
     });
     return response.totalItems;
+  }
+
+  async getUnits(activityId: string): Promise<Unit[]> {
+    return this.pb.collection('units').getFullList({
+      sort: '+order',
+      filter: `activityId='${activityId}'`,
+    });
+  }
+
+  async getSubmissions(
+    activityId: string,
+  ): Promise<GetSubmissionsResponse | null> {
+    const user = this.getUser();
+    if (!user || user.role !== 'Teacher') return null;
+
+    const units: Unit[] = await this.getUnits(activityId);
+    const models = await this.pb.collection('submissions').getFullList({
+      expand: 'userId,unitId.activityId.groupId',
+      filter: `unitId.activityId='${activityId}'`,
+    });
+
+    if (!models.length) {
+      const model = await this.pb.collection('activities').getOne(activityId, {
+        expand: 'groupId',
+      });
+      return {
+        activity: new Activity(model, units.length),
+        units,
+        submissions: [],
+      };
+    }
+    return {
+      activity: new Activity(
+        models[0].expand?.unitId.expand.activityId,
+        units.length,
+      ),
+      units,
+      submissions: models.map((model) => new Submission(model)),
+    };
   }
 }
 

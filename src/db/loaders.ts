@@ -1,8 +1,12 @@
+import { LoaderFunctionArgs } from 'react-router-dom';
 import client from '.';
 
 export const groupsLoader = async () => client.getGroups();
 
-export const studentsLoader = async (groupId: string) =>
-  client.getStudents(groupId);
+export const studentsLoader = async ({ params }: LoaderFunctionArgs) =>
+  client.getStudents(params.groupId || '');
 
 export const activitiesLoader = async () => client.getActivities();
+
+export const submissionsLoader = async ({ params }: LoaderFunctionArgs) =>
+  client.getSubmissions(params.activityId || '');

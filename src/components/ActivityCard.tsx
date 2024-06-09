@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowForward,
   ChecklistRounded,
@@ -13,6 +14,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Activity } from 'db';
+import { useAuth } from 'hooks';
 
 interface ActivityCardProps {
   activity: Activity;
@@ -20,9 +22,18 @@ interface ActivityCardProps {
 
 export const ActivityCard = ({ activity }: ActivityCardProps) => {
   const { title } = activity;
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const onClick = () => {
+    if (user?.role === 'Teacher') {
+      navigate(`${activity.id}/submissions`);
+    }
+  };
+
   return (
     <Card variant="outlined">
-      <CardActionArea>
+      <CardActionArea onClick={onClick}>
         <CardContent
           sx={{
             display: 'flex',
