@@ -7,6 +7,7 @@ import {
   NotFound,
   Students,
   Submissions,
+  Units,
 } from 'pages';
 import { AuthenticatedRoute } from './AuthenticatedRoute';
 import { AuthorizedRoute } from './AuthorizedRoute';
@@ -15,6 +16,7 @@ import {
   groupsLoader,
   studentsLoader,
   submissionsLoader,
+  unitsLoader,
 } from 'db';
 
 export const router = createBrowserRouter([
@@ -37,6 +39,11 @@ export const router = createBrowserRouter([
             path: '',
             element: <Activities />,
             loader: activitiesLoader,
+          },
+          {
+            path: ':activityId',
+            element: <Units />,
+            loader: unitsLoader,
           },
           {
             path: ':activityId/submissions',

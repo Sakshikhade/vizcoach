@@ -8,5 +8,8 @@ export const studentsLoader = async ({ params }: LoaderFunctionArgs) =>
 
 export const activitiesLoader = async () => client.getActivities();
 
+export const unitsLoader = async ({ params }: LoaderFunctionArgs) =>
+  client.getUnits(params.activityId || '');
+
 export const submissionsLoader = async ({ params }: LoaderFunctionArgs) =>
   client.getSubmissions(params.activityId || '');

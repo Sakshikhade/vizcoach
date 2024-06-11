@@ -86,6 +86,11 @@ export interface Unit extends RecordModel {
   order: number;
 }
 
+export interface GetUnitsResponse {
+  activity: Activity;
+  units: Unit[];
+}
+
 export class Submission {
   constructor(readonly model: RecordModel) {}
 
@@ -114,8 +119,12 @@ export class Submission {
   }
 }
 
-export interface GetSubmissionsResponse {
-  activity: Activity;
-  units: Unit[];
+export interface GetSubmissionsResponse extends GetUnitsResponse {
   submissions: Submission[];
 }
+
+export const toTextContent = (innerHTML: string): string => {
+  const element = document.createElement('div');
+  element.innerHTML = innerHTML;
+  return element.textContent || innerHTML;
+};

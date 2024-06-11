@@ -22,19 +22,23 @@ export const Submissions = () => {
     <DashboardLayout
       breadcrumbs={
         <DashboardBreadcrumbs
-          title={activity.title}
+          title="Submissions"
           links={[
             {
               href: '/dashboard/activities',
               children: 'Activities',
+            },
+            {
+              href: `/dashboard/activities/${activity.id}`,
+              children: activity.title,
             },
           ]}
         />
       }
       header={
         <DashboardHeader
-          heading={activity.title}
-          subtitle={`Track ${activity.group.title}'s submissions for this activity.`}
+          heading="Submissions"
+          subtitle={`Track ${activity.group.title}'s submissions for ${activity.title}`}
         />
       }
       content={

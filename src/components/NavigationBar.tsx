@@ -18,7 +18,7 @@ import { useAuth } from 'hooks';
 export const NavigationBar = () => {
   const { user } = useAuth();
   return (
-    <AppBar position="static">
+    <AppBar position="fixed">
       <Container maxWidth="xl">
         <Toolbar
           disableGutters

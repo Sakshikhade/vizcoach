@@ -1,0 +1,47 @@
+import {
+  Card,
+  CardActionArea,
+  CardContent,
+  Chip,
+  Stack,
+  Typography,
+} from '@mui/material';
+import { TableRowsRounded } from '@mui/icons-material';
+import { CardEllipsisableBody, CardFooter } from 'components';
+import { Unit, toTextContent } from 'db';
+
+export interface UnitCardProps {
+  unit: Unit;
+}
+
+export const UnitCard = ({ unit }: UnitCardProps) => {
+  const { title, description, order, datasets } = unit;
+  return (
+    <Card variant="outlined">
+      <CardActionArea>
+        <CardContent>
+          <Stack>
+            <Typography gutterBottom variant="h6">
+              Unit {order} - {title}
+            </Typography>
+            <CardEllipsisableBody>
+              {toTextContent(description)}
+            </CardEllipsisableBody>
+          </Stack>
+          <CardFooter>
+            {datasets.map((dataset) => {
+              return (
+                <Chip
+                  key={dataset}
+                  variant="outlined"
+                  label={dataset}
+                  icon={<TableRowsRounded />}
+                />
+              );
+            })}
+          </CardFooter>
+        </CardContent>
+      </CardActionArea>
+    </Card>
+  );
+};

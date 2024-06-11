@@ -1,10 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  ArrowForward,
-  ChecklistRounded,
-  GroupRounded,
-  Update,
-} from '@mui/icons-material';
+import { ChecklistRounded, GroupRounded, Update } from '@mui/icons-material';
 import {
   Card,
   CardActionArea,
@@ -13,27 +8,20 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { Activity } from 'db';
-import { useAuth } from 'hooks';
+import { CardEllipsisableBody, CardFooter } from 'components';
+import { Activity, toTextContent } from 'db';
 
 interface ActivityCardProps {
   activity: Activity;
 }
 
 export const ActivityCard = ({ activity }: ActivityCardProps) => {
-  const { title } = activity;
-  const { user } = useAuth();
+  const { id, title, group, unitsCount, description, isScheduled, scheduled } =
+    activity;
   const navigate = useNavigate();
-
-  const onClick = () => {
-    if (user?.role === 'Teacher') {
-      navigate(`${activity.id}/submissions`);
-    }
-  };
-
   return (
     <Card variant="outlined">
-      <CardActionArea onClick={onClick}>
+      <CardActionArea onClick={() => navigate(`${id}`)}>
         <CardContent
           sx={{
             display: 'flex',
@@ -47,59 +35,37 @@ export const ActivityCard = ({ activity }: ActivityCardProps) => {
               <Typography gutterBottom variant="h6">
                 {title}
               </Typography>
-              <Typography
-                variant="subtitle2"
-                dangerouslySetInnerHTML={{ __html: activity.description }}
-                sx={{
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: '3',
-                  WebkitBoxOrient: 'vertical',
-                }}
-              ></Typography>
+              <CardEllipsisableBody>
+                {toTextContent(description)}
+              </CardEllipsisableBody>
             </Stack>
-            {activity.isScheduled && (
+            {isScheduled && (
               <Chip
                 variant="outlined"
                 color="warning"
                 icon={<Update />}
-                label={activity.scheduled.toLocaleDateString()}
+                label={scheduled.toLocaleDateString()}
               />
             )}
           </Stack>
-          <ActivityCardFooter activity={activity} />
+          <CardFooter>
+            {group.valid && (
+              <Chip
+                variant="outlined"
+                icon={<GroupRounded />}
+                label={group.title}
+              />
+            )}
+            {unitsCount > 0 && (
+              <Chip
+                variant="outlined"
+                icon={<ChecklistRounded />}
+                label={`${unitsCount} Unit${unitsCount > 1 ? 's' : ''}`}
+              />
+            )}
+          </CardFooter>
         </CardContent>
       </CardActionArea>
     </Card>
-  );
-};
-
-interface ActivityCardFooterProps {
-  activity: Activity;
-}
-
-const ActivityCardFooter = ({ activity }: ActivityCardFooterProps) => {
-  const { group, unitsCount } = activity;
-  return (
-    <Stack direction="row" alignItems="center" justifyContent={'space-between'}>
-      <Stack direction="row" spacing={1}>
-        {group.valid && (
-          <Chip
-            variant="outlined"
-            icon={<GroupRounded />}
-            label={group.title}
-          />
-        )}
-        {unitsCount > 0 && (
-          <Chip
-            variant="outlined"
-            icon={<ChecklistRounded />}
-            label={`${unitsCount} Unit${unitsCount > 1 ? 's' : ''}`}
-          />
-        )}
-      </Stack>
-      <ArrowForward />
-    </Stack>
   );
 };

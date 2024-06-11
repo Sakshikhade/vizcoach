@@ -20,7 +20,7 @@ export const DashboardSpeedDial = ({
   return (
     <SpeedDial
       ariaLabel={ariaLabel}
-      sx={{ position: 'absolute', bottom: '2rem', right: '2rem' }}
+      sx={{ position: 'fixed', bottom: '2rem', right: '2rem' }}
       icon={<SpeedDialIcon openIcon={openIcon} />}
     >
       {actions.map((action, i) => {

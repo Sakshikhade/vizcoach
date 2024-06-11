@@ -1,5 +1,7 @@
 export * from './ActivityCard';
 export * from './ButtonLink';
+export * from './CardEllipsisableBody';
+export * from './CardFooter';
 export * from './DashboardBreadcrumbs';
 export * from './DashboardHeader';
 export * from './DashboardLayout';
@@ -8,4 +10,5 @@ export * from './GroupCard';
 export * from './NavigationBar';
 export * from './StudentCard';
 export * from './SubmissionCard';
+export * from './UnitCard';
 export * from './VizCoachLogo';

@@ -16,7 +16,7 @@ export const DashboardLayout = ({
 }: DashboardLayoutProps) => {
   return (
     <Container>
-      <Stack spacing={4} marginY={4}>
+      <Stack spacing={4} marginTop={12} marginBottom={4}>
         {breadcrumbs}
         {header}
         {content}

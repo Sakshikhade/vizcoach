@@ -15,7 +15,7 @@ export const DashboardHeader = ({
   return (
     <Stack direction="row" justifyContent="space-between">
       <Stack>
-        <Typography variant="h5">{heading}</Typography>
+        <Typography variant="h4">{heading}</Typography>
         <Typography variant="subtitle1">{subtitle}</Typography>
       </Stack>
       {filterComponent}

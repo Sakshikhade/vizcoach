@@ -4,11 +4,10 @@ import {
   CardActionArea,
   CardContent,
   Chip,
-  Stack,
   Typography,
 } from '@mui/material';
-import { ArrowForward } from '@mui/icons-material';
 import { Group } from 'db';
+import { CardFooter } from './CardFooter';
 
 interface GroupCardProps {
   group: Group;
@@ -21,21 +20,14 @@ export const GroupCard = ({ group }: GroupCardProps) => {
     <Card variant="outlined">
       <CardActionArea onClick={() => navigate(group.id)}>
         <CardContent>
-          <Typography gutterBottom variant="h6">
-            {title}
-          </Typography>
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
+          <Typography variant="h6">{title}</Typography>
+          <CardFooter>
             <Chip
               variant="outlined"
               color="primary"
               label={`${studentsCount} student${(studentsCount || 0) > 1 ? 's' : ''}`}
             />
-            <ArrowForward />
-          </Stack>
+          </CardFooter>
         </CardContent>
       </CardActionArea>
     </Card>

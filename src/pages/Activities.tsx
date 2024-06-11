@@ -26,8 +26,8 @@ export const Activities = () => {
           heading="Activities"
           subtitle={
             user?.role === 'Teacher'
-              ? `Create, manage, and track activities.`
-              : 'Welcome, track you assigned activities.'
+              ? 'Create, manage, and track activities.'
+              : 'Welcome, track your assigned activities.'
           }
           filterComponent={
             <ActivitiesFilterControl

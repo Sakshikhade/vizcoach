@@ -3,6 +3,7 @@ import {
   Activity,
   GetStudentsResponse,
   GetSubmissionsResponse,
+  GetUnitsResponse,
   Group,
   Submission,
   Unit,
@@ -106,11 +107,26 @@ class PocketbaseClient {
     return response.totalItems;
   }
 
-  async getUnits(activityId: string): Promise<Unit[]> {
-    return this.pb.collection('units').getFullList({
+  async getUnits(activityId: string): Promise<GetUnitsResponse> {
+    const units: Unit[] = await this.pb.collection('units').getFullList({
       sort: '+order',
+      expand: 'activityId.groupId',
       filter: `activityId='${activityId}'`,
     });
+
+    if (!units.length) {
+      const model = await this.pb.collection('activities').getOne(activityId, {
+        expand: 'groupId',
+      });
+      return {
+        activity: new Activity(model, 0),
+        units: [],
+      };
+    }
+    return {
+      activity: new Activity(units[0].expand?.activityId, units.length),
+      units,
+    };
   }
 
   async getSubmissions(
@@ -119,27 +135,21 @@ class PocketbaseClient {
     const user = this.getUser();
     if (!user || user.role !== 'Teacher') return null;
 
-    const units: Unit[] = await this.getUnits(activityId);
+    const { units, activity } = await this.getUnits(activityId);
     const models = await this.pb.collection('submissions').getFullList({
-      expand: 'userId,unitId.activityId.groupId',
+      expand: 'userId,unitId',
       filter: `unitId.activityId='${activityId}'`,
     });
 
     if (!models.length) {
-      const model = await this.pb.collection('activities').getOne(activityId, {
-        expand: 'groupId',
-      });
       return {
-        activity: new Activity(model, units.length),
+        activity,
         units,
         submissions: [],
       };
     }
     return {
-      activity: new Activity(
-        models[0].expand?.unitId.expand.activityId,
-        units.length,
-      ),
+      activity,
       units,
       submissions: models.map((model) => new Submission(model)),
     };
