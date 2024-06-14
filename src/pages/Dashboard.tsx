@@ -1,11 +1,12 @@
-import { Outlet } from 'react-router-dom';
-import { NavigationBar } from 'components';
+import { Outlet, useNavigation } from 'react-router-dom';
+import { Loading, NavigationBar } from 'components';
 
 export const Dashboard = () => {
+  const { state } = useNavigation();
   return (
     <>
       <NavigationBar />
-      <Outlet />
+      {state !== 'idle' ? <Loading /> : <Outlet />}
     </>
   );
 };
