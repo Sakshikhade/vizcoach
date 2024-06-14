@@ -1,8 +1,13 @@
 import Pocketbase, { RecordModel } from 'pocketbase';
+import { GridColDef } from '@mui/x-data-grid';
+import { autoType, csv } from 'd3';
 import {
   Activity,
+  Dataset,
+  DatasetRow,
   GetStudentsResponse,
   GetSubmissionsResponse,
+  GetUnitResponse,
   GetUnitsResponse,
   Group,
   Submission,
@@ -107,7 +112,10 @@ class PocketbaseClient {
     return response.totalItems;
   }
 
-  async getUnits(activityId: string): Promise<GetUnitsResponse> {
+  async getUnits(activityId: string): Promise<GetUnitsResponse | null> {
+    const user = this.getUser();
+    if (!user) return null;
+
     const units: Unit[] = await this.pb.collection('units').getFullList({
       sort: '+order',
       expand: 'activityId.groupId',
@@ -129,13 +137,70 @@ class PocketbaseClient {
     };
   }
 
+  async getUnit(
+    activityId: string,
+    unitId: string,
+  ): Promise<GetUnitResponse | null> {
+    const response = await this.getUnits(activityId);
+    if (!response) return null;
+
+    const { activity, units } = response;
+    const unit = units.find(({ id }) => id === unitId);
+    if (!unit) return null;
+
+    return {
+      activity,
+      unit,
+      datasets: await this.getDatasets(unit),
+    };
+  }
+
+  private async getDatasets(unit: Unit): Promise<Dataset[]> {
+    const token = await this.pb.files.getToken();
+    const datasets: Dataset[] = [];
+
+    for (const name of unit?.datasets) {
+      const url = this.pb.getFileUrl(unit, name, { token });
+      const rows = await csv(url, autoType);
+      const columns: string[] = rows.columns;
+      const fields: GridColDef<DatasetRow>[] = columns.map((field) => ({
+        field,
+        headerName: field,
+        filterable: false,
+      }));
+
+      // Adding ID field
+      if (!columns.includes('id')) {
+        fields.unshift({
+          field: 'id',
+          headerName: 'Generated ID',
+          hideable: true,
+          filterable: false,
+        });
+        for (let i = 0; i < rows.length; i++) {
+          Object.assign(rows[i], { id: `${i}-${name}` });
+        }
+      }
+
+      datasets.push({
+        name,
+        fields,
+        rows,
+      });
+    }
+    return datasets;
+  }
+
   async getSubmissions(
     activityId: string,
   ): Promise<GetSubmissionsResponse | null> {
     const user = this.getUser();
     if (!user || user.role !== 'Teacher') return null;
 
-    const { units, activity } = await this.getUnits(activityId);
+    const response = await this.getUnits(activityId);
+    if (!response) return null;
+
+    const { activity, units } = response;
     const models = await this.pb.collection('submissions').getFullList({
       expand: 'userId,unitId',
       filter: `unitId.activityId='${activityId}'`,

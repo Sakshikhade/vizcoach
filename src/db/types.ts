@@ -1,4 +1,5 @@
 import { RecordModel } from 'pocketbase';
+import { GridColDef } from '@mui/x-data-grid';
 
 export type UserRole = 'Teacher' | 'Student';
 
@@ -79,11 +80,25 @@ export class Activity {
   }
 }
 
+export type DatasetRow = { [key: string]: any };
+
+export interface Dataset {
+  name: string;
+  fields: GridColDef<DatasetRow>[];
+  rows: DatasetRow[];
+}
+
 export interface Unit extends RecordModel {
   title: string;
   description: string;
   datasets: string[];
   order: number;
+}
+
+export interface GetUnitResponse {
+  activity: Activity;
+  unit: Unit;
+  datasets: Dataset[];
 }
 
 export interface GetUnitsResponse {

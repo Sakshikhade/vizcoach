@@ -9,39 +9,51 @@ import {
 import { GetStudentsResponse } from 'db';
 
 export const Students = () => {
-  const { students, group } = useLoaderData() as GetStudentsResponse;
-  const title = group.title || 'Unknown';
-  const studentsCount = group.studentsCount || 0;
+  const response = useLoaderData() as GetStudentsResponse;
   return (
     <DashboardLayout
-      breadcrumbs={
-        <DashboardBreadcrumbs
-          title={title}
-          links={[
-            {
-              href: '/dashboard/groups',
-              children: 'Student Groups',
-            },
-          ]}
-        />
-      }
-      header={
-        <DashboardHeader
-          heading={title}
-          subtitle={`${studentsCount} student${studentsCount > 1 ? 's' : ''} in ${title}'s student group.`}
-        />
-      }
-      content={
-        <Grid2 container rowSpacing={1} columnSpacing={1}>
-          {students.map((student) => {
-            return (
-              <Grid2 key={student.id} xs={6} md={4} lg={3}>
-                <StudentCard student={student} />
-              </Grid2>
-            );
-          })}
-        </Grid2>
-      }
+      breadcrumbs={<StudentsBreadcrumbs {...response} />}
+      header={<StudentsHeader {...response} />}
+      content={<StudentsContent {...response} />}
     />
+  );
+};
+
+const StudentsBreadcrumbs = ({ group }: GetStudentsResponse) => {
+  return (
+    <DashboardBreadcrumbs
+      title={group.title}
+      links={[
+        {
+          href: '/dashboard/groups',
+          children: 'Student Groups',
+        },
+      ]}
+    />
+  );
+};
+
+const StudentsHeader = ({
+  group: { title, studentsCount },
+}: GetStudentsResponse) => {
+  return (
+    <DashboardHeader
+      heading={title}
+      subtitle={`${studentsCount} student${studentsCount > 1 ? 's' : ''} in ${title}'s student group.`}
+    />
+  );
+};
+
+const StudentsContent = ({ students }: GetStudentsResponse) => {
+  return (
+    <Grid2 container rowSpacing={1} columnSpacing={1}>
+      {students.map((student) => {
+        return (
+          <Grid2 key={student.id} xs={6} md={4} lg={3}>
+            <StudentCard student={student} />
+          </Grid2>
+        );
+      })}
+    </Grid2>
   );
 };

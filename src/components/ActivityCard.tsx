@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { CardEllipsisableBody, CardFooter } from 'components';
 import { Activity, toTextContent } from 'db';
+import { useAuth } from 'hooks';
 
 interface ActivityCardProps {
   activity: Activity;
@@ -18,10 +19,18 @@ interface ActivityCardProps {
 export const ActivityCard = ({ activity }: ActivityCardProps) => {
   const { id, title, group, unitsCount, description, isScheduled, scheduled } =
     activity;
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  const onClick = () => {
+    if (user?.role === 'Teacher') {
+      navigate(`${id}/units`);
+    }
+  };
+
   return (
     <Card variant="outlined">
-      <CardActionArea onClick={() => navigate(`${id}`)}>
+      <CardActionArea onClick={onClick}>
         <CardContent
           sx={{
             display: 'flex',

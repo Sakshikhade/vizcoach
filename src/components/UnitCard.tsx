@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardActionArea,
@@ -15,10 +16,11 @@ export interface UnitCardProps {
 }
 
 export const UnitCard = ({ unit }: UnitCardProps) => {
-  const { title, description, order, datasets } = unit;
+  const { id, title, description, order, datasets } = unit;
+  const navigate = useNavigate();
   return (
     <Card variant="outlined">
-      <CardActionArea>
+      <CardActionArea onClick={() => navigate(`${id}`)}>
         <CardContent>
           <Stack>
             <Typography gutterBottom variant="h6">

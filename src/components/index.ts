@@ -6,6 +6,7 @@ export * from './DashboardBreadcrumbs';
 export * from './DashboardHeader';
 export * from './DashboardLayout';
 export * from './DashboardSpeedDial';
+export * from './DatasetTable';
 export * from './GroupCard';
 export * from './NavigationBar';
 export * from './StudentCard';

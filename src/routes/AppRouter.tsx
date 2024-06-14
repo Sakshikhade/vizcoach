@@ -7,6 +7,7 @@ import {
   NotFound,
   Students,
   Submissions,
+  UnitPage,
   Units,
 } from 'pages';
 import { AuthenticatedRoute } from './AuthenticatedRoute';
@@ -16,6 +17,7 @@ import {
   groupsLoader,
   studentsLoader,
   submissionsLoader,
+  unitLoader,
   unitsLoader,
 } from 'db';
 
@@ -41,9 +43,28 @@ export const router = createBrowserRouter([
             loader: activitiesLoader,
           },
           {
-            path: ':activityId',
-            element: <Units />,
+            path: ':activityId/units',
+            element: (
+              <AuthorizedRoute
+                navigateTo="/dashboard"
+                allowedRoles={['Teacher']}
+              >
+                <Units />
+              </AuthorizedRoute>
+            ),
             loader: unitsLoader,
+          },
+          {
+            path: ':activityId/units/:unitId',
+            element: (
+              <AuthorizedRoute
+                navigateTo="/dashboard"
+                allowedRoles={['Teacher']}
+              >
+                <UnitPage />
+              </AuthorizedRoute>
+            ),
+            loader: unitLoader,
           },
           {
             path: ':activityId/submissions',
@@ -56,6 +77,10 @@ export const router = createBrowserRouter([
               </AuthorizedRoute>
             ),
             loader: submissionsLoader,
+          },
+          {
+            path: '*',
+            element: <Navigate to="/dashboard" />,
           },
         ],
       },

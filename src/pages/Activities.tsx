@@ -10,7 +10,7 @@ import {
   DashboardLayout,
   DashboardSpeedDial,
 } from 'components';
-import { Activity } from 'db';
+import { Activity, User } from 'db';
 import { useAuth } from 'hooks';
 
 export const Activities = () => {
@@ -22,54 +22,41 @@ export const Activities = () => {
     <DashboardLayout
       breadcrumbs={<DashboardBreadcrumbs title="Activities" />}
       header={
-        <DashboardHeader
-          heading="Activities"
-          subtitle={
-            user?.role === 'Teacher'
-              ? 'Create, manage, and track activities.'
-              : 'Welcome, track your assigned activities.'
-          }
-          filterComponent={
-            <ActivitiesFilterControl
-              activities={activities}
-              setFilteredActivities={setFilteredActivities}
-            />
-          }
+        <ActivitiesBreadcrumbs
+          user={user}
+          activities={activities}
+          setFilteredActivities={setFilteredActivities}
         />
       }
-      content={
-        <Grid2 container rowSpacing={1} columnSpacing={1}>
-          {filteredActivities.map((activity) => {
-            return (
-              <Grid2 key={activity.id} xs={12} md={6} lg={4}>
-                <ActivityCard activity={activity} />
-              </Grid2>
-            );
-          })}
-        </Grid2>
-      }
-      speedDial={
-        user?.role === 'Teacher' && (
-          <DashboardSpeedDial
-            ariaLabel="Activities SpeedDial"
-            openIcon={<BarChart />}
-            actions={[
-              {
-                icon: <Addchart />,
-                tooltipTitle: 'Add Activity',
-              },
-            ]}
-          />
-        )
-      }
+      content={<ActivitiesContent activities={filteredActivities} />}
+      speedDial={<ActivitiesSpeedDial user={user} />}
     />
   );
 };
 
-interface ActivitiesFilterControlProps {
+type ActivitiesBreadcrumbsProps = {
+  user: User | null;
+} & ActivitiesFilterControlProps;
+
+const ActivitiesBreadcrumbs = (props: ActivitiesBreadcrumbsProps) => {
+  const { user } = props;
+  return (
+    <DashboardHeader
+      heading="Activities"
+      subtitle={
+        user?.role === 'Teacher'
+          ? 'Create, manage, and track activities.'
+          : 'Welcome, track your assigned activities.'
+      }
+      filterComponent={<ActivitiesFilterControl {...props} />}
+    />
+  );
+};
+
+type ActivitiesFilterControlProps = {
   activities: Activity[];
   setFilteredActivities: (activities: Activity[]) => void;
-}
+};
 
 const ActivitiesFilterControl = ({
   activities,
@@ -101,5 +88,43 @@ const ActivitiesFilterControl = ({
         onChange={onFilterChange}
       />
     </FormControl>
+  );
+};
+
+type ActivitiesContentProps = {
+  activities: Activity[];
+};
+
+const ActivitiesContent = ({ activities }: ActivitiesContentProps) => {
+  return (
+    <Grid2 container rowSpacing={1} columnSpacing={1}>
+      {activities.map((activity) => {
+        return (
+          <Grid2 key={activity.id} xs={12} md={6} lg={4}>
+            <ActivityCard activity={activity} />
+          </Grid2>
+        );
+      })}
+    </Grid2>
+  );
+};
+
+type ActivitiesSpeedDialProps = {
+  user: User | null;
+};
+
+const ActivitiesSpeedDial = ({ user }: ActivitiesSpeedDialProps) => {
+  if (user?.role !== 'Teacher') return null;
+  return (
+    <DashboardSpeedDial
+      ariaLabel="Activities SpeedDial"
+      openIcon={<BarChart />}
+      actions={[
+        {
+          icon: <Addchart />,
+          tooltipTitle: 'Add Activity',
+        },
+      ]}
+    />
   );
 };
