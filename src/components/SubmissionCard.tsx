@@ -39,8 +39,7 @@ export const SubmissionCard = ({
   const unitSubmissions = useMemo(
     () =>
       submissions.reduce((map, submission) => {
-        const { unit } = submission;
-        map.set(unit.id, submission);
+        map.set(submission.unitId, submission);
         return map;
       }, new Map<string, Submission>()),
     [submissions],

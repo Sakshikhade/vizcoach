@@ -8,12 +8,11 @@ import {
   GetStudentsResponse,
   GetSubmissionsResponse,
   GetUnitResponse,
-  GetUnitsResponse,
   Group,
   Submission,
   Unit,
   User,
-} from '.';
+} from 'db';
 
 class PocketbaseClient {
   readonly pb: Pocketbase;
@@ -83,75 +82,70 @@ class PocketbaseClient {
     };
   }
 
-  async getActivities(): Promise<Activity[]> {
+  async getActivities(filter?: string): Promise<Activity[]> {
     const user = this.getUser();
     if (!user) return [];
+
+    const filters = [];
+    if (user.role === 'Student') {
+      filters.push(
+        `groupId.usergroups_via_groupId.userId='${user.id}'`,
+        `(scheduled='' || scheduled<'${new Date().toISOString()}')`,
+      );
+    }
+    if (filter) {
+      filters.push(filter);
+    }
 
     const activities: Activity[] = [];
     const models = await this.pb.collection('activities').getFullList({
       sort: '-created',
       expand: user.role === 'Teacher' ? 'groupId' : '',
-      filter:
-        user.role === 'Student'
-          ? [
-              `groupId.usergroups_via_groupId.userId='${user.id}'`,
-              `(scheduled='' || scheduled<'${new Date().toISOString()}')`,
-            ].join(' && ')
-          : '',
+      filter: filters.join(' && '),
     });
     for (const model of models) {
-      activities.push(new Activity(model, await this.getUnitsCount(model.id)));
+      const { totalItems } = await this.pb.collection('units').getList(1, 1, {
+        filter: `activityId='${model.id}'`,
+      });
+      activities.push(new Activity(model, totalItems));
     }
     return activities;
   }
 
-  async getUnitsCount(activityId: string): Promise<number> {
-    const response = await this.pb.collection('units').getList(1, 1, {
-      filter: `activityId='${activityId}'`,
-    });
-    return response.totalItems;
+  async getActivity(activityId: string): Promise<Activity | null> {
+    const activities = await this.getActivities(`id='${activityId}'`);
+    return activities.length ? activities[0] : null;
   }
 
-  async getUnits(activityId: string): Promise<GetUnitsResponse | null> {
+  async getUnits(activityId: string, filter?: string): Promise<Unit[]> {
     const user = this.getUser();
-    if (!user) return null;
+    if (!user) return [];
 
-    const units: Unit[] = await this.pb.collection('units').getFullList({
-      sort: '+order',
-      expand: 'activityId.groupId',
-      filter: `activityId='${activityId}'`,
-    });
-
-    if (!units.length) {
-      const model = await this.pb.collection('activities').getOne(activityId, {
-        expand: 'groupId',
-      });
-      return {
-        activity: new Activity(model, 0),
-        units: [],
-      };
+    const filters = [`activityId='${activityId}'`];
+    if (filter) {
+      filters.push(filter);
     }
-    return {
-      activity: new Activity(units[0].expand?.activityId, units.length),
-      units,
-    };
+
+    return await this.pb.collection('units').getFullList({
+      sort: '+order',
+      filter: filters.join(' && '),
+    });
   }
 
   async getUnit(
     activityId: string,
     unitId: string,
   ): Promise<GetUnitResponse | null> {
-    const response = await this.getUnits(activityId);
-    if (!response) return null;
+    const activity = await this.getActivity(activityId);
+    if (!activity) return null;
 
-    const { activity, units } = response;
-    const unit = units.find(({ id }) => id === unitId);
-    if (!unit) return null;
+    const units = await this.getUnits(activityId, `id='${unitId}'`);
+    if (!units.length) return null;
 
     return {
       activity,
-      unit,
-      datasets: await this.getDatasets(unit),
+      unit: units[0],
+      datasets: await this.getDatasets(units[0]),
     };
   }
 
@@ -194,23 +188,22 @@ class PocketbaseClient {
   async getSubmissions(
     activityId: string,
   ): Promise<GetSubmissionsResponse | null> {
-    const response = await this.getUnits(activityId);
-    if (!response) return null;
-    const { activity, units } = response;
-
     const user = this.getUser();
     if (!user) return null;
 
-    const expands = ['unitId'];
+    const activity = await this.getActivity(activityId);
+    if (!activity) return null;
+
+    const units = await this.getUnits(activityId);
+    if (!units.length) return null;
+
     const filters = [`unitId.activityId='${activityId}'`];
     if (user.role !== 'Teacher') {
       filters.push(`userId='${user.id}'`);
-    } else {
-      expands.push('userId');
     }
 
     const models = await this.pb.collection('submissions').getFullList({
-      expand: expands.join(','),
+      expand: user.role === 'Teacher' ? 'userId' : '',
       filter: filters.join(' && '),
     });
 

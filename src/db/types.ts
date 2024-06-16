@@ -101,11 +101,6 @@ export interface GetUnitResponse {
   datasets: Dataset[];
 }
 
-export interface GetUnitsResponse {
-  activity: Activity;
-  units: Unit[];
-}
-
 export class Submission {
   constructor(
     readonly model: RecordModel,
@@ -128,12 +123,14 @@ export class Submission {
     return new Date(this.model.updated);
   }
 
-  get unit(): Unit {
-    return this.model.expand?.unitId;
+  get unitId(): string {
+    return this.model.unitId;
   }
 }
 
-export interface GetSubmissionsResponse extends GetUnitsResponse {
+export interface GetSubmissionsResponse {
+  activity: Activity;
+  units: Unit[];
   submissions: Submission[];
 }
 

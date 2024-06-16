@@ -65,7 +65,7 @@ const Content = () => {
   const { user } = useAuth();
 
   const submissionMap = submissions.reduce((map, submission) => {
-    map.set(submission.unit.id, submission);
+    map.set(submission.unitId, submission);
     return map;
   }, new Map<string, Submission>());
 
