@@ -1,10 +1,12 @@
 import { PropsWithChildren } from 'react';
 import { Stack } from '@mui/material';
-import { ArrowForward } from '@mui/icons-material';
+import { ArrowForward, Lock } from '@mui/icons-material';
 
-export type CardFooterProps = PropsWithChildren;
+export type CardFooterProps = {
+  locked?: boolean;
+} & PropsWithChildren;
 
-export const CardFooter = ({ children }: CardFooterProps) => {
+export const CardFooter = ({ locked, children }: CardFooterProps) => {
   return (
     <Stack
       marginTop={2}
@@ -15,7 +17,7 @@ export const CardFooter = ({ children }: CardFooterProps) => {
       <Stack direction="row" spacing={1}>
         {children}
       </Stack>
-      <ArrowForward />
+      {locked ? <Lock /> : <ArrowForward />}
     </Stack>
   );
 };

@@ -107,7 +107,10 @@ export interface GetUnitsResponse {
 }
 
 export class Submission {
-  constructor(readonly model: RecordModel) {}
+  constructor(
+    readonly model: RecordModel,
+    readonly student: User,
+  ) {}
 
   get id(): string {
     return this.model.id;
@@ -115,10 +118,6 @@ export class Submission {
 
   get json(): object {
     return this.model.json;
-  }
-
-  get student(): User {
-    return this.model.expand?.userId;
   }
 
   get state(): 'help' | 'submitted' {

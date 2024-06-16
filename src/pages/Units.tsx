@@ -14,21 +14,24 @@ import {
   DashboardSpeedDial,
   UnitCard,
 } from 'components';
-import { GetUnitsResponse } from 'db';
+import { GetSubmissionsResponse, Submission } from 'db';
+import { useAuth } from 'hooks';
+
+const useSubmissions = () => useLoaderData() as GetSubmissionsResponse;
 
 export const Units = () => {
-  const response = useLoaderData() as GetUnitsResponse;
   return (
     <DashboardLayout
-      breadcrumbs={<UnitsBreadcrumbs {...response} />}
-      header={<UnitsHeader {...response} />}
-      content={<UnitsContent {...response} />}
-      speedDial={<UnitsSpeedDial {...response} />}
+      breadcrumbs={<Breadcrumbs />}
+      header={<Header />}
+      content={<Content />}
+      speedDial={<SpeedDial />}
     />
   );
 };
 
-const UnitsBreadcrumbs = ({ activity }: GetUnitsResponse) => {
+const Breadcrumbs = () => {
+  const { activity } = useSubmissions();
   return (
     <DashboardBreadcrumbs
       title={activity.title}
@@ -42,16 +45,30 @@ const UnitsBreadcrumbs = ({ activity }: GetUnitsResponse) => {
   );
 };
 
-const UnitsHeader = ({ activity }: GetUnitsResponse) => {
+const Header = () => {
+  const { activity } = useSubmissions();
+  const { user } = useAuth();
   return (
     <DashboardHeader
       heading={activity.title}
-      subtitle="Create, manage, and track activity's units."
+      subtitle={
+        user?.role === 'Teacher'
+          ? "Create, manage, and track activity's units."
+          : 'Track your progress for this activity.'
+      }
     />
   );
 };
 
-const UnitsContent = ({ activity, units }: GetUnitsResponse) => {
+const Content = () => {
+  const { activity, units, submissions } = useSubmissions();
+  const { user } = useAuth();
+
+  const submissionMap = submissions.reduce((map, submission) => {
+    map.set(submission.unit.id, submission);
+    return map;
+  }, new Map<string, Submission>());
+
   return (
     <>
       <Stack padding={0.5}>
@@ -69,10 +86,22 @@ const UnitsContent = ({ activity, units }: GetUnitsResponse) => {
         </Paper>
       </Stack>
       <Grid2 container rowSpacing={1} columnSpacing={1}>
-        {units.map((unit) => {
+        {units.map((unit, index) => {
           return (
             <Grid2 key={unit.id} xs={12} md={12} lg={12}>
-              <UnitCard unit={unit} />
+              <UnitCard
+                unit={unit}
+                submission={
+                  user?.role !== 'Teacher'
+                    ? submissionMap.get(unit.id)
+                    : undefined
+                }
+                locked={
+                  user?.role !== 'Teacher' &&
+                  index !== 0 &&
+                  submissionMap.get(units[index - 1].id)?.state !== 'submitted'
+                }
+              />
             </Grid2>
           );
         })}
@@ -81,8 +110,11 @@ const UnitsContent = ({ activity, units }: GetUnitsResponse) => {
   );
 };
 
-const UnitsSpeedDial = ({ activity }: GetUnitsResponse) => {
+const SpeedDial = () => {
+  const { user } = useAuth();
+  const { activity } = useSubmissions();
   const navigate = useNavigate();
+  if (user?.role !== 'Teacher') return null;
   return (
     <DashboardSpeedDial
       ariaLabel="Units SpeedDial"

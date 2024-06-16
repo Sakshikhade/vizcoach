@@ -2,17 +2,13 @@ import { useMemo } from 'react';
 import {
   AdjustRounded,
   ArrowForward,
-  BackHandRounded,
   CheckCircleOutlineRounded,
-  ErrorOutlineRounded,
   RadioButtonUncheckedRounded,
 } from '@mui/icons-material';
 import {
   Card,
   CardActionArea,
   CardContent,
-  Chip,
-  ChipProps,
   Divider,
   List,
   ListItem,
@@ -20,8 +16,14 @@ import {
   ListItemText,
   Stack,
 } from '@mui/material';
+import {
+  AttemptingChip,
+  NotAttemptedChip,
+  RaisedHandChip,
+  StudentHeader,
+  SubmittedChip,
+} from 'components';
 import { Submission, Unit, User } from 'db';
-import { StudentHeader } from './StudentCard';
 
 interface SubmissionCardProps {
   student: User;
@@ -78,37 +80,6 @@ const SubmissionCardFooter = ({
   units,
   submissions,
 }: SubmissionCardFooterProps) => {
-  const props: ChipProps = useMemo(() => {
-    if (!submissions.length) {
-      return {
-        label: 'Not Attempted',
-        color: 'error',
-        icon: <ErrorOutlineRounded />,
-      };
-    } else if (submissions.some(({ state }) => state === 'help')) {
-      return {
-        label: 'Raised Hand',
-        color: 'warning',
-        icon: <BackHandRounded />,
-      };
-    } else if (
-      submissions.filter(({ state }) => state === 'submitted').length ===
-      units.length
-    ) {
-      return {
-        label: 'Submitted',
-        color: 'success',
-        icon: <CheckCircleOutlineRounded />,
-      };
-    } else {
-      return {
-        label: 'Attempting',
-        color: 'primary',
-        icon: <AdjustRounded />,
-      };
-    }
-  }, [units, submissions]);
-
   return (
     <Stack
       direction="row"
@@ -117,7 +88,16 @@ const SubmissionCardFooter = ({
       spacing={1}
       marginTop={2}
     >
-      <Chip variant="outlined" {...props} />
+      {!submissions.length ? (
+        <NotAttemptedChip />
+      ) : submissions.some(({ state }) => state === 'help') ? (
+        <RaisedHandChip />
+      ) : submissions.filter(({ state }) => state === 'submitted').length ===
+        units.length ? (
+        <SubmittedChip />
+      ) : (
+        <AttemptingChip />
+      )}
       <ArrowForward />
     </Stack>
   );

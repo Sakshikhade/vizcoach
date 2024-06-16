@@ -1,9 +1,11 @@
 import { PropsWithChildren } from 'react';
 import { Typography } from '@mui/material';
 
-export type CardEllipsisableBody = PropsWithChildren;
+type CardEllipsisableBodyProps = PropsWithChildren;
 
-export const CardEllipsisableBody = ({ children }: CardEllipsisableBody) => {
+export const CardEllipsisableBody = ({
+  children,
+}: CardEllipsisableBodyProps) => {
   return (
     <Typography
       variant="subtitle2"

@@ -11,19 +11,21 @@ import {
 } from 'components';
 import { GetUnitResponse } from 'db';
 
-export const UnitPage = () => {
-  const response = useLoaderData() as GetUnitResponse;
+const useUnit = () => useLoaderData() as GetUnitResponse;
+
+export const ViewUnit = () => {
   return (
     <DashboardLayout
-      breadcrumbs={<UnitPageBreadcrumbs {...response} />}
-      header={<UnitPageHeader {...response} />}
-      content={<UnitPageContent {...response} />}
-      speedDial={<UnitPageSpeedDial />}
+      breadcrumbs={<Breadcrumbs />}
+      header={<Header />}
+      content={<Content />}
+      speedDial={<SpeedDial />}
     />
   );
 };
 
-const UnitPageBreadcrumbs = ({ activity, unit }: GetUnitResponse) => {
+const Breadcrumbs = () => {
+  const { activity, unit } = useUnit();
   return (
     <DashboardBreadcrumbs
       title={unit.title}
@@ -41,7 +43,8 @@ const UnitPageBreadcrumbs = ({ activity, unit }: GetUnitResponse) => {
   );
 };
 
-const UnitPageHeader = ({ unit }: GetUnitResponse) => {
+const Header = () => {
+  const { unit } = useUnit();
   return (
     <DashboardHeader
       heading={unit.title}
@@ -50,7 +53,8 @@ const UnitPageHeader = ({ unit }: GetUnitResponse) => {
   );
 };
 
-const UnitPageContent = ({ unit, datasets }: GetUnitResponse) => {
+const Content = () => {
+  const { unit, datasets } = useUnit();
   const [index, setIndex] = useState(0);
   return (
     <>
@@ -86,7 +90,7 @@ const UnitPageContent = ({ unit, datasets }: GetUnitResponse) => {
   );
 };
 
-const UnitPageSpeedDial = () => {
+const SpeedDial = () => {
   return (
     <DashboardSpeedDial
       ariaLabel="UnitPage SpeedDial"

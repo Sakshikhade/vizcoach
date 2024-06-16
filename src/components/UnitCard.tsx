@@ -1,46 +1,71 @@
 import { useNavigate } from 'react-router-dom';
 import {
+  Alert,
   Card,
   CardActionArea,
   CardContent,
-  Chip,
   Stack,
   Typography,
 } from '@mui/material';
-import { TableRowsRounded } from '@mui/icons-material';
-import { CardEllipsisableBody, CardFooter } from 'components';
-import { Unit, toTextContent } from 'db';
+import {
+  CardEllipsisableBody,
+  CardFooter,
+  DatasetChip,
+  SubmissionChip,
+} from 'components';
+import { Submission, Unit, toTextContent } from 'db';
+import { useAuth } from 'hooks';
 
 export interface UnitCardProps {
   unit: Unit;
+  submission?: Submission;
+  locked?: boolean;
 }
 
-export const UnitCard = ({ unit }: UnitCardProps) => {
+export const UnitCard = ({ unit, submission, locked }: UnitCardProps) => {
   const { id, title, description, order, datasets } = unit;
+  const { user } = useAuth();
   const navigate = useNavigate();
+
+  const onClick = () => {
+    navigate(`${id}/${user?.role === 'Teacher' ? 'view' : 'perform'}`);
+  };
+
   return (
-    <Card variant="outlined">
-      <CardActionArea onClick={() => navigate(`${id}`)}>
+    <Card
+      variant="outlined"
+      sx={{ cursor: locked ? 'not-allowed' : 'pointer' }}
+    >
+      <CardActionArea disabled={locked} onClick={onClick}>
         <CardContent>
           <Stack>
-            <Typography gutterBottom variant="h6">
-              Unit {order} - {title}
-            </Typography>
-            <CardEllipsisableBody>
-              {toTextContent(description)}
-            </CardEllipsisableBody>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Typography gutterBottom variant="h6">
+                Unit {order} - {title}
+              </Typography>
+              <SubmissionChip submission={submission} locked={locked} />
+            </Stack>
+            <Stack marginY={2}>
+              {!locked ? (
+                <CardEllipsisableBody>
+                  {toTextContent(description)}
+                </CardEllipsisableBody>
+              ) : (
+                <Alert variant="outlined" severity="warning">
+                  Complete previous units to unlock this unit.
+                </Alert>
+              )}
+            </Stack>
           </Stack>
-          <CardFooter>
-            {datasets.map((dataset) => {
-              return (
-                <Chip
-                  key={dataset}
-                  variant="outlined"
-                  label={dataset}
-                  icon={<TableRowsRounded />}
-                />
-              );
-            })}
+          <CardFooter locked={locked}>
+            {datasets.map(
+              (dataset) =>
+                !locked && <DatasetChip key={dataset} dataset={dataset} />,
+            )}
           </CardFooter>
         </CardContent>
       </CardActionArea>

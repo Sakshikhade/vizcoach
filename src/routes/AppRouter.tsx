@@ -5,10 +5,11 @@ import {
   Groups,
   Login,
   NotFound,
+  Perform,
   Students,
   Submissions,
-  UnitPage,
   Units,
+  ViewUnit,
 } from 'pages';
 import { AuthenticatedRoute } from './AuthenticatedRoute';
 import { AuthorizedRoute } from './AuthorizedRoute';
@@ -18,7 +19,6 @@ import {
   studentsLoader,
   submissionsLoader,
   unitLoader,
-  unitsLoader,
 } from 'db';
 
 export const router = createBrowserRouter([
@@ -44,24 +44,29 @@ export const router = createBrowserRouter([
           },
           {
             path: ':activityId/units',
-            element: (
-              <AuthorizedRoute
-                navigateTo="/dashboard"
-                allowedRoles={['Teacher']}
-              >
-                <Units />
-              </AuthorizedRoute>
-            ),
-            loader: unitsLoader,
+            element: <Units />,
+            loader: submissionsLoader,
           },
           {
-            path: ':activityId/units/:unitId',
+            path: ':activityId/units/:unitId/view',
             element: (
               <AuthorizedRoute
                 navigateTo="/dashboard"
                 allowedRoles={['Teacher']}
               >
-                <UnitPage />
+                <ViewUnit />
+              </AuthorizedRoute>
+            ),
+            loader: unitLoader,
+          },
+          {
+            path: ':activityId/units/:unitId/perform',
+            element: (
+              <AuthorizedRoute
+                navigateTo="/dashboard"
+                allowedRoles={['Student']}
+              >
+                <Perform />
               </AuthorizedRoute>
             ),
             loader: unitLoader,

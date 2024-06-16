@@ -1,13 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import {
-  Card,
-  CardActionArea,
-  CardContent,
-  Chip,
-  Typography,
-} from '@mui/material';
+import { Card, CardActionArea, CardContent, Typography } from '@mui/material';
+import { CardFooter, StudentsCountChip } from 'components';
 import { Group } from 'db';
-import { CardFooter } from './CardFooter';
 
 interface GroupCardProps {
   group: Group;
@@ -22,11 +16,7 @@ export const GroupCard = ({ group }: GroupCardProps) => {
         <CardContent>
           <Typography variant="h6">{title}</Typography>
           <CardFooter>
-            <Chip
-              variant="outlined"
-              color="primary"
-              label={`${studentsCount} student${(studentsCount || 0) > 1 ? 's' : ''}`}
-            />
+            <StudentsCountChip count={studentsCount} />
           </CardFooter>
         </CardContent>
       </CardActionArea>

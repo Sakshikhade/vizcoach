@@ -2,6 +2,7 @@ export * from './ActivityCard';
 export * from './ButtonLink';
 export * from './CardEllipsisableBody';
 export * from './CardFooter';
+export * from './Chips';
 export * from './DashboardBreadcrumbs';
 export * from './DashboardHeader';
 export * from './DashboardLayout';

@@ -9,10 +9,6 @@ export const studentsLoader = async ({
 
 export const activitiesLoader = async () => client.getActivities();
 
-export const unitsLoader = async ({
-  params: { activityId },
-}: LoaderFunctionArgs) => client.getUnits(activityId || '');
-
 export const unitLoader = async ({
   params: { activityId, unitId },
 }: LoaderFunctionArgs) => await client.getUnit(activityId || '', unitId || '');

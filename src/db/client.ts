@@ -194,16 +194,24 @@ class PocketbaseClient {
   async getSubmissions(
     activityId: string,
   ): Promise<GetSubmissionsResponse | null> {
-    const user = this.getUser();
-    if (!user || user.role !== 'Teacher') return null;
-
     const response = await this.getUnits(activityId);
     if (!response) return null;
-
     const { activity, units } = response;
+
+    const user = this.getUser();
+    if (!user) return null;
+
+    const expands = ['unitId'];
+    const filters = [`unitId.activityId='${activityId}'`];
+    if (user.role !== 'Teacher') {
+      filters.push(`userId='${user.id}'`);
+    } else {
+      expands.push('userId');
+    }
+
     const models = await this.pb.collection('submissions').getFullList({
-      expand: 'userId,unitId',
-      filter: `unitId.activityId='${activityId}'`,
+      expand: expands.join(','),
+      filter: filters.join(' && '),
     });
 
     if (!models.length) {
@@ -216,7 +224,13 @@ class PocketbaseClient {
     return {
       activity,
       units,
-      submissions: models.map((model) => new Submission(model)),
+      submissions: models.map(
+        (model) =>
+          new Submission(
+            model,
+            user.role === 'Teacher' ? model.expand?.userId : user,
+          ),
+      ),
     };
   }
 }
