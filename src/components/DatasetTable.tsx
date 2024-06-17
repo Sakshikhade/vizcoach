@@ -18,6 +18,7 @@ export const DatasetTable = ({
         },
       }}
       pageSizeOptions={[5, 10, 20]}
+      autoHeight
     />
   );
 };

@@ -6,6 +6,7 @@ import {
   Dataset,
   DatasetRow,
   GetStudentsResponse,
+  GetSubmissionResponse,
   GetSubmissionsResponse,
   GetUnitResponse,
   Group,
@@ -187,6 +188,7 @@ class PocketbaseClient {
 
   async getSubmissions(
     activityId: string,
+    filter?: string,
   ): Promise<GetSubmissionsResponse | null> {
     const user = this.getUser();
     if (!user) return null;
@@ -200,6 +202,9 @@ class PocketbaseClient {
     const filters = [`unitId.activityId='${activityId}'`];
     if (user.role !== 'Teacher') {
       filters.push(`userId='${user.id}'`);
+    }
+    if (filter) {
+      filters.push(filter);
     }
 
     const models = await this.pb.collection('submissions').getFullList({
@@ -224,6 +229,26 @@ class PocketbaseClient {
             user.role === 'Teacher' ? model.expand?.userId : user,
           ),
       ),
+    };
+  }
+
+  async getSubmission(
+    activityId: string,
+    unitId: string,
+  ): Promise<GetSubmissionResponse | null> {
+    const response = await this.getSubmissions(
+      activityId,
+      `unitId='${unitId}'`,
+    );
+    if (!response) return null;
+
+    const { activity, units, submissions } = response;
+    const unit = units.find(({ id }) => id === unitId)!;
+    return {
+      activity,
+      unit,
+      datasets: await this.getDatasets(unit),
+      submission: submissions.length ? submissions[0] : undefined,
     };
   }
 }

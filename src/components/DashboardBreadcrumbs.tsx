@@ -1,6 +1,6 @@
 import { Home, NavigateNext } from '@mui/icons-material';
 import { Breadcrumbs, Link, Typography } from '@mui/material';
-import { ButtonLink } from '.';
+import { ButtonLink } from 'components';
 
 interface ButtonLinkObject {
   href: string;

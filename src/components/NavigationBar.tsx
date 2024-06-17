@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import { AccountBox, BarChart, Group, Logout } from '@mui/icons-material';
-import { VizCoachLogo } from '.';
+import { VizCoachLogo } from 'components';
 import { useAuth } from 'hooks';
 
 export const NavigationBar = () => {

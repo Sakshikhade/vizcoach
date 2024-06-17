@@ -134,6 +134,10 @@ export interface GetSubmissionsResponse {
   submissions: Submission[];
 }
 
+export interface GetSubmissionResponse extends GetUnitResponse {
+  submission?: Submission;
+}
+
 export const toTextContent = (innerHTML: string): string => {
   const element = document.createElement('div');
   element.innerHTML = innerHTML;

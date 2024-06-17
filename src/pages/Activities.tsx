@@ -48,7 +48,7 @@ const ActivitiesBreadcrumbs = (props: ActivitiesBreadcrumbsProps) => {
           ? 'Create, manage, and track activities.'
           : 'Welcome, track your assigned activities.'
       }
-      filterComponent={<ActivitiesFilterControl {...props} />}
+      options={<ActivitiesFilterControl {...props} />}
     />
   );
 };

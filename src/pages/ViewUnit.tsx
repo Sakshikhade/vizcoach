@@ -1,13 +1,12 @@
-import { useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
-import { Paper, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Paper, Stack, Typography } from '@mui/material';
 import { EditNoteRounded, TaskAltRounded } from '@mui/icons-material';
 import {
   DashboardBreadcrumbs,
   DashboardHeader,
   DashboardLayout,
   DashboardSpeedDial,
-  DatasetTable,
+  DatasetTabs,
 } from 'components';
 import { GetUnitResponse } from 'db';
 
@@ -55,7 +54,6 @@ const Header = () => {
 
 const Content = () => {
   const { unit, datasets } = useUnit();
-  const [index, setIndex] = useState(0);
   return (
     <>
       <Stack padding={0.5}>
@@ -74,16 +72,7 @@ const Content = () => {
       </Stack>
       <Stack padding={0.5}>
         <Paper variant="outlined">
-          <Tabs
-            value={index}
-            onChange={(_, index) => setIndex(index)}
-            aria-label="Datasets Tabs"
-          >
-            {unit.datasets.map((dataset, index) => (
-              <Tab key={dataset} label={dataset} value={index} />
-            ))}
-          </Tabs>
-          <DatasetTable dataset={datasets[index]} />
+          <DatasetTabs datasets={datasets} />
         </Paper>
       </Stack>
     </>
@@ -93,7 +82,7 @@ const Content = () => {
 const SpeedDial = () => {
   return (
     <DashboardSpeedDial
-      ariaLabel="UnitPage SpeedDial"
+      ariaLabel="ViewUnit SpeedDial"
       openIcon={<TaskAltRounded />}
       actions={[
         {

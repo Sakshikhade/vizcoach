@@ -4,13 +4,13 @@ import { Stack, Typography } from '@mui/material';
 interface DashboardHeaderProps {
   heading: string;
   subtitle: string;
-  filterComponent?: ReactNode;
+  options?: ReactNode;
 }
 
 export const DashboardHeader = ({
   heading,
   subtitle,
-  filterComponent,
+  options,
 }: DashboardHeaderProps) => {
   return (
     <Stack direction="row" justifyContent="space-between">
@@ -18,7 +18,7 @@ export const DashboardHeader = ({
         <Typography variant="h4">{heading}</Typography>
         <Typography variant="subtitle1">{subtitle}</Typography>
       </Stack>
-      {filterComponent}
+      {options}
     </Stack>
   );
 };

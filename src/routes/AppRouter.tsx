@@ -17,6 +17,7 @@ import {
   activitiesLoader,
   groupsLoader,
   studentsLoader,
+  submissionLoader,
   submissionsLoader,
   unitLoader,
 } from 'db';
@@ -69,7 +70,7 @@ export const router = createBrowserRouter([
                 <Perform />
               </AuthorizedRoute>
             ),
-            loader: unitLoader,
+            loader: submissionLoader,
           },
           {
             path: ':activityId/submissions',

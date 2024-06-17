@@ -43,7 +43,7 @@ const GroupsHeader = (props: GroupsFilterControlProps) => {
     <DashboardHeader
       heading="Student Groups"
       subtitle="Create, manage, and track student groups."
-      filterComponent={<GroupsFilterControl {...props} />}
+      options={<GroupsFilterControl {...props} />}
     />
   );
 };
