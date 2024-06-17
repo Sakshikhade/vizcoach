@@ -18,6 +18,7 @@ import {
   DashboardLayout,
   DashboardSpeedDial,
   DatasetTabs,
+  JsonEditor,
   SubmissionChip,
   Visualization,
 } from 'components';
@@ -59,8 +60,10 @@ namespace PerformSection {
   };
 
   const Details = ({ section }: { section: PerformSection }) => {
-    const { activity, unit, datasets } = useSubmission();
+    const { activity, unit, datasets, submission } = useSubmission();
     switch (section) {
+      case PerformSection.CONFIGURATION:
+        return <JsonEditor submission={submission} />;
       case PerformSection.ACTIVITY_DESCRIPTION:
         return (
           <Typography
@@ -78,12 +81,6 @@ namespace PerformSection {
       case PerformSection.DATASETS:
         return <DatasetTabs datasets={datasets} />;
     }
-    return (
-      <Typography>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-        malesuada lacus ex, sit amet blandit leo lobortis eget.
-      </Typography>
-    );
   };
 }
 
@@ -131,7 +128,7 @@ const Header = () => {
 const Content = () => {
   const { submission } = useSubmission();
   return (
-    <Stack direction="row" gap={2}>
+    <Stack direction="row" gap={2} position="relative">
       <Stack flex="1">
         <Visualization json={submission?.json} />
       </Stack>

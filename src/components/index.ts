@@ -10,6 +10,7 @@ export * from './DashboardSpeedDial';
 export * from './DatasetTable';
 export * from './DatasetTabs';
 export * from './GroupCard';
+export * from './JsonEditor';
 export * from './Loading';
 export * from './NavigationBar';
 export * from './StudentCard';
