@@ -5,8 +5,6 @@ import {
   Activity,
   Dataset,
   DatasetRow,
-  GetSubmissionResponse,
-  GetSubmissionsResponse,
   Group,
   Submission,
   Unit,
@@ -178,15 +176,9 @@ class PocketbaseClient {
   async getSubmissions(
     activityId: string,
     filter?: string,
-  ): Promise<GetSubmissionsResponse | null> {
+  ): Promise<Submission[]> {
     const user = this.getUser();
-    if (!user) return null;
-
-    const activity = await this.getActivity(activityId);
-    if (!activity) return null;
-
-    const units = await this.getUnits(activityId);
-    if (!units.length) return null;
+    if (!user) return [];
 
     const filters = [`unitId.activityId='${activityId}'`];
     if (user.role !== 'Teacher') {
@@ -200,45 +192,24 @@ class PocketbaseClient {
       expand: user.role === 'Teacher' ? 'userId' : '',
       filter: filters.join(' && '),
     });
-
-    if (!models.length) {
-      return {
-        activity,
-        units,
-        submissions: [],
-      };
-    }
-    return {
-      activity,
-      units,
-      submissions: models.map(
-        (model) =>
-          new Submission(
-            model,
-            user.role === 'Teacher' ? model.expand?.userId : user,
-          ),
-      ),
-    };
+    return models.map(
+      (model) =>
+        new Submission(
+          model,
+          user.role === 'Teacher' ? model.expand?.userId : user,
+        ),
+    );
   }
 
   async getSubmission(
     activityId: string,
     unitId: string,
-  ): Promise<GetSubmissionResponse | null> {
-    const response = await this.getSubmissions(
+  ): Promise<Submission | null> {
+    const submissions = await this.getSubmissions(
       activityId,
       `unitId='${unitId}'`,
     );
-    if (!response) return null;
-
-    const { activity, units, submissions } = response;
-    const unit = units.find(({ id }) => id === unitId)!;
-    return {
-      activity,
-      unit,
-      datasets: await this.getDatasets(unit),
-      submission: submissions.length ? submissions[0] : undefined,
-    };
+    return submissions.length ? submissions[0] : null;
   }
 }
 

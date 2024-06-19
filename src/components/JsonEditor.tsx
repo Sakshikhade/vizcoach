@@ -3,7 +3,7 @@ import { Editor, EditorProps } from '@monaco-editor/react';
 import { Submission } from 'db';
 
 type JsonEditorProps = {
-  submission?: Submission;
+  submission: Submission | null;
   onErrors?: (messages: string[]) => void;
 };
 

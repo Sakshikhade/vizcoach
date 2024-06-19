@@ -1,4 +1,3 @@
-import { useLoaderData } from 'react-router-dom';
 import {
   Accordion,
   AccordionDetails,
@@ -22,9 +21,7 @@ import {
   SubmissionChip,
   Visualization,
 } from 'components';
-import { GetSubmissionResponse } from 'db';
-
-const useSubmission = () => useLoaderData() as GetSubmissionResponse;
+import { useSubmissionLoader } from 'hooks';
 
 enum PerformSection {
   CONFIGURATION = 'Configuration',
@@ -60,7 +57,7 @@ namespace PerformSection {
   };
 
   const Details = ({ section }: { section: PerformSection }) => {
-    const { activity, unit, datasets, submission } = useSubmission();
+    const { activity, unit, datasets, submission } = useSubmissionLoader();
     switch (section) {
       case PerformSection.CONFIGURATION:
         return <JsonEditor submission={submission} />;
@@ -96,7 +93,7 @@ export const Perform = () => {
 };
 
 const Breadcrumbs = () => {
-  const { activity, unit } = useSubmission();
+  const { activity, unit } = useSubmissionLoader();
   return (
     <DashboardBreadcrumbs
       title={unit.title}
@@ -115,7 +112,7 @@ const Breadcrumbs = () => {
 };
 
 const Header = () => {
-  const { unit, submission } = useSubmission();
+  const { unit, submission } = useSubmissionLoader();
   return (
     <DashboardHeader
       heading={unit.title}
@@ -126,7 +123,7 @@ const Header = () => {
 };
 
 const Content = () => {
-  const { submission } = useSubmission();
+  const { submission } = useSubmissionLoader();
   return (
     <Stack direction="row" gap={2} position="relative">
       <Stack flex="1">
@@ -150,7 +147,7 @@ const Content = () => {
 };
 
 const SpeedDial = () => {
-  const { submission } = useSubmission();
+  const { submission } = useSubmissionLoader();
   if (submission?.state === 'submitted') return null;
   return (
     <DashboardSpeedDial

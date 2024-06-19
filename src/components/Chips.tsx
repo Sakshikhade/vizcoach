@@ -120,7 +120,7 @@ export const DatasetChip = ({ dataset }: DatasetChipProps) => {
 };
 
 type SubmissionChipProps = {
-  submission?: Submission;
+  submission: Submission | null;
   locked?: boolean;
 };
 

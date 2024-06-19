@@ -135,7 +135,7 @@ export interface GetSubmissionsResponse {
 }
 
 export interface GetSubmissionResponse extends GetUnitResponse {
-  submission?: Submission;
+  submission: Submission | null;
 }
 
 export const toTextContent = (innerHTML: string): string => {

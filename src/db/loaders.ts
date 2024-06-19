@@ -1,5 +1,10 @@
 import { LoaderFunctionArgs } from 'react-router-dom';
-import client, { GetStudentsResponse, GetUnitResponse } from 'db';
+import client, {
+  GetStudentsResponse,
+  GetSubmissionResponse,
+  GetSubmissionsResponse,
+  GetUnitResponse,
+} from 'db';
 
 export const groupsLoader = async () => client.getGroups();
 
@@ -43,10 +48,42 @@ export const unitLoader = async ({
 };
 
 export const submissionsLoader = async ({
-  params: { activityId },
-}: LoaderFunctionArgs) => client.getSubmissions(activityId || '');
+  params,
+}: LoaderFunctionArgs): Promise<GetSubmissionsResponse | null> => {
+  const { activityId } = params;
+  if (!activityId) return null;
+
+  const [activity, units, submissions] = await Promise.all([
+    client.getActivity(activityId),
+    client.getUnits(activityId),
+    client.getSubmissions(activityId),
+  ]);
+
+  if (!activity) return null;
+  return {
+    activity,
+    units,
+    submissions,
+  };
+};
 
 export const submissionLoader = async ({
-  params: { activityId, unitId },
-}: LoaderFunctionArgs) =>
-  await client.getSubmission(activityId || '', unitId || '');
+  params,
+}: LoaderFunctionArgs): Promise<GetSubmissionResponse | null> => {
+  const { activityId, unitId } = params;
+  if (!activityId || !unitId) return null;
+
+  const [activity, unit, submission] = await Promise.all([
+    client.getActivity(activityId),
+    client.getUnit(activityId, unitId),
+    client.getSubmission(activityId, unitId),
+  ]);
+
+  if (!activity || !unit) return null;
+  return {
+    activity,
+    unit,
+    datasets: await client.getDatasets(unit),
+    submission,
+  };
+};

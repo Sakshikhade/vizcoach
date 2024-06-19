@@ -18,7 +18,7 @@ import { useAuth } from 'hooks';
 
 export interface UnitCardProps {
   unit: Unit;
-  submission?: Submission;
+  submission: Submission | null;
   locked?: boolean;
 }
 

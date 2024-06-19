@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Paper, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
@@ -14,10 +14,8 @@ import {
   DashboardSpeedDial,
   UnitCard,
 } from 'components';
-import { GetSubmissionsResponse, Submission } from 'db';
-import { useAuth } from 'hooks';
-
-const useSubmissions = () => useLoaderData() as GetSubmissionsResponse;
+import { Submission } from 'db';
+import { useAuth, useSubmissionsLoader } from 'hooks';
 
 export const Units = () => {
   return (
@@ -31,7 +29,7 @@ export const Units = () => {
 };
 
 const Breadcrumbs = () => {
-  const { activity } = useSubmissions();
+  const { activity } = useSubmissionsLoader();
   return (
     <DashboardBreadcrumbs
       title={activity.title}
@@ -46,7 +44,7 @@ const Breadcrumbs = () => {
 };
 
 const Header = () => {
-  const { activity } = useSubmissions();
+  const { activity } = useSubmissionsLoader();
   const { user } = useAuth();
   return (
     <DashboardHeader
@@ -61,7 +59,7 @@ const Header = () => {
 };
 
 const Content = () => {
-  const { activity, units, submissions } = useSubmissions();
+  const { activity, units, submissions } = useSubmissionsLoader();
   const { user } = useAuth();
 
   const submissionMap = submissions.reduce((map, submission) => {
@@ -93,8 +91,8 @@ const Content = () => {
                 unit={unit}
                 submission={
                   user?.role !== 'Teacher'
-                    ? submissionMap.get(unit.id)
-                    : undefined
+                    ? submissionMap.get(unit.id) || null
+                    : null
                 }
                 locked={
                   user?.role !== 'Teacher' &&
@@ -112,7 +110,7 @@ const Content = () => {
 
 const SpeedDial = () => {
   const { user } = useAuth();
-  const { activity } = useSubmissions();
+  const { activity } = useSubmissionsLoader();
   const navigate = useNavigate();
   if (user?.role !== 'Teacher') return null;
   return (

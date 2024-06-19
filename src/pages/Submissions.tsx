@@ -1,4 +1,3 @@
-import { useLoaderData } from 'react-router-dom';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   DashboardBreadcrumbs,
@@ -6,20 +5,21 @@ import {
   DashboardLayout,
   SubmissionCard,
 } from 'components';
-import { GetSubmissionsResponse, Submission, User } from 'db';
+import { Submission, User } from 'db';
+import { useSubmissionsLoader } from 'hooks';
 
 export const Submissions = () => {
-  const response = useLoaderData() as GetSubmissionsResponse;
   return (
     <DashboardLayout
-      breadcrumbs={<SubmissionsBreadcrumbs {...response} />}
-      header={<SubmissionsHeader {...response} />}
-      content={<SubmissionsContent {...response} />}
+      breadcrumbs={<Breadcrumbs />}
+      header={<Header />}
+      content={<Content />}
     />
   );
 };
 
-const SubmissionsBreadcrumbs = ({ activity }: GetSubmissionsResponse) => {
+const Breadcrumbs = () => {
+  const { activity } = useSubmissionsLoader();
   return (
     <DashboardBreadcrumbs
       title="Submissions"
@@ -37,7 +37,8 @@ const SubmissionsBreadcrumbs = ({ activity }: GetSubmissionsResponse) => {
   );
 };
 
-const SubmissionsHeader = ({ activity }: GetSubmissionsResponse) => {
+const Header = () => {
+  const { activity } = useSubmissionsLoader();
   return (
     <DashboardHeader
       heading="Submissions"
@@ -46,7 +47,9 @@ const SubmissionsHeader = ({ activity }: GetSubmissionsResponse) => {
   );
 };
 
-const SubmissionsContent = ({ units, submissions }: GetSubmissionsResponse) => {
+const Content = () => {
+  const { units, submissions } = useSubmissionsLoader();
+
   const students = submissions.reduce((map, submission) => {
     const { student } = submission;
     map.set(student, [...(map.get(student) || []), submission]);
