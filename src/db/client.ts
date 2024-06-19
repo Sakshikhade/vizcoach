@@ -8,7 +8,6 @@ import {
   GetStudentsResponse,
   GetSubmissionResponse,
   GetSubmissionsResponse,
-  GetUnitResponse,
   Group,
   Submission,
   Unit,
@@ -133,24 +132,12 @@ class PocketbaseClient {
     });
   }
 
-  async getUnit(
-    activityId: string,
-    unitId: string,
-  ): Promise<GetUnitResponse | null> {
-    const activity = await this.getActivity(activityId);
-    if (!activity) return null;
-
+  async getUnit(activityId: string, unitId: string): Promise<Unit | null> {
     const units = await this.getUnits(activityId, `id='${unitId}'`);
-    if (!units.length) return null;
-
-    return {
-      activity,
-      unit: units[0],
-      datasets: await this.getDatasets(units[0]),
-    };
+    return units.length ? units[0] : null;
   }
 
-  private async getDatasets(unit: Unit): Promise<Dataset[]> {
+  async getDatasets(unit: Unit): Promise<Dataset[]> {
     const token = await this.pb.files.getToken();
     const datasets: Dataset[] = [];
 

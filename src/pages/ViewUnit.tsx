@@ -1,4 +1,3 @@
-import { useLoaderData } from 'react-router-dom';
 import { Paper, Stack, Typography } from '@mui/material';
 import { EditNoteRounded, TaskAltRounded } from '@mui/icons-material';
 import {
@@ -8,9 +7,7 @@ import {
   DashboardSpeedDial,
   DatasetTabs,
 } from 'components';
-import { GetUnitResponse } from 'db';
-
-const useUnit = () => useLoaderData() as GetUnitResponse;
+import { useUnitLoader } from 'hooks';
 
 export const ViewUnit = () => {
   return (
@@ -24,7 +21,7 @@ export const ViewUnit = () => {
 };
 
 const Breadcrumbs = () => {
-  const { activity, unit } = useUnit();
+  const { activity, unit } = useUnitLoader();
   return (
     <DashboardBreadcrumbs
       title={unit.title}
@@ -43,7 +40,7 @@ const Breadcrumbs = () => {
 };
 
 const Header = () => {
-  const { unit } = useUnit();
+  const { unit } = useUnitLoader();
   return (
     <DashboardHeader
       heading={unit.title}
@@ -53,7 +50,7 @@ const Header = () => {
 };
 
 const Content = () => {
-  const { unit, datasets } = useUnit();
+  const { unit, datasets } = useUnitLoader();
   return (
     <>
       <Stack padding={0.5}>
