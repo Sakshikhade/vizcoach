@@ -1,11 +1,10 @@
-import Pocketbase, { RecordModel } from 'pocketbase';
+import Pocketbase from 'pocketbase';
 import { GridColDef } from '@mui/x-data-grid';
 import { autoType, csv } from 'd3';
 import {
   Activity,
   Dataset,
   DatasetRow,
-  GetStudentsResponse,
   GetSubmissionResponse,
   GetSubmissionsResponse,
   Group,
@@ -39,47 +38,50 @@ class PocketbaseClient {
     return isValid ? (model as User) : null;
   }
 
-  async getGroups(): Promise<Group[]> {
+  async getGroups(filter?: string): Promise<Group[]> {
+    const user = this.getUser();
+    if (!user) return [];
+
+    const filters = [];
+    if (user.role === 'Student') {
+      filters.push(`usergroups_via_groupId.userId='${user.id}'`);
+    }
+    if (filter) {
+      filters.push(filter);
+    }
+
+    const groups: Group[] = [];
     const models = await this.pb.collection('groups').getFullList({
       sort: '-created',
+      filter: filters.join(' && '),
     });
-    const groups: Group[] = [];
     for (const model of models) {
-      groups.push(new Group(model, await this.getStudentsCount(model.id)));
+      const { totalItems } = await this.pb
+        .collection('usergroups')
+        .getList(1, 1, {
+          filter: `groupId='${model.id}' && userId.role='Student'`,
+        });
+      groups.push(new Group(model, totalItems));
     }
     return groups;
   }
 
-  async getStudentsCount(groupId: string): Promise<number> {
-    const response = await this.pb.collection('usergroups').getList(1, 1, {
-      filter: `groupId='${groupId}' && userId.role='Student'`,
-    });
-    return response.totalItems;
+  async getGroup(groupId: string): Promise<Group | null> {
+    const groups = await this.getGroups(`id='${groupId}'`);
+    return groups.length ? groups[0] : null;
   }
 
-  async getStudents(groupId: string): Promise<GetStudentsResponse | null> {
+  async getStudents(groupId: string): Promise<User[]> {
     const user = this.getUser();
-    if (!user || user.role !== 'Teacher') return null;
+    if (!user || user.role !== 'Teacher') return [];
 
     const userGroups = await this.pb.collection('usergroups').getFullList({
-      expand: 'userId,groupId',
+      expand: 'userId',
       filter: `groupId='${groupId}' && userId.role='Student'`,
     });
-
-    // Extracting user from the expanded collection
-    const students = userGroups
+    return userGroups
       .map(({ expand }) => expand?.userId)
       .filter((user) => !!user);
-
-    // Getting group from either the expanded collection or fetching new one
-    const record: RecordModel = userGroups.length
-      ? userGroups[0].expand?.groupId
-      : await this.pb.collection('groups').getOne(groupId);
-
-    return {
-      group: new Group(record, students.length),
-      students,
-    };
   }
 
   async getActivities(filter?: string): Promise<Activity[]> {

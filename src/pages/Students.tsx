@@ -1,4 +1,3 @@
-import { useLoaderData } from 'react-router-dom';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   DashboardBreadcrumbs,
@@ -6,20 +5,20 @@ import {
   DashboardLayout,
   StudentCard,
 } from 'components';
-import { GetStudentsResponse } from 'db';
+import { useStudentsLoader } from 'hooks';
 
 export const Students = () => {
-  const response = useLoaderData() as GetStudentsResponse;
   return (
     <DashboardLayout
-      breadcrumbs={<StudentsBreadcrumbs {...response} />}
-      header={<StudentsHeader {...response} />}
-      content={<StudentsContent {...response} />}
+      breadcrumbs={<Breadcrumbs />}
+      header={<Header />}
+      content={<Content />}
     />
   );
 };
 
-const StudentsBreadcrumbs = ({ group }: GetStudentsResponse) => {
+const Breadcrumbs = () => {
+  const { group } = useStudentsLoader();
   return (
     <DashboardBreadcrumbs
       title={group.title}
@@ -33,9 +32,10 @@ const StudentsBreadcrumbs = ({ group }: GetStudentsResponse) => {
   );
 };
 
-const StudentsHeader = ({
-  group: { title, studentsCount },
-}: GetStudentsResponse) => {
+const Header = () => {
+  const {
+    group: { title, studentsCount },
+  } = useStudentsLoader();
   return (
     <DashboardHeader
       heading={title}
@@ -44,7 +44,8 @@ const StudentsHeader = ({
   );
 };
 
-const StudentsContent = ({ students }: GetStudentsResponse) => {
+const Content = () => {
+  const { students } = useStudentsLoader();
   return (
     <Grid2 container rowSpacing={1} columnSpacing={1}>
       {students.map((student) => {

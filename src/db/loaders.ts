@@ -1,11 +1,25 @@
 import { LoaderFunctionArgs } from 'react-router-dom';
-import client, { GetUnitResponse } from 'db';
+import client, { GetStudentsResponse, GetUnitResponse } from 'db';
 
 export const groupsLoader = async () => client.getGroups();
 
 export const studentsLoader = async ({
-  params: { groupId },
-}: LoaderFunctionArgs) => client.getStudents(groupId || '');
+  params,
+}: LoaderFunctionArgs): Promise<GetStudentsResponse | null> => {
+  const { groupId } = params;
+  if (!groupId) return null;
+
+  const [group, students] = await Promise.all([
+    client.getGroup(groupId),
+    client.getStudents(groupId),
+  ]);
+
+  if (!group) return null;
+  return {
+    group,
+    students,
+  };
+};
 
 export const activitiesLoader = async () => client.getActivities();
 
