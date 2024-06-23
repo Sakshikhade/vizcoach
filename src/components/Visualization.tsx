@@ -1,39 +1,29 @@
-import { Paper } from '@mui/material';
+import { Paper, Stack } from '@mui/material';
 import { PlainObject, VegaLite, VisualizationSpec } from 'react-vega';
-
-const spec: VisualizationSpec = {
-  width: 400,
-  height: 200,
-  mark: 'bar',
-  encoding: {
-    x: { field: 'a', type: 'ordinal' },
-    y: { field: 'b', type: 'quantitative' },
-  },
-  data: { name: 'table' },
-};
-
-const barData: PlainObject = {
-  table: [
-    { a: 'A', b: 28 },
-    { a: 'B', b: 55 },
-    { a: 'C', b: 43 },
-    { a: 'D', b: 91 },
-    { a: 'E', b: 81 },
-    { a: 'F', b: 53 },
-    { a: 'G', b: 19 },
-    { a: 'H', b: 87 },
-    { a: 'I', b: 52 },
-  ],
-};
+import { Handler } from 'vega-tooltip';
+import { Dataset, Submission } from 'db';
 
 type VisualizationProps = {
-  json?: object;
+  datasets: Dataset[];
+  submission: Submission | null;
 };
 
-export const Visualization = ({ json }: VisualizationProps) => {
+export const Visualization = ({ datasets, submission }: VisualizationProps) => {
+  const spec = (submission?.json as VisualizationSpec) || {};
+  const data = datasets.reduce(
+    (obj, dataset) => Object.assign(obj, { [dataset.name]: dataset.rows }),
+    {} as PlainObject,
+  );
   return (
-    <Paper variant="outlined" sx={{ height: '30rem' }}>
-      <VegaLite spec={spec} data={barData} />
+    <Paper variant="outlined">
+      <Stack height="30rem" width="100%">
+        <VegaLite
+          spec={spec}
+          data={data}
+          actions={false}
+          tooltip={new Handler().call}
+        />
+      </Stack>
     </Paper>
   );
 };

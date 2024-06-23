@@ -18,13 +18,17 @@ const options: editor.IStandaloneEditorConstructionOptions = {
   },
   'semanticHighlighting.enabled': true,
   autoIndent: 'full',
+  formatOnType: true,
+  formatOnPaste: true,
   minimap: {
     enabled: false,
   },
 };
 
 export const JsonEditor = ({ submission, onErrors }: JsonEditorProps) => {
-  const json = submission?.json ? JSON.stringify(submission.json) : '{}';
+  const json = submission?.json
+    ? JSON.stringify(submission.json, null, 4)
+    : '{}';
   const readOnly = submission?.state === 'submitted';
 
   const onValidate = (markers: editor.IMarker[]) => {

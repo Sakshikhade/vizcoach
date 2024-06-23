@@ -123,11 +123,11 @@ const Header = () => {
 };
 
 const Content = () => {
-  const { submission } = useSubmissionLoader();
+  const { datasets, submission } = useSubmissionLoader();
   return (
     <Stack direction="row" gap={2} position="relative">
       <Stack flex="1">
-        <Visualization json={submission?.json} />
+        <Visualization datasets={datasets} submission={submission} />
       </Stack>
       <Stack flex="1">
         <PerformSection.AccordionComponent
