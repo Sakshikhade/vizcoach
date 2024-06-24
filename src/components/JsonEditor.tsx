@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { editor } from 'monaco-editor';
 import { Editor, EditorProps } from '@monaco-editor/react';
-import { Submission } from 'db';
 
 type JsonEditorProps = {
-  submission: Submission | null;
-  onErrors?: (messages: string[]) => void;
+  json: string;
+  readOnly?: boolean;
+  onJsonChange?: (value: string) => void;
 };
 
 const props: EditorProps = {
@@ -25,21 +26,22 @@ const options: editor.IStandaloneEditorConstructionOptions = {
   },
 };
 
-export const JsonEditor = ({ submission, onErrors }: JsonEditorProps) => {
-  const json = submission?.json
-    ? JSON.stringify(submission.json, null, 4)
-    : '{}';
-  const readOnly = submission?.state === 'submitted';
+export const JsonEditor = ({
+  json,
+  readOnly,
+  onJsonChange,
+}: JsonEditorProps) => {
+  const [value, setValue] = useState<string>(json);
 
-  const onValidate = (markers: editor.IMarker[]) => {
-    if (!onErrors) return;
-    onErrors(markers.map((marker) => marker.message));
+  const onChange = (newValue?: string) => {
+    setValue((prevValue) => newValue || prevValue);
+    if (onJsonChange && newValue) onJsonChange(newValue);
   };
 
   return (
     <Editor
-      value={json}
-      onValidate={onValidate}
+      value={value}
+      onChange={onChange}
       options={{ readOnly, ...options }}
       {...props}
     />

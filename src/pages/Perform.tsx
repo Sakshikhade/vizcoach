@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Alert,
   Stack,
   Typography,
 } from '@mui/material';
 import {
   BackHandRounded,
   CheckCircleOutlineRounded,
+  ErrorOutlineRounded,
   TaskAltRounded,
 } from '@mui/icons-material';
 import { GridExpandMoreIcon } from '@mui/x-data-grid';
@@ -28,57 +31,6 @@ enum PerformSection {
   ACTIVITY_DESCRIPTION = "Activity's Description",
   UNIT_DESCRIPTION = "Unit's Description",
   DATASETS = 'Datasets',
-}
-
-namespace PerformSection {
-  type AccordionComponentProps = {
-    section: PerformSection;
-    defaultExpanded?: boolean;
-  };
-
-  export const AccordionComponent = ({
-    section,
-    defaultExpanded,
-  }: AccordionComponentProps) => {
-    return (
-      <Accordion variant="outlined" defaultExpanded={defaultExpanded}>
-        <AccordionSummary
-          expandIcon={<GridExpandMoreIcon />}
-          aria-controls={`${section}-content`}
-          id={`${section}-header`}
-        >
-          <Typography>{section}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Details section={section} />
-        </AccordionDetails>
-      </Accordion>
-    );
-  };
-
-  const Details = ({ section }: { section: PerformSection }) => {
-    const { activity, unit, datasets, submission } = useSubmissionLoader();
-    switch (section) {
-      case PerformSection.CONFIGURATION:
-        return <JsonEditor submission={submission} />;
-      case PerformSection.ACTIVITY_DESCRIPTION:
-        return (
-          <Typography
-            dangerouslySetInnerHTML={{ __html: activity.description }}
-            sx={{ paddingX: 2 }}
-          />
-        );
-      case PerformSection.UNIT_DESCRIPTION:
-        return (
-          <Typography
-            dangerouslySetInnerHTML={{ __html: unit.description }}
-            sx={{ paddingX: 2 }}
-          />
-        );
-      case PerformSection.DATASETS:
-        return <DatasetTabs datasets={datasets} />;
-    }
-  };
 }
 
 export const Perform = () => {
@@ -123,24 +75,97 @@ const Header = () => {
 };
 
 const Content = () => {
-  const { datasets, submission } = useSubmissionLoader();
+  const { activity, unit, datasets, submission } = useSubmissionLoader();
+  const [json, setJson] = useState<string>(
+    submission?.json ? JSON.stringify(submission.json, null, 4) : '{}',
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  const onJsonChange = (value: string) => {
+    try {
+      JSON.parse(value);
+      setJson(value);
+      setError(null);
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        setError(error.message);
+      } else {
+        setError('Invalid JSON!');
+      }
+    }
+  };
+
   return (
     <Stack direction="row" gap={2} position="relative">
       <Stack flex="1">
-        <Visualization datasets={datasets} submission={submission} />
+        <Visualization datasets={datasets} json={json} />
       </Stack>
       <Stack flex="1">
-        <PerformSection.AccordionComponent
-          section={PerformSection.CONFIGURATION}
-          defaultExpanded
-        />
-        <PerformSection.AccordionComponent
-          section={PerformSection.ACTIVITY_DESCRIPTION}
-        />
-        <PerformSection.AccordionComponent
-          section={PerformSection.UNIT_DESCRIPTION}
-        />
-        <PerformSection.AccordionComponent section={PerformSection.DATASETS} />
+        <Accordion variant="outlined" defaultExpanded>
+          <AccordionSummary
+            expandIcon={<GridExpandMoreIcon />}
+            aria-controls={`${PerformSection.CONFIGURATION}-content`}
+            id={`${PerformSection.CONFIGURATION}-header`}
+          >
+            <Typography>{PerformSection.CONFIGURATION}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <JsonEditor
+              json={json}
+              readOnly={submission?.state === 'submitted'}
+              onJsonChange={onJsonChange}
+            />
+            {error && (
+              <Stack marginTop={2}>
+                <Alert icon={<ErrorOutlineRounded />} color="error">
+                  {error}
+                </Alert>
+              </Stack>
+            )}
+          </AccordionDetails>
+        </Accordion>
+        <Accordion variant="outlined">
+          <AccordionSummary
+            expandIcon={<GridExpandMoreIcon />}
+            aria-controls={`${PerformSection.ACTIVITY_DESCRIPTION}-content`}
+            id={`${PerformSection.ACTIVITY_DESCRIPTION}-header`}
+          >
+            <Typography>{PerformSection.ACTIVITY_DESCRIPTION}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography
+              dangerouslySetInnerHTML={{ __html: activity.description }}
+              sx={{ paddingX: 2 }}
+            />
+          </AccordionDetails>
+        </Accordion>
+        <Accordion variant="outlined">
+          <AccordionSummary
+            expandIcon={<GridExpandMoreIcon />}
+            aria-controls={`${PerformSection.UNIT_DESCRIPTION}-content`}
+            id={`${PerformSection.UNIT_DESCRIPTION}-header`}
+          >
+            <Typography>{PerformSection.UNIT_DESCRIPTION}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography
+              dangerouslySetInnerHTML={{ __html: unit.description }}
+              sx={{ paddingX: 2 }}
+            />
+          </AccordionDetails>
+        </Accordion>
+        <Accordion variant="outlined">
+          <AccordionSummary
+            expandIcon={<GridExpandMoreIcon />}
+            aria-controls={`${PerformSection.DATASETS}-content`}
+            id={`${PerformSection.DATASETS}-header`}
+          >
+            <Typography>{PerformSection.DATASETS}</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <DatasetTabs datasets={datasets} />
+          </AccordionDetails>
+        </Accordion>
       </Stack>
     </Stack>
   );
