@@ -3,13 +3,15 @@ import {
   AdjustRounded,
   ArrowForward,
   CheckCircleOutlineRounded,
+  ErrorOutlineRounded,
   RadioButtonUncheckedRounded,
 } from '@mui/icons-material';
 import {
+  Alert,
   Card,
   CardActionArea,
   CardContent,
-  Divider,
+  CircularProgress,
   List,
   ListItem,
   ListItemAvatar,
@@ -22,19 +24,26 @@ import {
   RaisedHandChip,
   StudentHeader,
   SubmittedChip,
+  Visualization,
 } from 'components';
-import { Submission, Unit, User } from 'db';
+import { Dataset, Submission, Unit, User } from 'db';
 
-interface SubmissionCardProps {
+const CARD_CONTENT_HEIGHT = 300;
+
+type SubmissionCardProps = {
   student: User;
   units: Unit[];
   submissions: Submission[];
-}
+  datasets: Dataset[];
+  selectedUnit?: Unit;
+};
 
 export const SubmissionCard = ({
   student,
   units,
   submissions,
+  datasets,
+  selectedUnit,
 }: SubmissionCardProps) => {
   const unitSubmissions = useMemo(
     () =>
@@ -52,60 +61,139 @@ export const SubmissionCard = ({
           <Stack marginBottom={2}>
             <StudentHeader student={student} />
           </Stack>
-          <Divider />
-          <List>
-            {units.map((unit) => (
-              <UnitListItem
-                key={unit.id}
-                unit={unit}
-                submission={unitSubmissions.get(unit.id)}
+          <Stack marginY={2} height={CARD_CONTENT_HEIGHT}>
+            {selectedUnit ? (
+              <SelectedSubmissionContent
+                datasets={datasets}
+                submission={unitSubmissions.get(selectedUnit.id)}
               />
-            ))}
-          </List>
-          <Divider />
-          <SubmissionCardFooter units={units} submissions={submissions} />
+            ) : (
+              <AllSubmissionsContent
+                units={units}
+                unitSubmissions={unitSubmissions}
+              />
+            )}
+          </Stack>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            spacing={1}
+            marginTop={2}
+          >
+            {selectedUnit ? (
+              <SelectedSubmissionFooter
+                submission={unitSubmissions.get(selectedUnit.id)}
+              />
+            ) : (
+              <AllSubmissionsFooter units={units} submissions={submissions} />
+            )}
+            <ArrowForward />
+          </Stack>
         </CardContent>
       </CardActionArea>
     </Card>
   );
 };
 
-interface SubmissionCardFooterProps {
-  units: Unit[];
-  submissions: Submission[];
-}
+type SelectedSubmissionContentProps = {
+  datasets: Dataset[];
+  submission?: Submission;
+};
 
-const SubmissionCardFooter = ({
+const SelectedSubmissionContent = ({
+  datasets,
+  submission,
+}: SelectedSubmissionContentProps) => {
+  if (!datasets.length) {
+    return (
+      <Stack height="100%" alignItems="center" justifyContent="center">
+        <CircularProgress />
+      </Stack>
+    );
+  } else if (submission) {
+    const json = JSON.stringify({
+      ...submission.json,
+      height: CARD_CONTENT_HEIGHT,
+      width: 'container',
+    });
+    return <Visualization datasets={datasets} json={json} />;
+  } else {
+    return (
+      <Alert icon={<ErrorOutlineRounded />} color="error" variant="outlined">
+        No submission, unable to render a visualization!
+      </Alert>
+    );
+  }
+};
+
+type AllSubmissionsContentProps = {
+  units: Unit[];
+  unitSubmissions: Map<string, Submission>;
+};
+
+const AllSubmissionsContent = ({
   units,
-  submissions,
-}: SubmissionCardFooterProps) => {
+  unitSubmissions,
+}: AllSubmissionsContentProps) => {
   return (
-    <Stack
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      spacing={1}
-      marginTop={2}
-    >
-      {!submissions.length ? (
-        <NotAttemptedChip />
-      ) : submissions.some(({ state }) => state === 'help') ? (
-        <RaisedHandChip />
-      ) : submissions.filter(({ state }) => state === 'submitted').length ===
-        units.length ? (
-        <SubmittedChip />
-      ) : (
-        <AttemptingChip />
-      )}
-      <ArrowForward />
-    </Stack>
+    <List>
+      {units.map((unit) => (
+        <UnitListItem
+          key={unit.id}
+          unit={unit}
+          submission={unitSubmissions.get(unit.id)}
+        />
+      ))}
+    </List>
   );
 };
 
-interface UnitListItemProps {
+type SelectedSubmissionFooterProps = {
+  submission?: Submission;
+};
+
+const SelectedSubmissionFooter = ({
+  submission,
+}: SelectedSubmissionFooterProps) => {
+  if (!submission) {
+    return <NotAttemptedChip />;
+  } else if (submission.state === 'help') {
+    return <RaisedHandChip />;
+  } else if (submission.state === 'submitted') {
+    return <SubmittedChip />;
+  } else {
+    return <AttemptingChip />;
+  }
+};
+
+type AllSubmissionsFooterProps = {
+  units: Unit[];
+  submissions: Submission[];
+};
+
+const AllSubmissionsFooter = ({
+  units,
+  submissions,
+}: AllSubmissionsFooterProps) => {
+  if (!submissions.length) {
+    return <NotAttemptedChip />;
+  } else if (submissions.some(({ state }) => state === 'help')) {
+    return <RaisedHandChip />;
+  } else if (
+    submissions.filter(({ state }) => state === 'submitted').length ===
+    units.length
+  ) {
+    return <SubmittedChip />;
+  } else {
+    return <AttemptingChip />;
+  }
+};
+
+type UnitListItemProps = {
   unit: Unit;
   submission?: Submission;
-}
+};
 
 const UnitListItem = ({ unit, submission }: UnitListItemProps) => {
   return (
@@ -125,9 +213,9 @@ const UnitListItem = ({ unit, submission }: UnitListItemProps) => {
   );
 };
 
-interface UnitIconProps {
+type UnitIconProps = {
   submission?: Submission;
-}
+};
 
 const UnitIcon = ({ submission }: UnitIconProps) => {
   if (!!submission && submission.state === 'submitted') {

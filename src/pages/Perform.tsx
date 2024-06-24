@@ -4,6 +4,7 @@ import {
   AccordionDetails,
   AccordionSummary,
   Alert,
+  Paper,
   Stack,
   Typography,
 } from '@mui/material';
@@ -96,9 +97,13 @@ const Content = () => {
   };
 
   return (
-    <Stack direction="row" gap={2} position="relative">
+    <Stack direction="row" gap={2}>
       <Stack flex="1">
-        <Visualization datasets={datasets} json={json} />
+        <Paper variant="outlined">
+          <Stack>
+            <Visualization datasets={datasets} json={json} />
+          </Stack>
+        </Paper>
       </Stack>
       <Stack flex="1">
         <Accordion variant="outlined" defaultExpanded>

@@ -1,4 +1,3 @@
-import { Paper, Stack } from '@mui/material';
 import { VegaLite, View, VisualizationSpec } from 'react-vega';
 import { Dataset } from 'db';
 
@@ -19,11 +18,5 @@ export const Visualization = ({ datasets, json }: VisualizationProps) => {
     view.runAsync();
   };
 
-  return (
-    <Paper variant="outlined">
-      <Stack height="30rem" width="100%">
-        <VegaLite spec={spec} actions={false} onNewView={onNewView} />
-      </Stack>
-    </Paper>
-  );
+  return <VegaLite spec={spec} actions={false} onNewView={onNewView} />;
 };
