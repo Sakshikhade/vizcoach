@@ -21,6 +21,7 @@ import {
   submissionsLoader,
   unitLoader,
 } from 'db';
+import { AddActivity } from 'pages/AddActivity';
 
 export const router = createBrowserRouter([
   {
@@ -42,6 +43,18 @@ export const router = createBrowserRouter([
             path: '',
             element: <Activities />,
             loader: activitiesLoader,
+          },
+          {
+            path: 'add-activity',
+            element: (
+              <AuthorizedRoute
+                navigateTo="/dashboard"
+                allowedRoles={['Teacher']}
+              >
+                <AddActivity />
+              </AuthorizedRoute>
+            ),
+            loader: groupsLoader,
           },
           {
             path: ':activityId/units',

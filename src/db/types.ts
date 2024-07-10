@@ -80,6 +80,26 @@ export class Activity {
   }
 }
 
+export const UNSAVED_ACTIVITY_REQUIRED_FIELDS = [
+  'title',
+  'description',
+  'groupId',
+] as const;
+
+export const UNSAVED_ACTIVITY_FIELDS = [
+  ...UNSAVED_ACTIVITY_REQUIRED_FIELDS,
+  'scheduled',
+] as const;
+
+export type UnsavedActivityRequiredField =
+  (typeof UNSAVED_ACTIVITY_REQUIRED_FIELDS)[number];
+
+export type UnsavedActivityField = (typeof UNSAVED_ACTIVITY_FIELDS)[number];
+
+export type UnsavedActivity = Partial<{
+  [key in UnsavedActivityField]: string;
+}>;
+
 export type DatasetRow = { [key: string]: any };
 
 export interface Dataset {

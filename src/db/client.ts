@@ -8,6 +8,7 @@ import {
   Group,
   Submission,
   Unit,
+  UnsavedActivity,
   User,
 } from 'db';
 
@@ -210,6 +211,15 @@ class PocketbaseClient {
       `unitId='${unitId}'`,
     );
     return submissions.length ? submissions[0] : null;
+  }
+
+  async createActivity(activity: UnsavedActivity): Promise<Activity | null> {
+    try {
+      const { id } = await this.pb.collection('activities').create(activity);
+      return this.getActivity(id);
+    } catch {
+      return null;
+    }
   }
 }
 

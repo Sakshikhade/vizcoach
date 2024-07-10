@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from 'react';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { FormControl, TextField } from '@mui/material';
 import { Addchart, BarChart } from '@mui/icons-material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
@@ -114,6 +114,7 @@ type ActivitiesSpeedDialProps = {
 };
 
 const ActivitiesSpeedDial = ({ user }: ActivitiesSpeedDialProps) => {
+  const navigate = useNavigate();
   if (user?.role !== 'Teacher') return null;
   return (
     <DashboardSpeedDial
@@ -123,6 +124,7 @@ const ActivitiesSpeedDial = ({ user }: ActivitiesSpeedDialProps) => {
         {
           icon: <Addchart />,
           tooltipTitle: 'Add Activity',
+          onClick: () => navigate('add-activity'),
         },
       ]}
     />

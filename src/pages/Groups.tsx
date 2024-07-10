@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLoaderData } from 'react-router-dom';
 import { Group as GroupIcon, GroupAdd } from '@mui/icons-material';
 import {
   Box,
@@ -20,11 +19,12 @@ import {
   GroupCard,
 } from 'components';
 import { Group } from 'db';
+import { useGroupsLoader } from 'hooks';
 
 const ALL_STUDENT_GROUPS = 'All Student Groups';
 
 export const Groups = () => {
-  const groups = useLoaderData() as Group[];
+  const groups = useGroupsLoader();
   const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
   return (
     <DashboardLayout
