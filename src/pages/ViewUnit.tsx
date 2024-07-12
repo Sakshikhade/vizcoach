@@ -1,24 +1,26 @@
 import { Paper, SpeedDialAction, Stack, Typography } from '@mui/material';
 import { EditNoteRounded, TaskAltRounded } from '@mui/icons-material';
-import { DashboardLayout, DatasetTabs } from 'components';
-import { useUnitLoader } from 'hooks';
+import { Dashboard, DatasetTabs } from 'components';
+import { GetUnitResponse } from 'db';
+import { useDashboard } from 'hooks';
 
 export const ViewUnit = () => {
-  const { activity, unit, datasets } = useUnitLoader();
+  const { useData } = useDashboard();
+  const { activity, unit, datasets } = useData!<GetUnitResponse>();
   return (
-    <DashboardLayout>
-      <DashboardLayout.Breadcrumbs title={unit.title}>
-        <DashboardLayout.Breadcrumbs.Link href="/dashboard/activities">
+    <>
+      <Dashboard.Breadcrumbs title={unit.title}>
+        <Dashboard.Breadcrumbs.Link href="/dashboard/activities">
           Activities
-        </DashboardLayout.Breadcrumbs.Link>
-        <DashboardLayout.Breadcrumbs.Link
+        </Dashboard.Breadcrumbs.Link>
+        <Dashboard.Breadcrumbs.Link
           href={`/dashboard/activities/${activity.id}/units`}
         >
           {activity.title}
-        </DashboardLayout.Breadcrumbs.Link>
-      </DashboardLayout.Breadcrumbs>
+        </Dashboard.Breadcrumbs.Link>
+      </Dashboard.Breadcrumbs>
 
-      <DashboardLayout.Header
+      <Dashboard.Header
         heading={unit.title}
         subtitle="View this unit's description and datasets."
       />
@@ -44,12 +46,9 @@ export const ViewUnit = () => {
         </Paper>
       </Stack>
 
-      <DashboardLayout.SpeedDial
-        label="ViewUnit SpeedDial"
-        icon={<TaskAltRounded />}
-      >
+      <Dashboard.SpeedDial label="ViewUnit SpeedDial" icon={<TaskAltRounded />}>
         <SpeedDialAction icon={<EditNoteRounded />} tooltipTitle="Edit Unit" />
-      </DashboardLayout.SpeedDial>
-    </DashboardLayout>
+      </Dashboard.SpeedDial>
+    </>
   );
 };

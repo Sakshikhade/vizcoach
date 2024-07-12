@@ -1,7 +1,8 @@
 import { Navigate, Outlet, createBrowserRouter } from 'react-router-dom';
+import { Dashboard } from 'components';
 import {
   Activities,
-  Dashboard,
+  AddActivity,
   Groups,
   Login,
   NotFound,
@@ -11,8 +12,6 @@ import {
   Units,
   ViewUnit,
 } from 'pages';
-import { AuthenticatedRoute } from './AuthenticatedRoute';
-import { AuthorizedRoute } from './AuthorizedRoute';
 import {
   activitiesLoader,
   groupsLoader,
@@ -21,7 +20,8 @@ import {
   submissionsLoader,
   unitLoader,
 } from 'db';
-import { AddActivity } from 'pages/AddActivity';
+import { AuthenticatedRoute } from './AuthenticatedRoute';
+import { AuthorizedRoute } from './AuthorizedRoute';
 
 export const router = createBrowserRouter([
   {

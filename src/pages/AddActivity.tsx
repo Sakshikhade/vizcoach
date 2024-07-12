@@ -13,13 +13,14 @@ import {
   Typography,
 } from '@mui/material';
 import { DateCalendar } from '@mui/x-date-pickers';
-import { DashboardLayout, RichEditor } from 'components';
+import { Dashboard, RichEditor } from 'components';
 import client, {
+  Group,
   UNSAVED_ACTIVITY_REQUIRED_FIELDS,
   UnsavedActivity,
   UnsavedActivityField,
 } from 'db';
-import { useGroupsLoader } from 'hooks';
+import { useDashboard } from 'hooks';
 import dayjs from 'dayjs';
 
 type FormErrorState = UnsavedActivity & { generic?: string };
@@ -27,7 +28,8 @@ type FormErrorState = UnsavedActivity & { generic?: string };
 const GROUP_PLACEHOLDER = 'Select a Student Group';
 
 export const AddActivity = () => {
-  const groups = useGroupsLoader();
+  const { useData } = useDashboard();
+  const groups = useData!<Group[]>();
   const [activity, setActivity] = useState<UnsavedActivity>({});
   const [errors, setErrors] = useState<FormErrorState>({});
   const navigate = useNavigate();
@@ -82,14 +84,14 @@ export const AddActivity = () => {
   };
 
   return (
-    <DashboardLayout>
-      <DashboardLayout.Breadcrumbs title="Add Activity">
-        <DashboardLayout.Breadcrumbs.Link href="/dashboard/activities">
+    <>
+      <Dashboard.Breadcrumbs title="Add Activity">
+        <Dashboard.Breadcrumbs.Link href="/dashboard/activities">
           Activities
-        </DashboardLayout.Breadcrumbs.Link>
-      </DashboardLayout.Breadcrumbs>
+        </Dashboard.Breadcrumbs.Link>
+      </Dashboard.Breadcrumbs>
 
-      <DashboardLayout.Header
+      <Dashboard.Header
         heading="Add Activity"
         subtitle="Create new activity for a student group."
       />
@@ -171,17 +173,14 @@ export const AddActivity = () => {
         </Paper>
       </FormField>
 
-      <DashboardLayout.SpeedDial
-        label="Add Activity SpeedDial"
-        icon={<Addchart />}
-      >
+      <Dashboard.SpeedDial label="Add Activity SpeedDial" icon={<Addchart />}>
         <SpeedDialAction
           icon={<Save />}
           tooltipTitle="Save Activity"
           onClick={onSave}
         />
-      </DashboardLayout.SpeedDial>
-    </DashboardLayout>
+      </Dashboard.SpeedDial>
+    </>
   );
 };
 

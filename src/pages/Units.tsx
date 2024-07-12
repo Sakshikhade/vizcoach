@@ -7,13 +7,13 @@ import {
   PlaylistAddRounded,
   TaskAltRounded,
 } from '@mui/icons-material';
-import { DashboardLayout, UnitCard } from 'components';
-import { Submission } from 'db';
-import { useAuth, useSubmissionsLoader } from 'hooks';
+import { Dashboard, UnitCard } from 'components';
+import { GetSubmissionsResponse, Submission } from 'db';
+import { useDashboard } from 'hooks';
 
 export const Units = () => {
-  const { activity, units, submissions } = useSubmissionsLoader();
-  const { user } = useAuth();
+  const { user, useData } = useDashboard();
+  const { activity, units, submissions } = useData!<GetSubmissionsResponse>();
   const navigate = useNavigate();
 
   const submissionMap = submissions.reduce((map, submission) => {
@@ -22,14 +22,14 @@ export const Units = () => {
   }, new Map<string, Submission>());
 
   return (
-    <DashboardLayout>
-      <DashboardLayout.Breadcrumbs title={activity.title}>
-        <DashboardLayout.Breadcrumbs.Link href="/dashboard/activities">
+    <>
+      <Dashboard.Breadcrumbs title={activity.title}>
+        <Dashboard.Breadcrumbs.Link href="/dashboard/activities">
           Activities
-        </DashboardLayout.Breadcrumbs.Link>
-      </DashboardLayout.Breadcrumbs>
+        </Dashboard.Breadcrumbs.Link>
+      </Dashboard.Breadcrumbs>
 
-      <DashboardLayout.Header
+      <Dashboard.Header
         heading={activity.title}
         subtitle={
           user?.role === 'Teacher'
@@ -76,10 +76,7 @@ export const Units = () => {
       </Grid2>
 
       {user?.role === 'Teacher' && (
-        <DashboardLayout.SpeedDial
-          label="Units SpeedDial"
-          icon={<TaskAltRounded />}
-        >
+        <Dashboard.SpeedDial label="Units SpeedDial" icon={<TaskAltRounded />}>
           <SpeedDialAction
             icon={<PlaylistAddRounded />}
             tooltipTitle="Add Unit"
@@ -93,8 +90,8 @@ export const Units = () => {
             icon={<EditNoteRounded />}
             tooltipTitle="Edit Activity"
           />
-        </DashboardLayout.SpeedDial>
+        </Dashboard.SpeedDial>
       )}
-    </DashboardLayout>
+    </>
   );
 };

@@ -7,14 +7,15 @@ import {
   Select,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { DashboardLayout, SubmissionCard } from 'components';
-import { Submission, User } from 'db';
-import { useDatasets, useSubmissionsLoader } from 'hooks';
+import { Dashboard, SubmissionCard } from 'components';
+import { GetSubmissionsResponse, Submission, User } from 'db';
+import { useDashboard, useDatasets } from 'hooks';
 
 const ALL_UNITS = 'All Units';
 
 export const Submissions = () => {
-  const { activity, units, submissions } = useSubmissionsLoader();
+  const { useData } = useDashboard();
+  const { activity, units, submissions } = useData!<GetSubmissionsResponse>();
   const [unitId, setUnitId] = useState<string>(ALL_UNITS);
 
   const selectedUnit = units.find(({ id }) => id === unitId);
@@ -27,19 +28,19 @@ export const Submissions = () => {
   }, new Map<User, Submission[]>());
 
   return (
-    <DashboardLayout>
-      <DashboardLayout.Breadcrumbs title="Submissions">
-        <DashboardLayout.Breadcrumbs.Link href="/dashboard/activities">
+    <>
+      <Dashboard.Breadcrumbs title="Submissions">
+        <Dashboard.Breadcrumbs.Link href="/dashboard/activities">
           Activities
-        </DashboardLayout.Breadcrumbs.Link>
-        <DashboardLayout.Breadcrumbs.Link
+        </Dashboard.Breadcrumbs.Link>
+        <Dashboard.Breadcrumbs.Link
           href={`/dashboard/activities/${activity.id}/units`}
         >
           {activity.title}
-        </DashboardLayout.Breadcrumbs.Link>
-      </DashboardLayout.Breadcrumbs>
+        </Dashboard.Breadcrumbs.Link>
+      </Dashboard.Breadcrumbs>
 
-      <DashboardLayout.Header
+      <Dashboard.Header
         heading="Submissions"
         subtitle={`Track ${activity.group.title}'s submissions for ${activity.title}`}
       >
@@ -61,7 +62,7 @@ export const Submissions = () => {
             })}
           </Select>
         </FormControl>
-      </DashboardLayout.Header>
+      </Dashboard.Header>
 
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {[...students.entries()].map(([student, studentSubmissions]) => {
@@ -78,6 +79,6 @@ export const Submissions = () => {
           );
         })}
       </Grid2>
-    </DashboardLayout>
+    </>
   );
 };

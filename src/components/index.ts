@@ -3,7 +3,7 @@ export * from './ButtonLink';
 export * from './CardEllipsisableBody';
 export * from './CardFooter';
 export * from './Chips';
-export * from './DashboardLayout';
+export * from './Dashboard';
 export * from './DatasetTable';
 export * from './DatasetTabs';
 export * from './GroupCard';

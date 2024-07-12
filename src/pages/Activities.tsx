@@ -1,16 +1,16 @@
 import { ChangeEvent, useState } from 'react';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FormControl, SpeedDialAction, TextField } from '@mui/material';
 import { Addchart, BarChart } from '@mui/icons-material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { ActivityCard, DashboardLayout } from 'components';
+import { ActivityCard, Dashboard } from 'components';
 import { Activity } from 'db';
-import { useAuth } from 'hooks';
+import { useDashboard } from 'hooks';
 
 export const Activities = () => {
-  const allActivities = useLoaderData() as Activity[];
+  const { user, useData } = useDashboard();
+  const allActivities = useData!<Activity[]>();
   const [activities, setActivities] = useState<Activity[]>(allActivities);
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -31,10 +31,10 @@ export const Activities = () => {
   };
 
   return (
-    <DashboardLayout>
-      <DashboardLayout.Breadcrumbs title="Activities" />
+    <>
+      <Dashboard.Breadcrumbs title="Activities" />
 
-      <DashboardLayout.Header
+      <Dashboard.Header
         heading="Activities"
         subtitle={
           user?.role === 'Teacher'
@@ -50,7 +50,7 @@ export const Activities = () => {
             onChange={onChange}
           />
         </FormControl>
-      </DashboardLayout.Header>
+      </Dashboard.Header>
 
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {activities.map((activity) => {
@@ -63,17 +63,14 @@ export const Activities = () => {
       </Grid2>
 
       {user?.role === 'Teacher' && (
-        <DashboardLayout.SpeedDial
-          label="Activities SpeedDial"
-          icon={<BarChart />}
-        >
+        <Dashboard.SpeedDial label="Activities SpeedDial" icon={<BarChart />}>
           <SpeedDialAction
             icon={<Addchart />}
             tooltipTitle="Add Activity"
             onClick={() => navigate('add-activity')}
           />
-        </DashboardLayout.SpeedDial>
+        </Dashboard.SpeedDial>
       )}
-    </DashboardLayout>
+    </>
   );
 };

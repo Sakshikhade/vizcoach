@@ -1,4 +1,5 @@
-import { PropsWithChildren, ReactNode } from 'react';
+import { createContext, PropsWithChildren, ReactNode } from 'react';
+import { Outlet, useLoaderData, useNavigation } from 'react-router-dom';
 import {
   Breadcrumbs,
   Container,
@@ -9,15 +10,40 @@ import {
   Typography,
 } from '@mui/material';
 import { Home, NavigateNext } from '@mui/icons-material';
-import { ButtonLink } from 'components';
+import { ButtonLink, Loading, NavigationBar } from 'components';
+import { User } from 'db';
+import { useAuth } from 'hooks';
 
-export const DashboardLayout = ({ children }: PropsWithChildren) => (
-  <Container>
-    <Stack spacing={4} marginTop={12} marginBottom={4}>
-      {children}
-    </Stack>
-  </Container>
-);
+type DashboardContextValue = Partial<{
+  user: User | null;
+  useData: <T>() => T;
+}>;
+
+export const DashboardContext = createContext<DashboardContextValue>({});
+
+export const Dashboard = () => {
+  const { state } = useNavigation();
+  const { user } = useAuth();
+  return (
+    <DashboardContext.Provider
+      value={{
+        user,
+        useData: <T,>() => useLoaderData() as T,
+      }}
+    >
+      <NavigationBar />
+      {state !== 'idle' ? (
+        <Loading />
+      ) : (
+        <Container>
+          <Stack spacing={4} marginTop={12} marginBottom={4}>
+            <Outlet />
+          </Stack>
+        </Container>
+      )}
+    </DashboardContext.Provider>
+  );
+};
 
 type DashboardBreadcrumbsProps = {
   title: string;
@@ -91,6 +117,6 @@ const DashboardSpeedDial = ({
 );
 
 DashboardBreadcrumbs.Link = BreadcrumbsLink;
-DashboardLayout.Breadcrumbs = DashboardBreadcrumbs;
-DashboardLayout.Header = DashboardHeader;
-DashboardLayout.SpeedDial = DashboardSpeedDial;
+Dashboard.Breadcrumbs = DashboardBreadcrumbs;
+Dashboard.Header = DashboardHeader;
+Dashboard.SpeedDial = DashboardSpeedDial;

@@ -17,13 +17,14 @@ import {
 } from '@mui/icons-material';
 import { GridExpandMoreIcon } from '@mui/x-data-grid';
 import {
-  DashboardLayout,
+  Dashboard,
   DatasetTabs,
   JsonEditor,
   SubmissionChip,
   Visualization,
 } from 'components';
-import { useSubmissionLoader } from 'hooks';
+import { GetSubmissionResponse } from 'db';
+import { useDashboard } from 'hooks';
 
 enum PerformSection {
   CONFIGURATION = 'Configuration',
@@ -33,31 +34,32 @@ enum PerformSection {
 }
 
 export const Perform = () => {
-  const { activity, unit, submission } = useSubmissionLoader();
+  const { useData } = useDashboard();
+  const { activity, unit, submission } = useData!<GetSubmissionResponse>();
   return (
-    <DashboardLayout>
-      <DashboardLayout.Breadcrumbs title={unit.title}>
-        <DashboardLayout.Breadcrumbs.Link href="/dashboard/activities">
+    <>
+      <Dashboard.Breadcrumbs title={unit.title}>
+        <Dashboard.Breadcrumbs.Link href="/dashboard/activities">
           Activities
-        </DashboardLayout.Breadcrumbs.Link>
-        <DashboardLayout.Breadcrumbs.Link
+        </Dashboard.Breadcrumbs.Link>
+        <Dashboard.Breadcrumbs.Link
           href={`/dashboard/activities/${activity.id}/units`}
         >
           {activity.title}
-        </DashboardLayout.Breadcrumbs.Link>
-      </DashboardLayout.Breadcrumbs>
+        </Dashboard.Breadcrumbs.Link>
+      </Dashboard.Breadcrumbs>
 
-      <DashboardLayout.Header
+      <Dashboard.Header
         heading={unit.title}
         subtitle="Create visualization for this unit."
       >
         <SubmissionChip submission={submission} />
-      </DashboardLayout.Header>
+      </Dashboard.Header>
 
       <Content />
 
       {submission?.state !== 'submitted' && (
-        <DashboardLayout.SpeedDial
+        <Dashboard.SpeedDial
           label="Perform SpeedDial"
           icon={<TaskAltRounded />}
         >
@@ -69,14 +71,16 @@ export const Perform = () => {
             icon={<CheckCircleOutlineRounded />}
             tooltipTitle="Submit Unit"
           />
-        </DashboardLayout.SpeedDial>
+        </Dashboard.SpeedDial>
       )}
-    </DashboardLayout>
+    </>
   );
 };
 
 const Content = () => {
-  const { activity, unit, datasets, submission } = useSubmissionLoader();
+  const { useData } = useDashboard();
+  const { activity, datasets, unit, submission } =
+    useData!<GetSubmissionResponse>();
   const [json, setJson] = useState<string>(
     submission?.json ? JSON.stringify(submission.json, null, 4) : '{}',
   );

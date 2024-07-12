@@ -1,5 +1,5 @@
 export * from './Activities';
-export * from './Dashboard';
+export * from './AddActivity';
 export * from './Groups';
 export * from './Login';
 export * from './NotFound';

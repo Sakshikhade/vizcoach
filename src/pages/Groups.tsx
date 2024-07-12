@@ -12,14 +12,15 @@ import {
   SpeedDialAction,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { DashboardLayout, GroupCard } from 'components';
+import { Dashboard, GroupCard } from 'components';
 import { Group } from 'db';
-import { useGroupsLoader } from 'hooks';
+import { useDashboard } from 'hooks';
 
 const ALL_STUDENT_GROUPS = 'All Student Groups';
 
 export const Groups = () => {
-  const allGroups = useGroupsLoader();
+  const { useData } = useDashboard();
+  const allGroups = useData!<Group[]>();
   const [groups, setGroups] = useState<Group[]>([]);
 
   const courses = useMemo(
@@ -63,10 +64,10 @@ export const Groups = () => {
   }, [allGroups, filters, setGroups]);
 
   return (
-    <DashboardLayout>
-      <DashboardLayout.Breadcrumbs title="Student Groups" />
+    <>
+      <Dashboard.Breadcrumbs title="Student Groups" />
 
-      <DashboardLayout.Header
+      <Dashboard.Header
         heading="Student Groups"
         subtitle="Create, manage, and track student groups."
       >
@@ -95,7 +96,7 @@ export const Groups = () => {
             })}
           </Select>
         </FormControl>
-      </DashboardLayout.Header>
+      </Dashboard.Header>
 
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {groups.map((group) => {
@@ -107,9 +108,9 @@ export const Groups = () => {
         })}
       </Grid2>
 
-      <DashboardLayout.SpeedDial label="Groups SpeedDial" icon={<GroupIcon />}>
+      <Dashboard.SpeedDial label="Groups SpeedDial" icon={<GroupIcon />}>
         <SpeedDialAction icon={<GroupAdd />} tooltipTitle="Add Student Group" />
-      </DashboardLayout.SpeedDial>
-    </DashboardLayout>
+      </Dashboard.SpeedDial>
+    </>
   );
 };

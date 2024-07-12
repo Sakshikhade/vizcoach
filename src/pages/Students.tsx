@@ -1,18 +1,20 @@
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import { DashboardLayout, StudentCard } from 'components';
-import { useStudentsLoader } from 'hooks';
+import { Dashboard, StudentCard } from 'components';
+import { GetStudentsResponse } from 'db';
+import { useDashboard } from 'hooks';
 
 export const Students = () => {
-  const { group, students } = useStudentsLoader();
+  const { useData } = useDashboard();
+  const { group, students } = useData!<GetStudentsResponse>();
   return (
-    <DashboardLayout>
-      <DashboardLayout.Breadcrumbs title={group.title}>
-        <DashboardLayout.Breadcrumbs.Link href="/dashboard/groups">
+    <>
+      <Dashboard.Breadcrumbs title={group.title}>
+        <Dashboard.Breadcrumbs.Link href="/dashboard/groups">
           Student Groups
-        </DashboardLayout.Breadcrumbs.Link>
-      </DashboardLayout.Breadcrumbs>
+        </Dashboard.Breadcrumbs.Link>
+      </Dashboard.Breadcrumbs>
 
-      <DashboardLayout.Header
+      <Dashboard.Header
         heading={group.title}
         subtitle={`${group.studentsCount} student${group.studentsCount > 1 ? 's' : ''} in ${group.title}'s student group.`}
       />
@@ -26,6 +28,6 @@ export const Students = () => {
           );
         })}
       </Grid2>
-    </DashboardLayout>
+    </>
   );
 };
