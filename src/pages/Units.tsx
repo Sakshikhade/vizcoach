@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Paper, Stack, Typography } from '@mui/material';
+import { Paper, SpeedDialAction, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   EditNoteRounded,
@@ -7,60 +7,14 @@ import {
   PlaylistAddRounded,
   TaskAltRounded,
 } from '@mui/icons-material';
-import {
-  DashboardBreadcrumbs,
-  DashboardHeader,
-  DashboardLayout,
-  DashboardSpeedDial,
-  UnitCard,
-} from 'components';
+import { DashboardLayout, UnitCard } from 'components';
 import { Submission } from 'db';
 import { useAuth, useSubmissionsLoader } from 'hooks';
 
 export const Units = () => {
-  return (
-    <DashboardLayout
-      breadcrumbs={<Breadcrumbs />}
-      header={<Header />}
-      content={<Content />}
-      speedDial={<SpeedDial />}
-    />
-  );
-};
-
-const Breadcrumbs = () => {
-  const { activity } = useSubmissionsLoader();
-  return (
-    <DashboardBreadcrumbs
-      title={activity.title}
-      links={[
-        {
-          href: '/dashboard/activities',
-          children: 'Activities',
-        },
-      ]}
-    />
-  );
-};
-
-const Header = () => {
-  const { activity } = useSubmissionsLoader();
-  const { user } = useAuth();
-  return (
-    <DashboardHeader
-      heading={activity.title}
-      subtitle={
-        user?.role === 'Teacher'
-          ? "Create, manage, and track activity's units."
-          : 'Track your progress for this activity.'
-      }
-    />
-  );
-};
-
-const Content = () => {
   const { activity, units, submissions } = useSubmissionsLoader();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const submissionMap = submissions.reduce((map, submission) => {
     map.set(submission.unitId, submission);
@@ -68,7 +22,22 @@ const Content = () => {
   }, new Map<string, Submission>());
 
   return (
-    <>
+    <DashboardLayout>
+      <DashboardLayout.Breadcrumbs title={activity.title}>
+        <DashboardLayout.Breadcrumbs.Link href="/dashboard/activities">
+          Activities
+        </DashboardLayout.Breadcrumbs.Link>
+      </DashboardLayout.Breadcrumbs>
+
+      <DashboardLayout.Header
+        heading={activity.title}
+        subtitle={
+          user?.role === 'Teacher'
+            ? "Create, manage, and track activity's units."
+            : 'Track your progress for this activity.'
+        }
+      />
+
       <Stack padding={0.5}>
         <Paper variant="outlined">
           <Typography
@@ -83,6 +52,7 @@ const Content = () => {
           />
         </Paper>
       </Stack>
+
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {units.map((unit, index) => {
           return (
@@ -104,34 +74,27 @@ const Content = () => {
           );
         })}
       </Grid2>
-    </>
-  );
-};
 
-const SpeedDial = () => {
-  const { user } = useAuth();
-  const { activity } = useSubmissionsLoader();
-  const navigate = useNavigate();
-  if (user?.role !== 'Teacher') return null;
-  return (
-    <DashboardSpeedDial
-      ariaLabel="Units SpeedDial"
-      openIcon={<TaskAltRounded />}
-      actions={[
-        {
-          icon: <PlaylistAddRounded />,
-          tooltipTitle: 'Add Unit',
-        },
-        {
-          icon: <PlaylistAddCheckRounded />,
-          tooltipTitle: 'View Submissions',
-          onClick: () => navigate(`../${activity.id}/submissions`),
-        },
-        {
-          icon: <EditNoteRounded />,
-          tooltipTitle: `Edit Activity`,
-        },
-      ]}
-    />
+      {user?.role === 'Teacher' && (
+        <DashboardLayout.SpeedDial
+          label="Units SpeedDial"
+          icon={<TaskAltRounded />}
+        >
+          <SpeedDialAction
+            icon={<PlaylistAddRounded />}
+            tooltipTitle="Add Unit"
+          />
+          <SpeedDialAction
+            icon={<PlaylistAddCheckRounded />}
+            tooltipTitle="View Submissions"
+            onClick={() => navigate(`../${activity.id}/submissions`)}
+          />
+          <SpeedDialAction
+            icon={<EditNoteRounded />}
+            tooltipTitle="Edit Activity"
+          />
+        </DashboardLayout.SpeedDial>
+      )}
+    </DashboardLayout>
   );
 };

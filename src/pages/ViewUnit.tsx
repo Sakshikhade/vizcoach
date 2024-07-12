@@ -1,58 +1,28 @@
-import { Paper, Stack, Typography } from '@mui/material';
+import { Paper, SpeedDialAction, Stack, Typography } from '@mui/material';
 import { EditNoteRounded, TaskAltRounded } from '@mui/icons-material';
-import {
-  DashboardBreadcrumbs,
-  DashboardHeader,
-  DashboardLayout,
-  DashboardSpeedDial,
-  DatasetTabs,
-} from 'components';
+import { DashboardLayout, DatasetTabs } from 'components';
 import { useUnitLoader } from 'hooks';
 
 export const ViewUnit = () => {
+  const { activity, unit, datasets } = useUnitLoader();
   return (
-    <DashboardLayout
-      breadcrumbs={<Breadcrumbs />}
-      header={<Header />}
-      content={<Content />}
-      speedDial={<SpeedDial />}
-    />
-  );
-};
+    <DashboardLayout>
+      <DashboardLayout.Breadcrumbs title={unit.title}>
+        <DashboardLayout.Breadcrumbs.Link href="/dashboard/activities">
+          Activities
+        </DashboardLayout.Breadcrumbs.Link>
+        <DashboardLayout.Breadcrumbs.Link
+          href={`/dashboard/activities/${activity.id}/units`}
+        >
+          {activity.title}
+        </DashboardLayout.Breadcrumbs.Link>
+      </DashboardLayout.Breadcrumbs>
 
-const Breadcrumbs = () => {
-  const { activity, unit } = useUnitLoader();
-  return (
-    <DashboardBreadcrumbs
-      title={unit.title}
-      links={[
-        {
-          href: '/dashboard/activities',
-          children: 'Activities',
-        },
-        {
-          href: `/dashboard/activities/${activity.id}/units`,
-          children: activity.title,
-        },
-      ]}
-    />
-  );
-};
+      <DashboardLayout.Header
+        heading={unit.title}
+        subtitle="View this unit's description and datasets."
+      />
 
-const Header = () => {
-  const { unit } = useUnitLoader();
-  return (
-    <DashboardHeader
-      heading={unit.title}
-      subtitle="View this unit's description and datasets."
-    />
-  );
-};
-
-const Content = () => {
-  const { unit, datasets } = useUnitLoader();
-  return (
-    <>
       <Stack padding={0.5}>
         <Paper variant="outlined">
           <Typography
@@ -67,26 +37,19 @@ const Content = () => {
           />
         </Paper>
       </Stack>
+
       <Stack padding={0.5}>
         <Paper variant="outlined">
           <DatasetTabs datasets={datasets} />
         </Paper>
       </Stack>
-    </>
-  );
-};
 
-const SpeedDial = () => {
-  return (
-    <DashboardSpeedDial
-      ariaLabel="ViewUnit SpeedDial"
-      openIcon={<TaskAltRounded />}
-      actions={[
-        {
-          icon: <EditNoteRounded />,
-          tooltipTitle: 'Edit Unit',
-        },
-      ]}
-    />
+      <DashboardLayout.SpeedDial
+        label="ViewUnit SpeedDial"
+        icon={<TaskAltRounded />}
+      >
+        <SpeedDialAction icon={<EditNoteRounded />} tooltipTitle="Edit Unit" />
+      </DashboardLayout.SpeedDial>
+    </DashboardLayout>
   );
 };

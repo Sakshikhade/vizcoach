@@ -5,6 +5,7 @@ import {
   AccordionSummary,
   Alert,
   Paper,
+  SpeedDialAction,
   Stack,
   Typography,
 } from '@mui/material';
@@ -16,10 +17,7 @@ import {
 } from '@mui/icons-material';
 import { GridExpandMoreIcon } from '@mui/x-data-grid';
 import {
-  DashboardBreadcrumbs,
-  DashboardHeader,
   DashboardLayout,
-  DashboardSpeedDial,
   DatasetTabs,
   JsonEditor,
   SubmissionChip,
@@ -35,43 +33,45 @@ enum PerformSection {
 }
 
 export const Perform = () => {
+  const { activity, unit, submission } = useSubmissionLoader();
   return (
-    <DashboardLayout
-      breadcrumbs={<Breadcrumbs />}
-      header={<Header />}
-      content={<Content />}
-      speedDial={<SpeedDial />}
-    />
-  );
-};
+    <DashboardLayout>
+      <DashboardLayout.Breadcrumbs title={unit.title}>
+        <DashboardLayout.Breadcrumbs.Link href="/dashboard/activities">
+          Activities
+        </DashboardLayout.Breadcrumbs.Link>
+        <DashboardLayout.Breadcrumbs.Link
+          href={`/dashboard/activities/${activity.id}/units`}
+        >
+          {activity.title}
+        </DashboardLayout.Breadcrumbs.Link>
+      </DashboardLayout.Breadcrumbs>
 
-const Breadcrumbs = () => {
-  const { activity, unit } = useSubmissionLoader();
-  return (
-    <DashboardBreadcrumbs
-      title={unit.title}
-      links={[
-        {
-          href: '/dashboard/activities',
-          children: 'Activities',
-        },
-        {
-          href: `/dashboard/activities/${activity.id}/units`,
-          children: activity.title,
-        },
-      ]}
-    />
-  );
-};
+      <DashboardLayout.Header
+        heading={unit.title}
+        subtitle="Create visualization for this unit."
+      >
+        <SubmissionChip submission={submission} />
+      </DashboardLayout.Header>
 
-const Header = () => {
-  const { unit, submission } = useSubmissionLoader();
-  return (
-    <DashboardHeader
-      heading={unit.title}
-      subtitle="Create visualization for this unit."
-      options={<SubmissionChip submission={submission} />}
-    />
+      <Content />
+
+      {submission?.state !== 'submitted' && (
+        <DashboardLayout.SpeedDial
+          label="Perform SpeedDial"
+          icon={<TaskAltRounded />}
+        >
+          <SpeedDialAction
+            icon={<BackHandRounded />}
+            tooltipTitle="Raise Hand"
+          />
+          <SpeedDialAction
+            icon={<CheckCircleOutlineRounded />}
+            tooltipTitle="Submit Unit"
+          />
+        </DashboardLayout.SpeedDial>
+      )}
+    </DashboardLayout>
   );
 };
 
@@ -173,26 +173,5 @@ const Content = () => {
         </Accordion>
       </Stack>
     </Stack>
-  );
-};
-
-const SpeedDial = () => {
-  const { submission } = useSubmissionLoader();
-  if (submission?.state === 'submitted') return null;
-  return (
-    <DashboardSpeedDial
-      ariaLabel="Perform SpeedDial"
-      openIcon={<TaskAltRounded />}
-      actions={[
-        {
-          icon: <BackHandRounded />,
-          tooltipTitle: 'Raise Hand',
-        },
-        {
-          icon: <CheckCircleOutlineRounded />,
-          tooltipTitle: 'Submit Unit',
-        },
-      ]}
-    />
   );
 };

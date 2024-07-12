@@ -1,73 +1,24 @@
 import { ChangeEvent, useState } from 'react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
-import { FormControl, TextField } from '@mui/material';
+import { FormControl, SpeedDialAction, TextField } from '@mui/material';
 import { Addchart, BarChart } from '@mui/icons-material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import {
-  ActivityCard,
-  DashboardBreadcrumbs,
-  DashboardHeader,
-  DashboardLayout,
-  DashboardSpeedDial,
-} from 'components';
-import { Activity, User } from 'db';
+import { ActivityCard, DashboardLayout } from 'components';
+import { Activity } from 'db';
 import { useAuth } from 'hooks';
 
 export const Activities = () => {
-  const activities = useLoaderData() as Activity[];
-  const [filteredActivities, setFilteredActivities] =
-    useState<Activity[]>(activities);
+  const allActivities = useLoaderData() as Activity[];
+  const [activities, setActivities] = useState<Activity[]>(allActivities);
   const { user } = useAuth();
-  return (
-    <DashboardLayout
-      breadcrumbs={<DashboardBreadcrumbs title="Activities" />}
-      header={
-        <ActivitiesBreadcrumbs
-          user={user}
-          activities={activities}
-          setFilteredActivities={setFilteredActivities}
-        />
-      }
-      content={<ActivitiesContent activities={filteredActivities} />}
-      speedDial={<ActivitiesSpeedDial user={user} />}
-    />
-  );
-};
+  const navigate = useNavigate();
 
-type ActivitiesBreadcrumbsProps = {
-  user: User | null;
-} & ActivitiesFilterControlProps;
-
-const ActivitiesBreadcrumbs = (props: ActivitiesBreadcrumbsProps) => {
-  const { user } = props;
-  return (
-    <DashboardHeader
-      heading="Activities"
-      subtitle={
-        user?.role === 'Teacher'
-          ? 'Create, manage, and track activities.'
-          : 'Welcome, track your assigned activities.'
-      }
-      options={<ActivitiesFilterControl {...props} />}
-    />
-  );
-};
-
-type ActivitiesFilterControlProps = {
-  activities: Activity[];
-  setFilteredActivities: (activities: Activity[]) => void;
-};
-
-const ActivitiesFilterControl = ({
-  activities,
-  setFilteredActivities,
-}: ActivitiesFilterControlProps) => {
-  const onFilterChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = (event.target.value || '').toLowerCase();
     if (!value.length) {
-      setFilteredActivities(activities);
+      setActivities(allActivities);
     }
-    const filteredActivities = activities.filter((activity) => {
+    const filteredActivities = allActivities.filter((activity) => {
       const { title, description, group } = activity;
       const searchTexts = [
         title.toLowerCase(),
@@ -76,57 +27,53 @@ const ActivitiesFilterControl = ({
       ];
       return searchTexts.some((text) => text.includes(value));
     });
-    setFilteredActivities(filteredActivities);
+    setActivities(filteredActivities);
   };
 
   return (
-    <FormControl>
-      <TextField
-        id="outlined-basic"
-        label="Filter"
-        variant="outlined"
-        onChange={onFilterChange}
-      />
-    </FormControl>
-  );
-};
+    <DashboardLayout>
+      <DashboardLayout.Breadcrumbs title="Activities" />
 
-type ActivitiesContentProps = {
-  activities: Activity[];
-};
+      <DashboardLayout.Header
+        heading="Activities"
+        subtitle={
+          user?.role === 'Teacher'
+            ? 'Create, manage, and track activities.'
+            : 'Welcome, track your assigned activities.'
+        }
+      >
+        <FormControl>
+          <TextField
+            id="outlined-basic"
+            label="Filter"
+            variant="outlined"
+            onChange={onChange}
+          />
+        </FormControl>
+      </DashboardLayout.Header>
 
-const ActivitiesContent = ({ activities }: ActivitiesContentProps) => {
-  return (
-    <Grid2 container rowSpacing={1} columnSpacing={1}>
-      {activities.map((activity) => {
-        return (
-          <Grid2 key={activity.id} xs={12} md={6} lg={4}>
-            <ActivityCard activity={activity} />
-          </Grid2>
-        );
-      })}
-    </Grid2>
-  );
-};
+      <Grid2 container rowSpacing={1} columnSpacing={1}>
+        {activities.map((activity) => {
+          return (
+            <Grid2 key={activity.id} xs={12} md={6} lg={4}>
+              <ActivityCard activity={activity} />
+            </Grid2>
+          );
+        })}
+      </Grid2>
 
-type ActivitiesSpeedDialProps = {
-  user: User | null;
-};
-
-const ActivitiesSpeedDial = ({ user }: ActivitiesSpeedDialProps) => {
-  const navigate = useNavigate();
-  if (user?.role !== 'Teacher') return null;
-  return (
-    <DashboardSpeedDial
-      ariaLabel="Activities SpeedDial"
-      openIcon={<BarChart />}
-      actions={[
-        {
-          icon: <Addchart />,
-          tooltipTitle: 'Add Activity',
-          onClick: () => navigate('add-activity'),
-        },
-      ]}
-    />
+      {user?.role === 'Teacher' && (
+        <DashboardLayout.SpeedDial
+          label="Activities SpeedDial"
+          icon={<BarChart />}
+        >
+          <SpeedDialAction
+            icon={<Addchart />}
+            tooltipTitle="Add Activity"
+            onClick={() => navigate('add-activity')}
+          />
+        </DashboardLayout.SpeedDial>
+      )}
+    </DashboardLayout>
   );
 };

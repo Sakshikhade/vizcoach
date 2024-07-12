@@ -7,18 +7,13 @@ import {
   MenuItem,
   Paper,
   Select,
+  SpeedDialAction,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
 import { DateCalendar } from '@mui/x-date-pickers';
-import {
-  DashboardBreadcrumbs,
-  DashboardHeader,
-  DashboardLayout,
-  DashboardSpeedDial,
-  RichEditor,
-} from 'components';
+import { DashboardLayout, RichEditor } from 'components';
 import client, {
   UNSAVED_ACTIVITY_REQUIRED_FIELDS,
   UnsavedActivity,
@@ -32,6 +27,7 @@ type FormErrorState = UnsavedActivity & { generic?: string };
 const GROUP_PLACEHOLDER = 'Select a Student Group';
 
 export const AddActivity = () => {
+  const groups = useGroupsLoader();
   const [activity, setActivity] = useState<UnsavedActivity>({});
   const [errors, setErrors] = useState<FormErrorState>({});
   const navigate = useNavigate();
@@ -86,69 +82,18 @@ export const AddActivity = () => {
   };
 
   return (
-    <DashboardLayout
-      breadcrumbs={<Breadcrumbs />}
-      header={<Header />}
-      content={
-        <Content activity={activity} errors={errors} setField={setField} />
-      }
-      speedDial={<SpeedDial onSave={onSave} />}
-    />
-  );
-};
+    <DashboardLayout>
+      <DashboardLayout.Breadcrumbs title="Add Activity">
+        <DashboardLayout.Breadcrumbs.Link href="/dashboard/activities">
+          Activities
+        </DashboardLayout.Breadcrumbs.Link>
+      </DashboardLayout.Breadcrumbs>
 
-const Breadcrumbs = () => {
-  return (
-    <DashboardBreadcrumbs
-      title="Add Activity"
-      links={[
-        {
-          href: '/dashboard/activities',
-          children: 'Activities',
-        },
-      ]}
-    />
-  );
-};
+      <DashboardLayout.Header
+        heading="Add Activity"
+        subtitle="Create new activity for a student group."
+      />
 
-const Header = () => {
-  return (
-    <DashboardHeader
-      heading="Add Activity"
-      subtitle="Create new activity for a student group."
-    />
-  );
-};
-
-type FormFieldProps = {
-  label: string;
-  required?: boolean;
-  error?: string;
-} & PropsWithChildren;
-
-const FormField = ({ children, error, label, required }: FormFieldProps) => {
-  return (
-    <FormControl>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography>{label}</Typography>
-        {required && <Typography color="error">* required</Typography>}
-      </Stack>
-      {children}
-      <Typography color="error">{error}</Typography>
-    </FormControl>
-  );
-};
-
-type ContentProps = {
-  activity: UnsavedActivity;
-  errors: FormErrorState;
-  setField: (name: UnsavedActivityField, value: string) => void;
-};
-
-const Content = ({ activity, errors, setField }: ContentProps) => {
-  const groups = useGroupsLoader();
-  return (
-    <>
       <Alert variant="outlined" severity={errors.generic ? 'error' : 'info'}>
         {errors.generic ? (
           errors.generic
@@ -160,6 +105,7 @@ const Content = ({ activity, errors, setField }: ContentProps) => {
           </>
         )}
       </Alert>
+
       <FormField
         label="What's the activity's title?"
         error={errors.title}
@@ -172,6 +118,7 @@ const Content = ({ activity, errors, setField }: ContentProps) => {
           required
         />
       </FormField>
+
       <FormField
         label="What's the activity's description?"
         error={errors.description}
@@ -182,6 +129,7 @@ const Content = ({ activity, errors, setField }: ContentProps) => {
           onChange={(value) => setField('description', value)}
         />
       </FormField>
+
       <FormField
         label="Which Student Group should attempt this activity?"
         error={errors.groupId}
@@ -202,6 +150,7 @@ const Content = ({ activity, errors, setField }: ContentProps) => {
           ))}
         </Select>
       </FormField>
+
       <FormField
         label="When to schedule this activity?"
         error={errors.scheduled}
@@ -221,26 +170,36 @@ const Content = ({ activity, errors, setField }: ContentProps) => {
           />
         </Paper>
       </FormField>
-    </>
+
+      <DashboardLayout.SpeedDial
+        label="Add Activity SpeedDial"
+        icon={<Addchart />}
+      >
+        <SpeedDialAction
+          icon={<Save />}
+          tooltipTitle="Save Activity"
+          onClick={onSave}
+        />
+      </DashboardLayout.SpeedDial>
+    </DashboardLayout>
   );
 };
 
-type SpeedDialProps = {
-  onSave: () => void;
-};
+type FormFieldProps = {
+  label: string;
+  required?: boolean;
+  error?: string;
+} & PropsWithChildren;
 
-const SpeedDial = ({ onSave }: SpeedDialProps) => {
+const FormField = ({ children, error, label, required }: FormFieldProps) => {
   return (
-    <DashboardSpeedDial
-      ariaLabel="Add Activity SpeedDial"
-      openIcon={<Addchart />}
-      actions={[
-        {
-          icon: <Save />,
-          tooltipTitle: 'Save Activity',
-          onClick: onSave,
-        },
-      ]}
-    />
+    <FormControl>
+      <Stack direction="row" justifyContent="space-between">
+        <Typography>{label}</Typography>
+        {required && <Typography color="error">* required</Typography>}
+      </Stack>
+      {children}
+      <Typography color="error">{error}</Typography>
+    </FormControl>
   );
 };
