@@ -21,11 +21,18 @@ export const Submissions = () => {
   const selectedUnit = units.find(({ id }) => id === unitId);
   const datasets = useDatasets(selectedUnit);
 
-  const students = submissions.reduce((map, submission) => {
-    const { student } = submission;
-    map.set(student, [...(map.get(student) || []), submission]);
+  const students = submissions.reduce((map, { student }) => {
+    map.set(student.id, student);
     return map;
-  }, new Map<User, Submission[]>());
+  }, new Map<string, User>());
+
+  const studentSubmissions = submissions.reduce((map, submission) => {
+    const {
+      student: { id },
+    } = submission;
+    map.set(id, [...(map.get(id) || []), submission]);
+    return map;
+  }, new Map<string, Submission[]>());
 
   return (
     <>
@@ -65,12 +72,12 @@ export const Submissions = () => {
       </Dashboard.Header>
 
       <Grid2 container rowSpacing={1} columnSpacing={1}>
-        {[...students.entries()].map(([student, studentSubmissions]) => {
+        {[...students.entries()].map(([studentId, student]) => {
           return (
-            <Grid2 key={student.id} xs={12} md={6} lg={4}>
+            <Grid2 key={studentId} xs={12} md={6} lg={4}>
               <SubmissionCard
                 student={student}
-                submissions={studentSubmissions}
+                submissions={studentSubmissions.get(studentId) || []}
                 units={units}
                 datasets={datasets}
                 selectedUnit={selectedUnit}

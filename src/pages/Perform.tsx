@@ -14,6 +14,7 @@ import {
   CheckCircleOutlineRounded,
   DoNotTouch,
   ErrorOutlineRounded,
+  Save,
   TaskAltRounded,
 } from '@mui/icons-material';
 import { GridExpandMoreIcon } from '@mui/x-data-grid';
@@ -45,6 +46,8 @@ export const Perform = () => {
     updateJson,
     raiseHand,
     unraiseHand,
+    submit,
+    save,
   } = usePerform();
   const [error, setError] = useState<string | null>(null);
 
@@ -171,6 +174,11 @@ export const Perform = () => {
           label="Perform SpeedDial"
           icon={<TaskAltRounded />}
         >
+          <SpeedDialAction
+            icon={<Save />}
+            tooltipTitle="Save Submission"
+            onClick={save}
+          />
           {submission?.state === 'help' ? (
             <SpeedDialAction
               icon={<DoNotTouch />}
@@ -186,7 +194,8 @@ export const Perform = () => {
           )}
           <SpeedDialAction
             icon={<CheckCircleOutlineRounded />}
-            tooltipTitle="Submit Unit"
+            tooltipTitle="Submit Submission"
+            onClick={submit}
           />
         </Dashboard.SpeedDial>
       )}

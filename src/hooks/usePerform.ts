@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import client, { GetSubmissionResponse, Submission } from 'db';
+import client, { GetSubmissionResponse, Submission, SubmissionState } from 'db';
 import { useDashboard } from 'hooks';
 
 const DEFAULT_JSON = `{
@@ -56,46 +56,41 @@ export const usePerform = () => {
     window.onbeforeunload = json === getJson(submission) ? null : unsavedPrompt;
   }, [submission, json]);
 
-  const raiseHand = () => {
-    if (syncing || submission?.state === 'help') return;
+  const createOrUpdate = (state: SubmissionState) => {
+    if (syncing || submission?.state === 'submitted') return;
     setSyncing(true);
 
     /**
-     * Students can raise hands even if no submission record exists.
+     * Students can save submission even if no database record exists.
      * This check ensures to either create or update the submission.
      */
+    const unsavedSubmission = {
+      json: JSON.parse(json),
+      state,
+    };
     const promise = !submission
-      ? client.createSubmission(activity.id, unit.id, {
-          json: JSON.parse(DEFAULT_JSON),
-          state: 'help',
-        })
-      : client.updateSubmission(activity.id, unit.id, {
-          json: JSON.parse(json),
-          state: 'help',
-        });
+      ? client.createSubmission(activity.id, unit.id, unsavedSubmission)
+      : client.updateSubmission(activity.id, unit.id, unsavedSubmission);
+
     promise
       .then(setSubmission)
       .catch(console.error)
       .finally(() => setSyncing(false));
   };
 
-  const unraiseHand = () => {
-    if (syncing || submission?.state !== 'help') return;
-    setSyncing(true);
-
-    /**
-     * Students can only unraise their hands if a submission record exists,
-     * so no need to create a submission.
-     */
-    client
-      .updateSubmission(activity.id, unit.id, {
-        json: JSON.parse(json),
-        state: null,
-      })
-      .then(setSubmission)
-      .catch(console.error)
-      .finally(() => setSyncing(false));
+  const raiseHand = () => {
+    if (submission?.state === 'help') return;
+    createOrUpdate('help');
   };
+
+  const unraiseHand = () => {
+    if (submission?.state !== 'help') return;
+    createOrUpdate(null);
+  };
+
+  const submit = () => createOrUpdate('submitted');
+
+  const save = () => createOrUpdate(null);
 
   return {
     ...data,
@@ -105,5 +100,7 @@ export const usePerform = () => {
     updateJson,
     raiseHand,
     unraiseHand,
+    submit,
+    save,
   };
 };
