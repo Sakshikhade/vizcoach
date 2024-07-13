@@ -3,6 +3,7 @@ import { Dashboard } from 'components';
 import {
   Activities,
   AddActivity,
+  AddGroup,
   Groups,
   Login,
   NotFound,
@@ -115,6 +116,10 @@ export const router = createBrowserRouter([
             path: '',
             element: <Groups />,
             loader: groupsLoader,
+          },
+          {
+            path: 'add-group',
+            element: <AddGroup />,
           },
           {
             path: ':groupId',

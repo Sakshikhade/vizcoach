@@ -1,19 +1,16 @@
-import { PropsWithChildren, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Addchart, Save } from '@mui/icons-material';
 import {
   Alert,
-  FormControl,
   MenuItem,
   Paper,
   Select,
   SpeedDialAction,
-  Stack,
   TextField,
-  Typography,
 } from '@mui/material';
 import { DateCalendar } from '@mui/x-date-pickers';
-import { Dashboard, RichEditor } from 'components';
+import { Dashboard, FormField, RichEditor } from 'components';
 import client, {
   Group,
   UNSAVED_ACTIVITY_REQUIRED_FIELDS,
@@ -181,24 +178,5 @@ export const AddActivity = () => {
         />
       </Dashboard.SpeedDial>
     </>
-  );
-};
-
-type FormFieldProps = {
-  label: string;
-  required?: boolean;
-  error?: string;
-} & PropsWithChildren;
-
-const FormField = ({ children, error, label, required }: FormFieldProps) => {
-  return (
-    <FormControl>
-      <Stack direction="row" justifyContent="space-between">
-        <Typography>{label}</Typography>
-        {required && <Typography color="error">* required</Typography>}
-      </Stack>
-      {children}
-      <Typography color="error">{error}</Typography>
-    </FormControl>
   );
 };

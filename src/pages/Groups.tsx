@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Group as GroupIcon, GroupAdd } from '@mui/icons-material';
 import {
   Box,
@@ -22,6 +23,7 @@ export const Groups = () => {
   const { useData } = useDashboard();
   const allGroups = useData!<Group[]>();
   const [groups, setGroups] = useState<Group[]>([]);
+  const navigate = useNavigate();
 
   const courses = useMemo(
     () => [...new Set(allGroups.map(({ course }) => course))],
@@ -109,7 +111,11 @@ export const Groups = () => {
       </Grid2>
 
       <Dashboard.SpeedDial label="Groups SpeedDial" icon={<GroupIcon />}>
-        <SpeedDialAction icon={<GroupAdd />} tooltipTitle="Add Student Group" />
+        <SpeedDialAction
+          icon={<GroupAdd />}
+          tooltipTitle="Add Student Group"
+          onClick={() => navigate('add-group')}
+        />
       </Dashboard.SpeedDial>
     </>
   );

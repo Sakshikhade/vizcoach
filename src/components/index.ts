@@ -6,6 +6,7 @@ export * from './Chips';
 export * from './Dashboard';
 export * from './DatasetTable';
 export * from './DatasetTabs';
+export * from './FormField';
 export * from './GroupCard';
 export * from './JsonEditor';
 export * from './Loading';
