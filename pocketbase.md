@@ -91,3 +91,7 @@ Follow these steps to setup Pocketbase database for the application.
         @request.auth.role = 'Teacher' ||
         // Students should have only access their submissions
         @request.auth.id = @collection.submissions.userId
+
+9.  Update the `Create rule` and `Update rule` in the `API Rules` for the `submissions` collection to the following value. This step will ensure that only students can create and update submissions.
+
+        @request.auth.id = @request.data.unitId.activityId.groupId.usergroups_via_groupId.userId

@@ -10,6 +10,7 @@ import {
   Unit,
   UnsavedActivity,
   UnsavedGroup,
+  UnsavedSubmission,
   User,
 } from 'db';
 
@@ -231,6 +232,73 @@ class PocketbaseClient {
     } catch {
       return null;
     }
+  }
+
+  async createSubmission(
+    activityId: string,
+    unitId: string,
+    unsavedSubmission: UnsavedSubmission,
+  ): Promise<Submission> {
+    const user = this.getUser();
+    if (!user || user?.role !== 'Student') {
+      throw new Error('Only logged-in student can create a submission!');
+    }
+
+    // Checking if student has access to the unit
+    const unit = await this.getUnit(activityId, unitId);
+    if (!unit) {
+      throw new Error(
+        `Either unit not found or you are not authorized to access it!`,
+      );
+    }
+
+    // Creating submission's record in the database
+    const { json, state } = unsavedSubmission;
+    await this.pb.collection('submissions').create({
+      json,
+      unitId,
+      userId: user.id,
+      state,
+    });
+
+    // Fetching newly created submission
+    const submission = await this.getSubmission(activityId, unitId);
+    if (!submission) {
+      throw new Error(`Unable to create new submissions!`);
+    }
+    return submission;
+  }
+
+  async updateSubmission(
+    activityId: string,
+    unitId: string,
+    unsavedSubmission: UnsavedSubmission,
+  ) {
+    const user = this.getUser();
+    if (!user || user?.role !== 'Student') {
+      throw new Error('Only logged-in student can update submissions!');
+    }
+
+    const oldSubmission = await this.getSubmission(activityId, unitId);
+    if (!oldSubmission) {
+      throw new Error(
+        `Either submission not found or you are not authorized to access it!`,
+      );
+    }
+
+    // Updating submission's record in the database
+    await this.pb.collection('submissions').update(oldSubmission.id, {
+      ...unsavedSubmission,
+      unitId,
+      userId: user.id,
+    });
+
+    // Fetching updated submission
+    const newSubmission = await this.getSubmission(activityId, unitId);
+    if (!newSubmission) {
+      throw new Error(`Unable to update submission!`);
+    }
+    return newSubmission;
   }
 }
 

@@ -131,6 +131,8 @@ export interface GetUnitResponse {
   datasets: Dataset[];
 }
 
+export type SubmissionState = 'help' | 'submitted' | null;
+
 export class Submission {
   constructor(
     readonly model: RecordModel,
@@ -145,7 +147,7 @@ export class Submission {
     return this.model.json;
   }
 
-  get state(): 'help' | 'submitted' {
+  get state(): SubmissionState {
     return this.model.state;
   }
 
@@ -157,6 +159,11 @@ export class Submission {
     return this.model.unitId;
   }
 }
+
+export type UnsavedSubmission = {
+  json: object;
+  state?: SubmissionState;
+};
 
 export interface GetSubmissionsResponse {
   activity: Activity;

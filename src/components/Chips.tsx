@@ -138,3 +138,7 @@ export const SubmissionChip = ({ submission, locked }: SubmissionChipProps) => {
     return <AttemptingChip />;
   }
 };
+
+export const UnsavedChip = () => (
+  <Chip variant="outlined" label="Unsaved" color="warning" size="small" />
+);

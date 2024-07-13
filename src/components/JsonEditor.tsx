@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { editor } from 'monaco-editor';
 import { Editor, EditorProps } from '@monaco-editor/react';
 
@@ -31,16 +30,13 @@ export const JsonEditor = ({
   readOnly,
   onJsonChange,
 }: JsonEditorProps) => {
-  const [value, setValue] = useState<string>(json);
-
   const onChange = (newValue?: string) => {
-    setValue((prevValue) => newValue || prevValue);
     if (onJsonChange && newValue) onJsonChange(newValue);
   };
 
   return (
     <Editor
-      value={value}
+      value={json}
       onChange={onChange}
       options={{ readOnly, ...options }}
       {...props}
