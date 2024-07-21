@@ -80,6 +80,7 @@ export const Units = () => {
           <SpeedDialAction
             icon={<PlaylistAddRounded />}
             tooltipTitle="Add Unit"
+            onClick={() => navigate(`../${activity.id}/add-unit`)}
           />
           <SpeedDialAction
             icon={<PlaylistAddCheckRounded />}

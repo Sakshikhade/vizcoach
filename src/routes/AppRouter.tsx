@@ -4,6 +4,7 @@ import {
   Activities,
   AddActivity,
   AddGroup,
+  AddUnit,
   Groups,
   Login,
   NotFound,
@@ -15,6 +16,7 @@ import {
 } from 'pages';
 import {
   activitiesLoader,
+  activityLoader,
   groupsLoader,
   studentsLoader,
   submissionLoader,
@@ -61,6 +63,18 @@ export const router = createBrowserRouter([
             path: ':activityId/units',
             element: <Units />,
             loader: submissionsLoader,
+          },
+          {
+            path: ':activityId/add-unit',
+            element: (
+              <AuthorizedRoute
+                navigateTo="/dashboard"
+                allowedRoles={['Teacher']}
+              >
+                <AddUnit />
+              </AuthorizedRoute>
+            ),
+            loader: activityLoader,
           },
           {
             path: ':activityId/units/:unitId/view',

@@ -1,5 +1,6 @@
 import { LoaderFunctionArgs } from 'react-router-dom';
 import client, {
+  GetActivityResponse,
   GetStudentsResponse,
   GetSubmissionResponse,
   GetSubmissionsResponse,
@@ -27,6 +28,21 @@ export const studentsLoader = async ({
 };
 
 export const activitiesLoader = async () => client.getActivities();
+
+export const activityLoader = async ({
+  params,
+}: LoaderFunctionArgs): Promise<GetActivityResponse | null> => {
+  const { activityId } = params;
+  if (!activityId) return null;
+
+  const [activity, units] = await Promise.all([
+    client.getActivity(activityId),
+    client.getUnits(activityId),
+  ]);
+  if (!activity) return null;
+
+  return { activity, units };
+};
 
 export const unitLoader = async ({
   params,

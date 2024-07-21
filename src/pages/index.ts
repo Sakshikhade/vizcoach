@@ -1,6 +1,7 @@
 export * from './Activities';
 export * from './AddActivity';
 export * from './AddGroup';
+export * from './AddUnit';
 export * from './Groups';
 export * from './Login';
 export * from './NotFound';

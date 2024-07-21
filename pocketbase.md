@@ -76,6 +76,10 @@ Follow these steps to setup Pocketbase database for the application.
         // Students should have only access if associated with activity
         @request.auth.id = @collection.units.activityId.groupId.usergroups_via_groupId.userId
 
+9.  Update the `Create rule`, `Update rule`, and `Delete rule` in the `API Rules` for the `units` collection to the following value. This step will ensure that only teachers can create, update, and delete units.
+
+        @request.auth.role = 'Teacher'
+
 ## Submissions Collection
 
 1.  Create a new collection called `submissions`.

@@ -110,6 +110,11 @@ export type UnsavedActivity = Partial<{
   [key in UnsavedActivityField]: string;
 }>;
 
+export interface GetActivityResponse {
+  activity: Activity;
+  units: Unit[];
+}
+
 export type DatasetRow = { [key: string]: any };
 
 export interface Dataset {
@@ -124,6 +129,22 @@ export interface Unit extends RecordModel {
   datasets: string[];
   order: number;
 }
+
+export type UnsavedUnit = Partial<{
+  title: string;
+  description: string;
+  datasets: File[];
+  activityId: string;
+  order: number;
+}>;
+
+export type UnsavedUnitField = keyof UnsavedUnit;
+
+export const UNSAVED_UNIT_REQUIRED_FIELDS = [
+  'title',
+  'description',
+  'datasets',
+] as const;
 
 export interface GetUnitResponse {
   activity: Activity;
@@ -165,9 +186,7 @@ export type UnsavedSubmission = {
   state?: SubmissionState;
 };
 
-export interface GetSubmissionsResponse {
-  activity: Activity;
-  units: Unit[];
+export interface GetSubmissionsResponse extends GetActivityResponse {
   submissions: Submission[];
 }
 
