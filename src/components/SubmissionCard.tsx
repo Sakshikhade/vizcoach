@@ -137,7 +137,7 @@ const AllSubmissionsContent = ({
   unitSubmissions,
 }: AllSubmissionsContentProps) => {
   return (
-    <List>
+    <List sx={{ overflowY: 'auto' }}>
       {units.map((unit) => (
         <UnitListItem
           key={unit.id}

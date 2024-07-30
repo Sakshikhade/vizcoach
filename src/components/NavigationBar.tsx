@@ -13,10 +13,10 @@ import {
 } from '@mui/material';
 import { AccountBox, BarChart, Group, Logout } from '@mui/icons-material';
 import { VizCoachLogo } from 'components';
-import { useAuth } from 'hooks';
+import { useAuth, useDashboard } from 'hooks';
 
 export const NavigationBar = () => {
-  const { user } = useAuth();
+  const { user } = useDashboard();
   return (
     <AppBar position="fixed">
       <Container maxWidth="xl">
