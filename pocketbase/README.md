@@ -2,11 +2,20 @@
 
 Follow these steps to setup Pocketbase database for the application.
 
-## General
+## Installation
 
-1. Download Pocketbase's executable file from the [official website](https://pocketbase.io/docs/). Run the executable using `./pocketbase serve` command. Ensure that you allow necessary permissions to run the executable per your OS.
-2. Add a new field called `role` to the default `users` collection of type `Select`. This field should be set to `non-empty` and `single-valued`. Values for the select `Teacher` and `Student`.
-3. Update the `View rule` in the `API Rules` for the `users` collection to `id = @request.auth.id || @request.auth.role = 'Teacher'`. This step will ensure that teachers can view student's records, apart from the requesting user.
+> [!NOTE]
+> Ensure that all scripts in the `pocketbase` directory have execution permissions. If you are not sure, run the `chmod +x *.sh` command inside the `pocketbase` directory.
+
+1. Follow the [PocketBase documentation](https://pocketbase.io/docs/go-overview/) and install Go on your system.
+2. Install the project's dependency using the [install.sh](install.sh) script.
+3. Run the development server using the [dev.sh](dev.sh) script.
+4. Build production version of the server using [build.sh](build.sh) script and serve it using the [serve.sh](serve.sh) script.
+
+## Users Auth Collection
+
+1. Add a new field called `role` to the default `users` collection of type `Select`. This field should be set to `non-empty` and `single-valued`. Values for the select `Teacher` and `Student`.
+2. Update the `View rule` in the `API Rules` for the `users` collection to `id = @request.auth.id || @request.auth.role = 'Teacher'`. This step will ensure that teachers can view student's records, apart from the requesting user.
 
 ## Groups Collection
 
