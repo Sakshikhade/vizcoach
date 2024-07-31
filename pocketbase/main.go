@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -13,6 +14,7 @@ import (
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/forms"
+	"github.com/pocketbase/pocketbase/mails"
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
@@ -37,20 +39,19 @@ type Student struct {
 	Name     string `csv:"name"`
 }
 
-func OnGroupBeforeCreateRequest(app *pocketbase.PocketBase, e *core.RecordCreateEvent) error {
-
+func GetStudents(app *pocketbase.PocketBase, e *core.RecordCreateEvent) ([]*Student, error) {
 	// Fetching the CSV file from the request
 	header, err := e.HttpContext.FormFile(CSVKey)
 	if err != nil {
 		app.Logger().Error(err.Error())
-		return apis.NewBadRequestError("Unable to retreive csv from request!", nil)
+		return nil, errors.New("unable to retreive csv from request")
 	}
 
 	// Opening the CSV file
 	file, err := header.Open()
 	if err != nil {
 		app.Logger().Error(err.Error())
-		return apis.NewBadRequestError("Unable to open csv file!", nil)
+		return nil, errors.New("unable to open csv file")
 	}
 	defer file.Close()
 
@@ -58,41 +59,92 @@ func OnGroupBeforeCreateRequest(app *pocketbase.PocketBase, e *core.RecordCreate
 	buf := bytes.NewBuffer(nil)
 	if _, err := io.Copy(buf, file); err != nil {
 		app.Logger().Error(err.Error())
-		return apis.NewBadRequestError("Unable to read csv file!", nil)
+		return nil, errors.New("unable to read bytes from the csv file")
 	}
 
 	// Unmarshalling CSV bytes to students slice
 	students := []*Student{}
 	if err := gocsv.UnmarshalBytes(buf.Bytes(), &students); err != nil {
 		app.Logger().Error(err.Error())
-		return apis.NewBadRequestError("Unable to parse the csv file!", nil)
+		return nil, errors.New("unable to unmarshall bytes from the csv file")
 	}
+
+	return students, nil
+}
+
+func CreateStudentAccount(app *pocketbase.PocketBase, student *Student) error {
 
 	// Loading users collection from name
 	users, err := app.Dao().FindCollectionByNameOrId(UsersCollection)
 	if err != nil {
 		app.Logger().Error(err.Error())
-		return apis.NewApiError(500, fmt.Sprintf("Unable to load %q collection!", UsersCollection), nil)
+		return apis.NewApiError(500, fmt.Sprintf("Unable to load %q collection", UsersCollection), nil)
 	}
 
-	// Submitting user creation request for validation
+	// Creating new record form
+	record := models.NewRecord(users)
+	form := forms.NewRecordUpsert(app, record)
+
+	// Setting default password as UUID
+	password := uuid.New()
+	form.LoadData(map[string]any{
+		UsernameKey:        student.Username,
+		EmailKey:           student.Email,
+		NameKey:            student.Name,
+		PasswordKey:        password,
+		PasswordConfirmKey: password,
+		RoleKey:            StudentRole,
+	})
+
+	// Creating student's account
+	if err := form.Submit(); err != nil {
+		app.Logger().Error(err.Error())
+		return apis.NewBadRequestError(fmt.Sprintf("Unable to save student record for %q", student.Username), nil)
+	}
+
+	app.Logger().Debug(fmt.Sprintf("Created account for %q", student.Email))
+	return nil
+}
+
+func SendPasswordResetEmail(app *pocketbase.PocketBase, student *Student) error {
+
+	// Checking if SMTP is enabled
+	if !app.Settings().Smtp.Enabled {
+		return errors.New("SMTP is disabled in the settings")
+	}
+
+	// Loading auth record from database using student's email
+	record, err := app.Dao().FindAuthRecordByEmail(UsersCollection, student.Email)
+	if err != nil {
+		return err
+	}
+
+	// Sending password reset email to student
+	if err := mails.SendRecordPasswordReset(app, record); err != nil {
+		return err
+	}
+
+	app.Logger().Debug(fmt.Sprintf("Sent password reset email to %q", student.Email))
+	return nil
+}
+
+func OnGroupBeforeCreateRequest(app *pocketbase.PocketBase, e *core.RecordCreateEvent) error {
+
+	// Loading students from request
+	students, err := GetStudents(app, e)
+	if err != nil {
+		return apis.NewBadRequestError(err.Error(), nil)
+	}
+
 	for _, student := range students {
-		record := models.NewRecord(users)
-		form := forms.NewRecordUpsert(app, record)
+		// Creating student account
+		if err := CreateStudentAccount(app, student); err != nil {
+			return err
+		}
 
-		password := uuid.New()
-		form.LoadData(map[string]any{
-			UsernameKey:        student.Username,
-			EmailKey:           student.Email,
-			NameKey:            student.Name,
-			PasswordKey:        password,
-			PasswordConfirmKey: password,
-			RoleKey:            StudentRole,
-		})
-
-		if err := form.Submit(); err != nil {
-			app.Logger().Error(err.Error())
-			return apis.NewBadRequestError(fmt.Sprintf("Unable to save student record for %q!", student.Username), nil)
+		// Sending email to the student to reset the password
+		if err := SendPasswordResetEmail(app, student); err != nil {
+			app.Logger().Warn(fmt.Sprintf("Skipping sending email to %q. Message: %q", student.Email, err.Error()))
 		}
 	}
 
@@ -124,8 +176,8 @@ func main() {
 
 	// ----- VIZCOACH RELATED EXTENSIONS ----- //
 
-	// Adding hook to users when creating student groups.
-	// We want to add users from the csv file uploaded with this record.
+	// Adding hook to peform actions before saving the group.
+	// Creating student accounts from the csv file uploaded with the student group record.
 	app.OnRecordBeforeCreateRequest(GroupsCollection).Add(func(e *core.RecordCreateEvent) error {
 		return OnGroupBeforeCreateRequest(app, e)
 	})

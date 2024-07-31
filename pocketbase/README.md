@@ -11,6 +11,18 @@ Follow these steps to setup Pocketbase database for the application.
 2. Install the project's dependency using the [install.sh](install.sh) script.
 3. Run the development server using the [dev.sh](dev.sh) script.
 4. Build production version of the server using [build.sh](build.sh) script and serve it using the [serve.sh](serve.sh) script.
+5. Set the application name in the settings tab to `VizCoach`.
+
+## SMTP Setup
+
+All these settings are under the Mail settings.
+
+1. Set `Sender name` to somthing like `VizCoach Admin` or `[Admin name] via VizCoach`. All emails will be sent under this name.
+2. Set `Sender email` to admin/professor's email. All emails will be in the `from` section of the email.
+3. Enable the `SMTP mail server` option. **Note:** You need to configure the SMTP mail server to send password reset email to students.
+
+> [!TIP]
+> To use Gmail's SMTP mail server, set `SMTP server host` to `smtp.gmail.com`. You can use any gmail/asu email address as `username` under this setting. For password, you will need to create an `App Password` for the Google Account you populated in the `username` field. Follow [this guide](https://knowledge.workspace.google.com/kb/how-to-create-app-passwords-000009237) to create an App Password for your Google Account.
 
 ## Users Auth Collection
 
@@ -26,7 +38,7 @@ Follow these steps to setup Pocketbase database for the application.
 > | -------- | --------------- | -------- |
 > | asurite  | asurite@asu.edu | John Doe |
 >
-> To understand how this works, refer to the [main.go](./main.go) file in this directory.
+> To understand how this works, refer to the [main.go](main.go) file in this directory.
 
 1.  Create a new collection called `groups`. This collection will store all student groups.
 2.  Add fields `semester`, `year`, `course`, and `csv` to the `groups` collection.
