@@ -19,22 +19,32 @@ Follow these steps to setup Pocketbase database for the application.
 
 ## Groups Collection
 
+> [!NOTE]
+> Before a group record is inserted in the database, the backend server will parse the associated `csv` file and try to create users from it. For the CSV file, please follow the following specifications.
+>
+> | username | email           | name     |
+> | -------- | --------------- | -------- |
+> | asurite  | asurite@asu.edu | John Doe |
+>
+> To understand how this works, refer to the [main.go](./main.go) file in this directory.
+
 1.  Create a new collection called `groups`. This collection will store all student groups.
-2.  Add fields `semester`, `year`, and `course` to the `groups` collection.
+2.  Add fields `semester`, `year`, `course`, and `csv` to the `groups` collection.
 3.  The field `semester` in the `groups` collection is of type `Select`. This field should be set to `non-empty` and `single-valued`. Values for the select `Fall`, `Spring`, and `Summer`.
 4.  The field `year` in the `groups` collection is of type `Number`. This field should be set to `non-zero` and `no-decimal`. Values should be between `2000` and `2100`.
 5.  The field `course` in the `groups` collection is of type `Select`. This field should be set to `non-empty` and `single-valued`. Values for the select `CSE578`.
-6.  Add an unique constraint on fields `course`, `semester`, and `year`, ensuring one group per semester per course per year.
-7.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `groups` collection to the following value. This step will ensure that only teachers and associated students can view student groups.
+6.  The field `csv` in the `groups` collection is of type `File`. This field should be set to `non-empty`, `protected`, and `single-valued`. Allowed mime types include `text/csv`.
+7.  Add an unique constraint on fields `course`, `semester`, and `year`, ensuring one group per semester per course per year.
+8.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `groups` collection to the following value. This step will ensure that only teachers and associated students can view student groups.
 
         // Teachers can access all groups
         @request.auth.role = 'Teacher' ||
         // Students can only access their associated group
         @request.auth.id = @collection.groups.usergroups_via_groupId.userId
 
-8.  Update the `Create rule`, `Update rule`, and `Delete rule` in the `API Rules` for the `groups` collection to the following value. This step will ensure that only teachers can create, update, and delete groups.
+9.  Update the `Create rule`, `Update rule`, and `Delete rule` in the `API Rules` for the `groups` collection to the following value. This step will ensure that only teachers can create, update, and delete groups.
 
-        @request.auth.role = 'Teacher'
+    @request.auth.role = 'Teacher'
 
 ## User-Groups Collection
 

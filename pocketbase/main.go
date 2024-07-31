@@ -1,18 +1,101 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
+	"io"
 	"log"
 	"os"
 
+	"github.com/gocarina/gocsv"
+	"github.com/google/uuid"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
+	"github.com/pocketbase/pocketbase/forms"
+	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 )
 
-func OnGroupAfterCreateRequest(e *core.RecordCreateEvent) error {
-	log.Println(e.Record)
+const (
+	GroupsCollection   = "groups"
+	UsersCollection    = "users"
+	UsernameKey        = "username"
+	EmailKey           = "email"
+	NameKey            = "name"
+	PasswordKey        = "password"
+	PasswordConfirmKey = "passwordConfirm"
+	RoleKey            = "role"
+	StudentRole        = "Student"
+	CSVKey             = "csv"
+)
+
+type Student struct {
+	Username string `csv:"username"`
+	Email    string `csv:"email"`
+	Name     string `csv:"name"`
+}
+
+func OnGroupBeforeCreateRequest(app *pocketbase.PocketBase, e *core.RecordCreateEvent) error {
+
+	// Fetching the CSV file from the request
+	header, err := e.HttpContext.FormFile(CSVKey)
+	if err != nil {
+		app.Logger().Error(err.Error())
+		return apis.NewBadRequestError("Unable to retreive csv from request!", nil)
+	}
+
+	// Opening the CSV file
+	file, err := header.Open()
+	if err != nil {
+		app.Logger().Error(err.Error())
+		return apis.NewBadRequestError("Unable to open csv file!", nil)
+	}
+	defer file.Close()
+
+	// Copying bytes from the file to a buffer
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, file); err != nil {
+		app.Logger().Error(err.Error())
+		return apis.NewBadRequestError("Unable to read csv file!", nil)
+	}
+
+	// Unmarshalling CSV bytes to students slice
+	students := []*Student{}
+	if err := gocsv.UnmarshalBytes(buf.Bytes(), &students); err != nil {
+		app.Logger().Error(err.Error())
+		return apis.NewBadRequestError("Unable to parse the csv file!", nil)
+	}
+
+	// Loading users collection from name
+	users, err := app.Dao().FindCollectionByNameOrId(UsersCollection)
+	if err != nil {
+		app.Logger().Error(err.Error())
+		return apis.NewApiError(500, fmt.Sprintf("Unable to load %q collection!", UsersCollection), nil)
+	}
+
+	// Submitting user creation request for validation
+	for _, student := range students {
+		record := models.NewRecord(users)
+		form := forms.NewRecordUpsert(app, record)
+
+		password := uuid.New()
+		form.LoadData(map[string]any{
+			UsernameKey:        student.Username,
+			EmailKey:           student.Email,
+			NameKey:            student.Name,
+			PasswordKey:        password,
+			PasswordConfirmKey: password,
+			RoleKey:            StudentRole,
+		})
+
+		if err := form.Submit(); err != nil {
+			app.Logger().Error(err.Error())
+			return apis.NewBadRequestError(fmt.Sprintf("Unable to save student record for %q!", student.Username), nil)
+		}
+	}
+
 	return nil
 }
 
@@ -43,7 +126,9 @@ func main() {
 
 	// Adding hook to users when creating student groups.
 	// We want to add users from the csv file uploaded with this record.
-	app.OnRecordAfterCreateRequest("groups").Add(OnGroupAfterCreateRequest)
+	app.OnRecordBeforeCreateRequest(GroupsCollection).Add(func(e *core.RecordCreateEvent) error {
+		return OnGroupBeforeCreateRequest(app, e)
+	})
 
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
