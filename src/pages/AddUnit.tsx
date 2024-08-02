@@ -1,20 +1,19 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Alert, Button, SpeedDialAction, TextField } from '@mui/material';
+import { AddTask, CloudUpload, Save } from '@mui/icons-material';
 import {
-  Alert,
-  Button,
-  SpeedDialAction,
-  styled,
-  TextField,
-} from '@mui/material';
-import { Dashboard, FormField, RichEditor } from 'components';
+  Dashboard,
+  FormField,
+  RichEditor,
+  VisuallyHiddenInput,
+} from 'components';
 import client, {
   GetActivityResponse,
   UNSAVED_UNIT_REQUIRED_FIELDS,
   UnsavedUnit,
   UnsavedUnitField,
 } from 'db';
-import { useState } from 'react';
-import { AddTask, CloudUpload, Save } from '@mui/icons-material';
 import { useDashboard } from 'hooks';
 
 type FormErrorState = Partial<{
@@ -130,7 +129,7 @@ export const AddUnit = () => {
       </FormField>
 
       <FormField
-        label="What's the unit's description?"
+        label="Which datasets to attach?"
         error={errors.datasets}
         required
       >
@@ -164,15 +163,3 @@ export const AddUnit = () => {
     </>
   );
 };
-
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-});

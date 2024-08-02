@@ -16,4 +16,5 @@ export * from './StudentCard';
 export * from './SubmissionCard';
 export * from './UnitCard';
 export * from './Visualization';
+export * from './VisuallyHiddenInput';
 export * from './VizCoachLogo';

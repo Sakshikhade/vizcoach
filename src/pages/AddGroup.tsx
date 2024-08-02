@@ -1,9 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, MenuItem, Paper, Select, SpeedDialAction } from '@mui/material';
-import { GroupAdd, Save } from '@mui/icons-material';
+import {
+  Alert,
+  Button,
+  CircularProgress,
+  MenuItem,
+  Paper,
+  Select,
+  SpeedDialAction,
+} from '@mui/material';
+import { CloudUpload, GroupAdd, Save } from '@mui/icons-material';
 import { YearCalendar } from '@mui/x-date-pickers';
-import { Dashboard, FormField } from 'components';
+import { Dashboard, FormField, VisuallyHiddenInput } from 'components';
 import client, {
   UNSAVED_GROUP_FIELDS,
   UnsavedGroup,
@@ -23,6 +31,7 @@ const GROUP_SEMESTERS = ['Spring', 'Summer', 'Fall'] as const;
 export const AddGroup = () => {
   const [group, setGroup] = useState<UnsavedGroup>({});
   const [errors, setErrors] = useState<FormErrorState>({});
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
 
   const unsetField = (name: UnsavedGroupField) =>
@@ -31,7 +40,10 @@ export const AddGroup = () => {
       return prev;
     });
 
-  const setField = (name: UnsavedGroupField, value?: string | number) => {
+  const setField = (
+    name: UnsavedGroupField,
+    value?: string | number | File,
+  ) => {
     if (value === group[name]) return;
     if (!value) {
       unsetField(name);
@@ -54,7 +66,8 @@ export const AddGroup = () => {
       if (
         !value ||
         (typeof value === 'string' && !value.length) ||
-        (typeof value === 'number' && value < new Date().getFullYear())
+        (typeof value === 'number' && value < new Date().getFullYear()) ||
+        (value instanceof File && (!value.size || value.type !== 'text/csv'))
       ) {
         setError(field, `Group's ${field} is required!`);
         return;
@@ -62,16 +75,20 @@ export const AddGroup = () => {
     }
 
     // Saving activity to database
-    client.createGroup(group).then((savedGroup) => {
-      if (!savedGroup) {
-        setError(
-          'generic',
-          "Error occurred while creating this group! Kindly ensure that this group doesn't already exists.",
-        );
-        return;
-      }
-      navigate('/dashboard/groups');
-    });
+    setSaving(true);
+    client
+      .createGroup(group)
+      .then((savedGroup) => {
+        if (!savedGroup) {
+          setError(
+            'generic',
+            "Error occurred while creating this group! Kindly ensure that this group doesn't already exists.",
+          );
+          return;
+        }
+        navigate('/dashboard/groups');
+      })
+      .finally(() => setSaving(false));
   };
 
   return (
@@ -87,9 +104,15 @@ export const AddGroup = () => {
         subtitle="Create new student group."
       />
 
-      <Alert variant="outlined" severity={errors.generic ? 'error' : 'info'}>
+      <Alert
+        variant="outlined"
+        severity={errors.generic ? 'error' : 'info'}
+        icon={saving ? <CircularProgress size="1.5rem" /> : undefined}
+      >
         {errors.generic ? (
           errors.generic
+        ) : saving ? (
+          <>Please wait while we create student accounts...</>
         ) : (
           <>
             Activities linked to a student group will be visible to students in
@@ -97,6 +120,35 @@ export const AddGroup = () => {
           </>
         )}
       </Alert>
+
+      <FormField
+        label="Which Students CSV to attach?"
+        error={errors.csv}
+        required
+      >
+        <Button
+          component="label"
+          role={undefined}
+          variant="outlined"
+          tabIndex={-1}
+          startIcon={<CloudUpload />}
+          sx={{ width: 'fit-content', marginTop: 1 }}
+        >
+          Upload Students CSV ({group.csv?.name || 'Not Selected'})
+          <VisuallyHiddenInput
+            type="file"
+            accept=".csv"
+            onChange={({ target }) =>
+              setField(
+                'csv',
+                target.files && target.files.length
+                  ? target.files[0]
+                  : undefined,
+              )
+            }
+          />
+        </Button>
+      </FormField>
 
       <FormField label="Student Group's Course?" error={errors.course} required>
         <Select
@@ -144,13 +196,15 @@ export const AddGroup = () => {
         </Paper>
       </FormField>
 
-      <Dashboard.SpeedDial label="Add Group SpeedDial" icon={<GroupAdd />}>
-        <SpeedDialAction
-          icon={<Save />}
-          tooltipTitle="Save Group"
-          onClick={onSave}
-        />
-      </Dashboard.SpeedDial>
+      {!saving && (
+        <Dashboard.SpeedDial label="Add Group SpeedDial" icon={<GroupAdd />}>
+          <SpeedDialAction
+            icon={<Save />}
+            tooltipTitle="Save Group"
+            onClick={onSave}
+          />
+        </Dashboard.SpeedDial>
+      )}
     </>
   );
 };
