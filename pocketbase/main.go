@@ -21,16 +21,19 @@ import (
 )
 
 const (
-	GroupsCollection   = "groups"
-	UsersCollection    = "users"
-	UsernameKey        = "username"
-	EmailKey           = "email"
-	NameKey            = "name"
-	PasswordKey        = "password"
-	PasswordConfirmKey = "passwordConfirm"
-	RoleKey            = "role"
-	StudentRole        = "Student"
-	CSVKey             = "csv"
+	GroupsCollection     = "groups"
+	UsersCollection      = "users"
+	UserGroupsCollection = "usergroups"
+	UsernameKey          = "username"
+	EmailKey             = "email"
+	NameKey              = "name"
+	PasswordKey          = "password"
+	PasswordConfirmKey   = "passwordConfirm"
+	RoleKey              = "role"
+	StudentRole          = "Student"
+	CSVKey               = "csv"
+	UserIdKey            = "userId"
+	GroupIdKey           = "groupId"
 )
 
 type Student struct {
@@ -141,6 +144,58 @@ func OnGroupBeforeCreateRequest(app *pocketbase.PocketBase, e *core.RecordCreate
 		if err := CreateStudentAccount(app, student); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func CreateStudentGroupLink(app *pocketbase.PocketBase, e *core.RecordCreateEvent, student *Student) error {
+
+	// Fetching records to link
+	groupId := e.Record.Id
+	studentAuthRecord, err := app.Dao().FindAuthRecordByEmail(UsersCollection, student.Email)
+	if err != nil {
+		return err
+	}
+
+	// Loading usergroups collection from name
+	collection, err := app.Dao().FindCollectionByNameOrId(UserGroupsCollection)
+	if err != nil {
+		app.Logger().Error(err.Error())
+		return apis.NewApiError(500, fmt.Sprintf("Unable to load %q collection", UserGroupsCollection), nil)
+	}
+
+	// Creating new record form
+	record := models.NewRecord(collection)
+	form := forms.NewRecordUpsert(app, record)
+
+	form.LoadData(map[string]any{
+		UserIdKey:  studentAuthRecord.Id,
+		GroupIdKey: groupId,
+	})
+
+	// Creating student group link
+	if err := form.Submit(); err != nil {
+		app.Logger().Error(err.Error())
+		return apis.NewBadRequestError(fmt.Sprintf("Unable to save link record for %q", student.Username), nil)
+	}
+
+	app.Logger().Debug(fmt.Sprintf("Created link between %q and %q", groupId, student.Username))
+	return nil
+}
+
+func OnGroupAfterCreateRequest(app *pocketbase.PocketBase, e *core.RecordCreateEvent) error {
+	// Loading students from request
+	students, err := GetStudents(app, e)
+	if err != nil {
+		return apis.NewBadRequestError(err.Error(), nil)
+	}
+
+	for _, student := range students {
+		// Creating student group link
+		if err := CreateStudentGroupLink(app, e, student); err != nil {
+			return err
+		}
 
 		// Sending email to the student to reset the password
 		if err := SendPasswordResetEmail(app, student); err != nil {
@@ -180,6 +235,12 @@ func main() {
 	// Creating student accounts from the csv file uploaded with the student group record.
 	app.OnRecordBeforeCreateRequest(GroupsCollection).Add(func(e *core.RecordCreateEvent) error {
 		return OnGroupBeforeCreateRequest(app, e)
+	})
+
+	// Adding hook to perform actions after saving the group.
+	// Creating student accounts to group links.
+	app.OnRecordAfterCreateRequest(GroupsCollection).Add(func(e *core.RecordCreateEvent) error {
+		return OnGroupAfterCreateRequest(app, e)
 	})
 
 	if err := app.Start(); err != nil {
