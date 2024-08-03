@@ -24,11 +24,7 @@ class PocketbaseClient {
   }
 
   async authWithPassword(email: string, password: string): Promise<void> {
-    try {
-      await this.pb.collection('users').authWithPassword(email, password);
-    } catch (error) {
-      console.error(error);
-    }
+    await this.pb.collection('users').authWithPassword(email, password);
   }
 
   clearAuthStore(): void {
