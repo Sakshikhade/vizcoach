@@ -1,12 +1,14 @@
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Alert,
+  FormControlLabel,
   Paper,
   SpeedDialAction,
   Stack,
+  Switch,
   Typography,
 } from '@mui/material';
 import {
@@ -24,6 +26,7 @@ import {
   JsonEditor,
   SubmissionChip,
   UnsavedChip,
+  VegaLiteBuilder,
   Visualization,
 } from 'components';
 import { usePerform } from 'hooks';
@@ -50,6 +53,11 @@ export const Perform = () => {
     save,
   } = usePerform();
   const [error, setError] = useState<string | null>(null);
+  const [showBuilder, setShowBuilder] = useState(true);
+
+  const onShowBuilderChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setShowBuilder((prev) => !prev);
+  };
 
   const onJsonChange = (value: string) => {
     try {
@@ -110,11 +118,20 @@ export const Perform = () => {
               </Stack>
             </AccordionSummary>
             <AccordionDetails>
-              <JsonEditor
-                json={json}
-                readOnly={submission?.state === 'submitted'}
-                onJsonChange={onJsonChange}
-              />
+              {showBuilder ? (
+                <VegaLiteBuilder
+                  json={json}
+                  datasets={datasets}
+                  readOnly={submission?.state === 'submitted'}
+                  onJsonChange={onJsonChange}
+                />
+              ) : (
+                <JsonEditor
+                  json={json}
+                  readOnly={submission?.state === 'submitted'}
+                  onJsonChange={onJsonChange}
+                />
+              )}
               {error && (
                 <Stack marginTop={2}>
                   <Alert icon={<ErrorOutlineRounded />} color="error">
@@ -122,6 +139,18 @@ export const Perform = () => {
                   </Alert>
                 </Stack>
               )}
+              <Stack marginTop={2} alignItems="end">
+                <FormControlLabel
+                  label="Show Builder"
+                  labelPlacement="start"
+                  control={
+                    <Switch
+                      checked={showBuilder}
+                      onChange={onShowBuilderChange}
+                    />
+                  }
+                />
+              </Stack>
             </AccordionDetails>
           </Accordion>
           <Accordion variant="outlined">
