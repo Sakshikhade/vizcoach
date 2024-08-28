@@ -7,9 +7,6 @@ const DEFAULT_JSON = `{
         "resize": true,
         "type": "fit"
     },
-    "data": {
-        "name": "1.csv"
-    },
     "height": 480,
     "width": "container"
 }`;
