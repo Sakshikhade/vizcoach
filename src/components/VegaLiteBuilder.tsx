@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import { VisualizationSpec } from 'react-vega';
 import {
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   IconButton,
   InputLabel,
   MenuItem,
@@ -67,6 +69,7 @@ type Spec = VisualizationSpec &
         field: string;
         type: EncodingType;
         aggregate: Aggregate;
+        bin: boolean;
       }>;
     }>;
   }>;
@@ -115,7 +118,14 @@ type ChangableField =
   | 'encoding.y.aggregate'
   | 'encoding.color.aggregate'
   | 'encoding.opacity.aggregate'
-  | 'encoding.size.aggregate';
+  | 'encoding.size.aggregate'
+
+  // Update Encoding bin
+  | 'encoding.x.bin'
+  | 'encoding.y.bin'
+  | 'encoding.color.bin'
+  | 'encoding.opacity.bin'
+  | 'encoding.size.bin';
 
 type VegaLiteBuilderProps = {
   json: string;
@@ -155,7 +165,7 @@ export const VegaLiteBuilder = ({
     return parsed;
   }, [json, datasetMap, datasetNames]);
 
-  const onChange = (field: ChangableField, value?: string) => {
+  const onChange = (field: ChangableField, value?: string | boolean) => {
     if (!onJsonChange) return;
     onJsonChange(applyChanges(json, field, value));
   };
@@ -234,7 +244,7 @@ type EncodingBuilderProps = {
   datasets: Dataset[];
   encoding: Encoding;
   spec: Spec;
-  onChange: (field: ChangableField, value?: string) => void;
+  onChange: (field: ChangableField, value?: string | boolean) => void;
   readOnly?: boolean;
 };
 
@@ -380,6 +390,7 @@ const EncodingBuilder = ({
               }
               size="small"
             >
+              <MenuItem value={''}>(Empty)</MenuItem>
               {aggregates.map((aggregate) => (
                 <MenuItem
                   key={aggregate}
@@ -391,6 +402,14 @@ const EncodingBuilder = ({
               ))}
             </Select>
           </FormControl>
+          <FormControlLabel
+            disabled={readOnly}
+            label="Bin"
+            control={<Checkbox />}
+            onChange={(_, checked) =>
+              onChange(`encoding.${encoding}.bin`, checked)
+            }
+          />
         </Stack>
       )}
     </>
@@ -400,7 +419,7 @@ const EncodingBuilder = ({
 const applyChanges = (
   json: string,
   field: ChangableField,
-  value?: string,
+  value?: string | boolean,
 ): string => {
   const parsed: Spec = JSON.parse(json);
   switch (field) {
@@ -469,7 +488,12 @@ const applyChanges = (
     case 'encoding.y.aggregate':
     case 'encoding.color.aggregate':
     case 'encoding.opacity.aggregate':
-    case 'encoding.size.aggregate': {
+    case 'encoding.size.aggregate':
+    case 'encoding.x.bin':
+    case 'encoding.y.bin':
+    case 'encoding.color.bin':
+    case 'encoding.opacity.bin':
+    case 'encoding.size.bin': {
       const encoding = parsed.encoding || {};
       const splits = field.split('.');
       const encodingKey = splits[1] as Encoding;
