@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { VisualizationSpec } from 'react-vega';
 import {
   Button,
@@ -9,7 +9,7 @@ import {
   Select,
   Stack,
 } from '@mui/material';
-import { Add, Delete } from '@mui/icons-material';
+import { Add, Delete, Settings } from '@mui/icons-material';
 import { Dataset } from 'db';
 
 const marks = ['bar', 'point', 'line'] as const;
@@ -137,14 +137,17 @@ export const VegaLiteBuilder = ({
   };
 
   return (
-    <Stack gap={4}>
+    <Stack gap={3}>
       <FormControl disabled={readOnly} fullWidth>
-        <InputLabel id="dataset-label">Dataset</InputLabel>
+        <InputLabel id="dataset-label" size="small">
+          Dataset
+        </InputLabel>
         <Select
           labelId="dataset-label"
           label="Dataset"
           value={spec.data?.name}
           onChange={(event) => onChange('data.name', event.target.value)}
+          size="small"
         >
           {datasets.map((dataset, i) => (
             <MenuItem key={dataset.name} value={dataset.name}>
@@ -154,12 +157,15 @@ export const VegaLiteBuilder = ({
         </Select>
       </FormControl>
       <FormControl disabled={readOnly} fullWidth>
-        <InputLabel id="mark-label">Mark</InputLabel>
+        <InputLabel id="mark-label" size="small">
+          Mark
+        </InputLabel>
         <Select
           labelId="mark-label"
           label="Mark"
           value={spec.mark?.type || ''}
           onChange={(event) => onChange('mark.type', event.target.value)}
+          size="small"
         >
           {marks.map((mark) => (
             <MenuItem key={mark} value={mark}>
@@ -204,6 +210,8 @@ const EncodingBuilder = ({
   onChange,
   readOnly,
 }: EncodingBuilderProps) => {
+  const [showOptions, setShowOptions] = useState(false);
+
   const exhaustedEncodings = useMemo(
     () => new Set(Object.keys(spec.encoding || {})),
     [spec],
@@ -227,11 +235,13 @@ const EncodingBuilder = ({
     [spec, encoding],
   );
 
+  const toggle = () => setShowOptions((prev) => !prev);
+
   return (
     <>
-      <Stack direction="row" gap={2} flex="auto 1">
+      <Stack direction="row" gap={1} flex="auto 1 1">
         <FormControl disabled={readOnly} fullWidth>
-          <InputLabel id={`${encoding}-encoding-label`}>
+          <InputLabel id={`${encoding}-encoding-label`} size="small">
             {capitalize(encoding)} Encoding
           </InputLabel>
           <Select
@@ -241,6 +251,7 @@ const EncodingBuilder = ({
             onChange={(event) =>
               onChange(`encoding.${encoding}`, event.target.value)
             }
+            size="small"
           >
             {encodings.map((availableEncoding) => (
               <MenuItem
@@ -253,64 +264,73 @@ const EncodingBuilder = ({
             ))}
           </Select>
         </FormControl>
+        <IconButton onClick={toggle} size="small">
+          <Settings />
+        </IconButton>
         <IconButton
-          sx={{ width: 0.1 }}
           onClick={() => onChange(`encoding.-${encoding}`)}
+          size="small"
         >
           <Delete />
         </IconButton>
       </Stack>
-      <FormControl disabled={readOnly} fullWidth>
-        <InputLabel id={`${encoding}-encoding-field-label`}>
-          {capitalize(encoding)} Encoding Field
-        </InputLabel>
-        <Select
-          labelId={`${encoding}-encoding-field-label`}
-          label={`${capitalize(encoding)} Encoding Field`}
-          value={encodingSpec.field || ''}
-          onChange={(event) =>
-            onChange(`encoding.${encoding}.field`, event.target.value)
-          }
-        >
-          {!fields.length && (
-            <MenuItem value={''} disabled selected>
-              You must select a dataset first!
-            </MenuItem>
-          )}
-          {fields.map(({ field, headerName }) => (
-            <MenuItem
-              key={field}
-              value={field}
-              disabled={field === encodingSpec.field}
+      {showOptions && (
+        <Stack gap={3}>
+          <FormControl disabled={readOnly} fullWidth>
+            <InputLabel id={`${encoding}-encoding-field-label`} size="small">
+              {capitalize(encoding)} Encoding Field
+            </InputLabel>
+            <Select
+              labelId={`${encoding}-encoding-field-label`}
+              label={`${capitalize(encoding)} Encoding Field`}
+              value={encodingSpec.field || ''}
+              onChange={(event) =>
+                onChange(`encoding.${encoding}.field`, event.target.value)
+              }
+              size="small"
             >
-              {headerName}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl disabled={readOnly} fullWidth>
-        <InputLabel id={`${encoding}-encoding-type-label`}>
-          {capitalize(encoding)} Encoding Type
-        </InputLabel>
-        <Select
-          labelId={`${encoding}-encoding-type-label`}
-          label={`${capitalize(encoding)} Encoding Type`}
-          value={encodingSpec.type || ''}
-          onChange={(event) =>
-            onChange(`encoding.${encoding}.type`, event.target.value)
-          }
-        >
-          {encodingTypes.map((type) => (
-            <MenuItem
-              key={type}
-              value={type}
-              disabled={type === encodingSpec.type}
+              {!fields.length && (
+                <MenuItem value={''} disabled selected>
+                  You must select a dataset first!
+                </MenuItem>
+              )}
+              {fields.map(({ field, headerName }) => (
+                <MenuItem
+                  key={field}
+                  value={field}
+                  disabled={field === encodingSpec.field}
+                >
+                  {headerName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl disabled={readOnly} fullWidth>
+            <InputLabel id={`${encoding}-encoding-type-label`} size="small">
+              {capitalize(encoding)} Encoding Type
+            </InputLabel>
+            <Select
+              labelId={`${encoding}-encoding-type-label`}
+              label={`${capitalize(encoding)} Encoding Type`}
+              value={encodingSpec.type || ''}
+              onChange={(event) =>
+                onChange(`encoding.${encoding}.type`, event.target.value)
+              }
+              size="small"
             >
-              {capitalize(type)}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+              {encodingTypes.map((type) => (
+                <MenuItem
+                  key={type}
+                  value={type}
+                  disabled={type === encodingSpec.type}
+                >
+                  {capitalize(type)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
+      )}
     </>
   );
 };
