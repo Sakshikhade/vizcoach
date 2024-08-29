@@ -8,8 +8,10 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
+  Paper,
   Select,
   Stack,
+  Typography,
 } from '@mui/material';
 import { Add, Delete, Settings } from '@mui/icons-material';
 import { Dataset } from 'db';
@@ -55,6 +57,23 @@ const aggregates = [
 ] as const;
 type Aggregate = (typeof aggregates)[number];
 
+const scaleTypes = [
+  'linear',
+  'pow',
+  'sqrt',
+  'symlog',
+  'log',
+  'time',
+  'utc',
+  'band',
+  'point',
+  'bin-ordinal',
+  'quantile',
+  'quantize',
+  'threshold',
+] as const;
+type ScaleType = (typeof scaleTypes)[number];
+
 type Spec = VisualizationSpec &
   Partial<{
     data: Partial<{
@@ -70,6 +89,9 @@ type Spec = VisualizationSpec &
         type: EncodingType;
         aggregate: Aggregate;
         bin: boolean;
+        scale: Partial<{
+          type: ScaleType;
+        }>;
       }>;
     }>;
   }>;
@@ -125,7 +147,14 @@ type ChangableField =
   | 'encoding.y.bin'
   | 'encoding.color.bin'
   | 'encoding.opacity.bin'
-  | 'encoding.size.bin';
+  | 'encoding.size.bin'
+
+  // Update Encoding scale type
+  | 'encoding.x.scale.type'
+  | 'encoding.y.scale.type'
+  | 'encoding.color.scale.type'
+  | 'encoding.opacity.scale.type'
+  | 'encoding.size.scale.type';
 
 type VegaLiteBuilderProps = {
   json: string;
@@ -320,97 +349,131 @@ const EncodingBuilder = ({
         </IconButton>
       </Stack>
       {showOptions && (
-        <Stack gap={3}>
-          <FormControl disabled={readOnly} fullWidth>
-            <InputLabel id={`${encoding}-encoding-field-label`} size="small">
-              {capitalize(encoding)} Encoding Field
-            </InputLabel>
-            <Select
-              labelId={`${encoding}-encoding-field-label`}
-              label={`${capitalize(encoding)} Encoding Field`}
-              value={encodingSpec.field || ''}
-              onChange={(event) =>
-                onChange(`encoding.${encoding}.field`, event.target.value)
+        <Paper variant="outlined">
+          <Stack gap={3} padding={3}>
+            <Typography>{capitalize(encoding)} Encoding Options</Typography>
+            <FormControl disabled={readOnly} fullWidth>
+              <InputLabel id={`${encoding}-encoding-field-label`} size="small">
+                Field
+              </InputLabel>
+              <Select
+                labelId={`${encoding}-encoding-field-label`}
+                label="Field"
+                value={encodingSpec.field || ''}
+                onChange={(event) =>
+                  onChange(`encoding.${encoding}.field`, event.target.value)
+                }
+                size="small"
+              >
+                {!fields.length && (
+                  <MenuItem value={''} disabled selected>
+                    You must select a dataset first!
+                  </MenuItem>
+                )}
+                {fields.map(({ field, headerName }) => (
+                  <MenuItem
+                    key={field}
+                    value={field}
+                    disabled={field === encodingSpec.field}
+                  >
+                    {headerName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl disabled={readOnly} fullWidth>
+              <InputLabel id={`${encoding}-encoding-type-label`} size="small">
+                Type
+              </InputLabel>
+              <Select
+                labelId={`${encoding}-encoding-type-label`}
+                label="Type"
+                value={encodingSpec.type || ''}
+                onChange={(event) =>
+                  onChange(`encoding.${encoding}.type`, event.target.value)
+                }
+                size="small"
+              >
+                {encodingTypes.map((type) => (
+                  <MenuItem
+                    key={type}
+                    value={type}
+                    disabled={type === encodingSpec.type}
+                  >
+                    {capitalize(type)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl disabled={readOnly} fullWidth>
+              <InputLabel
+                id={`${encoding}-encoding-aggregate-label`}
+                size="small"
+              >
+                Aggregate
+              </InputLabel>
+              <Select
+                labelId={`${encoding}-encoding-aggregate-label`}
+                label="Aggregate"
+                value={encodingSpec.aggregate || ''}
+                onChange={(event) =>
+                  onChange(`encoding.${encoding}.aggregate`, event.target.value)
+                }
+                size="small"
+              >
+                <MenuItem value={''}>(Empty)</MenuItem>
+                {aggregates.map((aggregate) => (
+                  <MenuItem
+                    key={aggregate}
+                    value={aggregate}
+                    disabled={aggregate === encodingSpec.aggregate}
+                  >
+                    {capitalize(aggregate)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl disabled={readOnly} fullWidth>
+              <InputLabel
+                id={`${encoding}-encoding-scale-type-label`}
+                size="small"
+              >
+                Scale
+              </InputLabel>
+              <Select
+                labelId={`${encoding}-encoding-scale-type-label`}
+                label="Scale"
+                value={encodingSpec.scale?.type || ''}
+                onChange={(event) =>
+                  onChange(
+                    `encoding.${encoding}.scale.type`,
+                    event.target.value,
+                  )
+                }
+                size="small"
+              >
+                <MenuItem value={''}>(Empty)</MenuItem>
+                {scaleTypes.map((type) => (
+                  <MenuItem
+                    key={type}
+                    value={type}
+                    disabled={type === encodingSpec.scale?.type}
+                  >
+                    {capitalize(type)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControlLabel
+              disabled={readOnly}
+              label="Bin"
+              control={<Checkbox checked={encodingSpec.bin} size="small" />}
+              onChange={(_, checked) =>
+                onChange(`encoding.${encoding}.bin`, checked)
               }
-              size="small"
-            >
-              {!fields.length && (
-                <MenuItem value={''} disabled selected>
-                  You must select a dataset first!
-                </MenuItem>
-              )}
-              {fields.map(({ field, headerName }) => (
-                <MenuItem
-                  key={field}
-                  value={field}
-                  disabled={field === encodingSpec.field}
-                >
-                  {headerName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl disabled={readOnly} fullWidth>
-            <InputLabel id={`${encoding}-encoding-type-label`} size="small">
-              {capitalize(encoding)} Encoding Type
-            </InputLabel>
-            <Select
-              labelId={`${encoding}-encoding-type-label`}
-              label={`${capitalize(encoding)} Encoding Type`}
-              value={encodingSpec.type || ''}
-              onChange={(event) =>
-                onChange(`encoding.${encoding}.type`, event.target.value)
-              }
-              size="small"
-            >
-              {encodingTypes.map((type) => (
-                <MenuItem
-                  key={type}
-                  value={type}
-                  disabled={type === encodingSpec.type}
-                >
-                  {capitalize(type)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl disabled={readOnly} fullWidth>
-            <InputLabel
-              id={`${encoding}-encoding-aggregate-label`}
-              size="small"
-            >
-              {capitalize(encoding)} Encoding Aggregate
-            </InputLabel>
-            <Select
-              labelId={`${encoding}-encoding-aggregate-label`}
-              label={`${capitalize(encoding)} Encoding Aggregate`}
-              value={encodingSpec.aggregate || ''}
-              onChange={(event) =>
-                onChange(`encoding.${encoding}.aggregate`, event.target.value)
-              }
-              size="small"
-            >
-              <MenuItem value={''}>(Empty)</MenuItem>
-              {aggregates.map((aggregate) => (
-                <MenuItem
-                  key={aggregate}
-                  value={aggregate}
-                  disabled={aggregate === encodingSpec.aggregate}
-                >
-                  {capitalize(aggregate)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControlLabel
-            disabled={readOnly}
-            label="Bin"
-            control={<Checkbox />}
-            onChange={(_, checked) =>
-              onChange(`encoding.${encoding}.bin`, checked)
-            }
-          />
-        </Stack>
+            />
+          </Stack>
+        </Paper>
       )}
     </>
   );
@@ -508,6 +571,25 @@ const applyChanges = (
         ...encodingSpec,
         [encodingProperty]: value,
       });
+      break;
+    }
+    case 'encoding.x.scale.type':
+    case 'encoding.y.scale.type':
+    case 'encoding.color.scale.type':
+    case 'encoding.opacity.scale.type':
+    case 'encoding.size.scale.type': {
+      const encoding = parsed.encoding || {};
+      const key = field.split('.')[1] as Encoding;
+      const encodingSpec = encoding[key];
+
+      // Validating that the encoding exists in the JSON
+      if (!encodingSpec) {
+        break;
+      }
+
+      const scale = encodingSpec.scale || {};
+      Object.assign(scale, { ...scale, type: value });
+      Object.assign(encodingSpec, { scale });
       break;
     }
     default:
