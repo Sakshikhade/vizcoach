@@ -73,7 +73,14 @@ type ChangableField =
   | 'encoding.y.field'
   | 'encoding.color.field'
   | 'encoding.opacity.field'
-  | 'encoding.size.field';
+  | 'encoding.size.field'
+
+  // Update Encoding type
+  | 'encoding.x.type'
+  | 'encoding.y.type'
+  | 'encoding.color.type'
+  | 'encoding.opacity.type'
+  | 'encoding.size.type';
 
 type VegaLiteBuilderProps = {
   json: string;
@@ -281,6 +288,29 @@ const EncodingBuilder = ({
           ))}
         </Select>
       </FormControl>
+      <FormControl disabled={readOnly} fullWidth>
+        <InputLabel id={`${encoding}-encoding-type-label`}>
+          {capitalize(encoding)} Encoding Type
+        </InputLabel>
+        <Select
+          labelId={`${encoding}-encoding-type-label`}
+          label={`${capitalize(encoding)} Encoding Type`}
+          value={encodingSpec.type || ''}
+          onChange={(event) =>
+            onChange(`encoding.${encoding}.type`, event.target.value)
+          }
+        >
+          {encodingTypes.map((type) => (
+            <MenuItem
+              key={type}
+              value={type}
+              disabled={type === encodingSpec.type}
+            >
+              {capitalize(type)}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
     </>
   );
 };
@@ -357,6 +387,22 @@ const applyChanges = (
         break;
       }
       Object.assign(encodingSpec, { ...encodingSpec, field: value });
+      break;
+    }
+    case 'encoding.x.type':
+    case 'encoding.y.type':
+    case 'encoding.color.type':
+    case 'encoding.opacity.type':
+    case 'encoding.size.type': {
+      const encoding = parsed.encoding || {};
+      const key = field.split('.')[1] as Encoding;
+      const encodingSpec = encoding[key];
+
+      // Validating that the encoding exists in the JSON
+      if (!encodingSpec) {
+        break;
+      }
+      Object.assign(encodingSpec, { ...encodingSpec, type: value });
       break;
     }
     default:
