@@ -5,6 +5,7 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  FormGroup,
   IconButton,
   InputLabel,
   MenuItem,
@@ -91,6 +92,7 @@ type Spec = VisualizationSpec &
         bin: boolean;
         scale: Partial<{
           type: ScaleType;
+          zero: boolean;
         }>;
       }>;
     }>;
@@ -154,7 +156,14 @@ type ChangableField =
   | 'encoding.y.scale.type'
   | 'encoding.color.scale.type'
   | 'encoding.opacity.scale.type'
-  | 'encoding.size.scale.type';
+  | 'encoding.size.scale.type'
+
+  // Update Encoding scale zero
+  | 'encoding.x.scale.zero'
+  | 'encoding.y.scale.zero'
+  | 'encoding.color.scale.zero'
+  | 'encoding.opacity.scale.zero'
+  | 'encoding.size.scale.zero';
 
 type VegaLiteBuilderProps = {
   json: string;
@@ -261,7 +270,10 @@ export const VegaLiteBuilder = ({
       <Button
         startIcon={<Add />}
         onClick={addEncoding}
-        disabled={Object.keys(spec.encoding || {}).length >= encodings.length}
+        disabled={
+          Object.keys(spec.encoding || {}).length >= encodings.length ||
+          readOnly
+        }
       >
         Add Encoding
       </Button>
@@ -342,6 +354,7 @@ const EncodingBuilder = ({
           <Settings />
         </IconButton>
         <IconButton
+          disabled={readOnly}
           onClick={() => onChange(`encoding.-${encoding}`)}
           size="small"
         >
@@ -464,14 +477,26 @@ const EncodingBuilder = ({
                 ))}
               </Select>
             </FormControl>
-            <FormControlLabel
-              disabled={readOnly}
-              label="Bin"
-              control={<Checkbox checked={encodingSpec.bin} size="small" />}
-              onChange={(_, checked) =>
-                onChange(`encoding.${encoding}.bin`, checked)
-              }
-            />
+            <FormGroup row={true}>
+              <FormControlLabel
+                disabled={readOnly}
+                label="Bin"
+                control={<Checkbox checked={encodingSpec.bin} size="small" />}
+                onChange={(_, checked) =>
+                  onChange(`encoding.${encoding}.bin`, checked)
+                }
+              />
+              <FormControlLabel
+                disabled={readOnly}
+                label="Zero"
+                control={
+                  <Checkbox checked={encodingSpec.scale?.zero} size="small" />
+                }
+                onChange={(_, checked) =>
+                  onChange(`encoding.${encoding}.scale.zero`, checked)
+                }
+              />
+            </FormGroup>
           </Stack>
         </Paper>
       )}
@@ -577,10 +602,17 @@ const applyChanges = (
     case 'encoding.y.scale.type':
     case 'encoding.color.scale.type':
     case 'encoding.opacity.scale.type':
-    case 'encoding.size.scale.type': {
+    case 'encoding.size.scale.type':
+    case 'encoding.x.scale.zero':
+    case 'encoding.y.scale.zero':
+    case 'encoding.color.scale.zero':
+    case 'encoding.opacity.scale.zero':
+    case 'encoding.size.scale.zero': {
       const encoding = parsed.encoding || {};
-      const key = field.split('.')[1] as Encoding;
-      const encodingSpec = encoding[key];
+      const splits = field.split('.');
+      const encodingKey = splits[1] as Encoding;
+      const scaleProperty = splits[3];
+      const encodingSpec = encoding[encodingKey];
 
       // Validating that the encoding exists in the JSON
       if (!encodingSpec) {
@@ -588,7 +620,7 @@ const applyChanges = (
       }
 
       const scale = encodingSpec.scale || {};
-      Object.assign(scale, { ...scale, type: value });
+      Object.assign(scale, { ...scale, [scaleProperty]: value });
       Object.assign(encodingSpec, { scale });
       break;
     }
