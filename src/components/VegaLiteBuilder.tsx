@@ -66,7 +66,14 @@ type ChangableField =
   | 'encoding.-y'
   | 'encoding.-color'
   | 'encoding.-opacity'
-  | 'encoding.-size';
+  | 'encoding.-size'
+
+  // Update Encoding field
+  | 'encoding.x.field'
+  | 'encoding.y.field'
+  | 'encoding.color.field'
+  | 'encoding.opacity.field'
+  | 'encoding.size.field';
 
 type VegaLiteBuilderProps = {
   json: string;
@@ -157,6 +164,7 @@ export const VegaLiteBuilder = ({
       {Object.keys(spec.encoding || {}).map((encoding) => (
         <EncodingBuilder
           key={encoding}
+          datasets={datasets}
           encoding={encoding as Encoding}
           spec={spec}
           onChange={onChange}
@@ -175,6 +183,7 @@ export const VegaLiteBuilder = ({
 };
 
 type EncodingBuilderProps = {
+  datasets: Dataset[];
   encoding: Encoding;
   spec: Spec;
   onChange: (field: ChangableField, value?: string) => void;
@@ -182,6 +191,7 @@ type EncodingBuilderProps = {
 };
 
 const EncodingBuilder = ({
+  datasets,
   encoding,
   spec,
   onChange,
@@ -190,6 +200,24 @@ const EncodingBuilder = ({
   const exhaustedEncodings = useMemo(
     () => new Set(Object.keys(spec.encoding || {})),
     [spec],
+  );
+
+  const fields = useMemo(() => {
+    const name = spec.data?.name;
+    if (!name) {
+      return [];
+    }
+    return (
+      datasets.find((dataset, i) => {
+        const index = parseInt(name.replace('.csv', ''), 10) - 1;
+        return dataset.name === name || index === i;
+      })?.fields || []
+    );
+  }, [spec, datasets]);
+
+  const encodingSpec = useMemo(
+    () => (spec?.encoding || {})[encoding] || {},
+    [spec, encoding],
   );
 
   return (
@@ -225,6 +253,34 @@ const EncodingBuilder = ({
           <Delete />
         </IconButton>
       </Stack>
+      <FormControl disabled={readOnly} fullWidth>
+        <InputLabel id={`${encoding}-encoding-field-label`}>
+          {capitalize(encoding)} Encoding Field
+        </InputLabel>
+        <Select
+          labelId={`${encoding}-encoding-field-label`}
+          label={`${capitalize(encoding)} Encoding Field`}
+          value={encodingSpec.field || ''}
+          onChange={(event) =>
+            onChange(`encoding.${encoding}.field`, event.target.value)
+          }
+        >
+          {!fields.length && (
+            <MenuItem value={''} disabled selected>
+              You must select a dataset first!
+            </MenuItem>
+          )}
+          {fields.map(({ field, headerName }) => (
+            <MenuItem
+              key={field}
+              value={field}
+              disabled={field === encodingSpec.field}
+            >
+              {headerName}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
     </>
   );
 };
@@ -285,6 +341,22 @@ const applyChanges = (
       const key = field.split('.-')[1] as Encoding;
       delete encoding[key];
       Object.assign(parsed, { encoding });
+      break;
+    }
+    case 'encoding.x.field':
+    case 'encoding.y.field':
+    case 'encoding.color.field':
+    case 'encoding.opacity.field':
+    case 'encoding.size.field': {
+      const encoding = parsed.encoding || {};
+      const key = field.split('.')[1] as Encoding;
+      const encodingSpec = encoding[key];
+
+      // Validating that the encoding exists in the JSON
+      if (!encodingSpec) {
+        break;
+      }
+      Object.assign(encodingSpec, { ...encodingSpec, field: value });
       break;
     }
     default:
