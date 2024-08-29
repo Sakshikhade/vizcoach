@@ -26,6 +26,33 @@ const encodingTypes = [
 ] as const;
 type EncodingType = (typeof encodingTypes)[number];
 
+const aggregates = [
+  'count',
+  'valid',
+  'values',
+  'missing',
+  'distinct',
+  'sum',
+  'product',
+  'mean',
+  'average',
+  'variance',
+  'variancep',
+  'stdev',
+  'stdevp',
+  'stderr',
+  'median',
+  'q1',
+  'q3',
+  'ci0',
+  'ci1',
+  'min',
+  'max',
+  'argmin',
+  'argmax',
+] as const;
+type Aggregate = (typeof aggregates)[number];
+
 type Spec = VisualizationSpec &
   Partial<{
     data: Partial<{
@@ -39,6 +66,7 @@ type Spec = VisualizationSpec &
       [key in Encoding]: Partial<{
         field: string;
         type: EncodingType;
+        aggregate: Aggregate;
       }>;
     }>;
   }>;
@@ -80,7 +108,14 @@ type ChangableField =
   | 'encoding.y.type'
   | 'encoding.color.type'
   | 'encoding.opacity.type'
-  | 'encoding.size.type';
+  | 'encoding.size.type'
+
+  // Update Encoding aggregate
+  | 'encoding.x.aggregate'
+  | 'encoding.y.aggregate'
+  | 'encoding.color.aggregate'
+  | 'encoding.opacity.aggregate'
+  | 'encoding.size.aggregate';
 
 type VegaLiteBuilderProps = {
   json: string;
@@ -329,6 +364,33 @@ const EncodingBuilder = ({
               ))}
             </Select>
           </FormControl>
+          <FormControl disabled={readOnly} fullWidth>
+            <InputLabel
+              id={`${encoding}-encoding-aggregate-label`}
+              size="small"
+            >
+              {capitalize(encoding)} Encoding Aggregate
+            </InputLabel>
+            <Select
+              labelId={`${encoding}-encoding-aggregate-label`}
+              label={`${capitalize(encoding)} Encoding Aggregate`}
+              value={encodingSpec.aggregate || ''}
+              onChange={(event) =>
+                onChange(`encoding.${encoding}.aggregate`, event.target.value)
+              }
+              size="small"
+            >
+              {aggregates.map((aggregate) => (
+                <MenuItem
+                  key={aggregate}
+                  value={aggregate}
+                  disabled={aggregate === encodingSpec.aggregate}
+                >
+                  {capitalize(aggregate)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Stack>
       )}
     </>
@@ -397,32 +459,31 @@ const applyChanges = (
     case 'encoding.y.field':
     case 'encoding.color.field':
     case 'encoding.opacity.field':
-    case 'encoding.size.field': {
-      const encoding = parsed.encoding || {};
-      const key = field.split('.')[1] as Encoding;
-      const encodingSpec = encoding[key];
-
-      // Validating that the encoding exists in the JSON
-      if (!encodingSpec) {
-        break;
-      }
-      Object.assign(encodingSpec, { ...encodingSpec, field: value });
-      break;
-    }
+    case 'encoding.size.field':
     case 'encoding.x.type':
     case 'encoding.y.type':
     case 'encoding.color.type':
     case 'encoding.opacity.type':
-    case 'encoding.size.type': {
+    case 'encoding.size.type':
+    case 'encoding.x.aggregate':
+    case 'encoding.y.aggregate':
+    case 'encoding.color.aggregate':
+    case 'encoding.opacity.aggregate':
+    case 'encoding.size.aggregate': {
       const encoding = parsed.encoding || {};
-      const key = field.split('.')[1] as Encoding;
-      const encodingSpec = encoding[key];
+      const splits = field.split('.');
+      const encodingKey = splits[1] as Encoding;
+      const encodingProperty = splits[2];
+      const encodingSpec = encoding[encodingKey];
 
       // Validating that the encoding exists in the JSON
       if (!encodingSpec) {
         break;
       }
-      Object.assign(encodingSpec, { ...encodingSpec, type: value });
+      Object.assign(encodingSpec, {
+        ...encodingSpec,
+        [encodingProperty]: value,
+      });
       break;
     }
     default:
