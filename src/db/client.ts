@@ -82,6 +82,13 @@ class PocketbaseClient {
       .filter((user) => !!user);
   }
 
+  async getStudent(studentId: string): Promise<User | null> {
+    const user = this.getUser();
+    if (!user || user.role !== 'Teacher') return null;
+
+    return this.pb.collection('users').getOne(studentId);
+  }
+
   async getActivities(filter?: string): Promise<Activity[]> {
     const user = this.getUser();
     if (!user) return [];
@@ -210,6 +217,13 @@ class PocketbaseClient {
       `unitId='${unitId}'`,
     );
     return submissions.length ? submissions[0] : null;
+  }
+
+  async getStudentSubmissions(
+    studentId: string,
+    activityId: string,
+  ): Promise<Submission[]> {
+    return this.getSubmissions(activityId, `userId='${studentId}'`);
   }
 
   async createGroup(group: UnsavedGroup): Promise<Group | null> {

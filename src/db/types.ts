@@ -196,6 +196,11 @@ export interface GetSubmissionsResponse extends GetActivityResponse {
   submissions: Submission[];
 }
 
+export interface GetStudentSubmissionsResponse extends GetSubmissionsResponse {
+  student: User;
+  unitDatasets: Record<string, Dataset[]>;
+}
+
 export interface GetSubmissionResponse extends GetUnitResponse {
   submission: Submission | null;
 }

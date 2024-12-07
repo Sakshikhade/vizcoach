@@ -10,7 +10,6 @@ import {
   Update,
 } from '@mui/icons-material';
 import { Group, Submission } from 'db';
-import { useAuth } from 'hooks';
 
 export const AttemptingChip = () => {
   return (
@@ -125,8 +124,7 @@ type SubmissionChipProps = {
 };
 
 export const SubmissionChip = ({ submission, locked }: SubmissionChipProps) => {
-  const { user } = useAuth();
-  if (user?.role === 'Teacher' || locked) {
+  if (locked) {
     return null;
   } else if (!submission) {
     return <NotAttemptedChip />;

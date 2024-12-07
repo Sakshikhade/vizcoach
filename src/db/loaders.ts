@@ -1,7 +1,9 @@
 import { LoaderFunctionArgs } from 'react-router-dom';
 import client, {
+  Dataset,
   GetActivityResponse,
   GetStudentsResponse,
+  GetStudentSubmissionsResponse,
   GetSubmissionResponse,
   GetSubmissionsResponse,
   GetUnitResponse,
@@ -101,5 +103,38 @@ export const submissionLoader = async ({
     unit,
     datasets: await client.getDatasets(unit),
     submission,
+  };
+};
+
+export const studentSubmissionsLoader = async ({
+  params,
+}: LoaderFunctionArgs): Promise<GetStudentSubmissionsResponse | null> => {
+  const { activityId, studentId } = params;
+  if (!activityId || !studentId) return null;
+
+  const [student, activity, units, submissions] = await Promise.all([
+    client.getStudent(studentId),
+    client.getActivity(activityId),
+    client.getUnits(activityId),
+    client.getStudentSubmissions(studentId, activityId),
+  ]);
+
+  if (!student || !activity) return null;
+
+  const datasets = await Promise.all(
+    units.map((unit) => client.getDatasets(unit)),
+  );
+  const unitDatasets = datasets.reduce(
+    (record, dataset, index) =>
+      Object.assign(record, { [units[index].id]: dataset }),
+    {} as Record<string, Dataset[]>,
+  );
+
+  return {
+    activity,
+    units,
+    submissions,
+    student,
+    unitDatasets,
   };
 };

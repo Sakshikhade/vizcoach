@@ -47,7 +47,9 @@ export const UnitCard = ({ unit, submission, locked }: UnitCardProps) => {
               <Typography gutterBottom variant="h6">
                 Unit {order} - {title}
               </Typography>
-              <SubmissionChip submission={submission} locked={locked} />
+              {user?.role !== 'Teacher' && (
+                <SubmissionChip submission={submission} locked={locked} />
+              )}
             </Stack>
             <Stack marginY={2}>
               {!locked ? (

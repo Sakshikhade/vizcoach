@@ -10,6 +10,7 @@ import {
   NotFound,
   Perform,
   Students,
+  StudentSubmissions,
   Submissions,
   Units,
   ViewUnit,
@@ -19,6 +20,7 @@ import {
   activityLoader,
   groupsLoader,
   studentsLoader,
+  studentSubmissionsLoader,
   submissionLoader,
   submissionsLoader,
   unitLoader,
@@ -111,6 +113,18 @@ export const router = createBrowserRouter([
               </AuthorizedRoute>
             ),
             loader: submissionsLoader,
+          },
+          {
+            path: ':activityId/submissions/:studentId',
+            element: (
+              <AuthorizedRoute
+                navigateTo="/dashboard"
+                allowedRoles={['Teacher']}
+              >
+                <StudentSubmissions />
+              </AuthorizedRoute>
+            ),
+            loader: studentSubmissionsLoader,
           },
           {
             path: '*',

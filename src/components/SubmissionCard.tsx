@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   AdjustRounded,
   ArrowForward,
@@ -45,6 +46,7 @@ export const SubmissionCard = ({
   datasets,
   selectedUnit,
 }: SubmissionCardProps) => {
+  const navigate = useNavigate();
   const unitSubmissions = useMemo(
     () =>
       submissions.reduce((map, submission) => {
@@ -56,7 +58,7 @@ export const SubmissionCard = ({
 
   return (
     <Card variant="outlined">
-      <CardActionArea>
+      <CardActionArea onClick={() => navigate(student.id)}>
         <CardContent>
           <Stack marginBottom={2}>
             <StudentHeader student={student} />

@@ -7,6 +7,7 @@ export * from './Login';
 export * from './NotFound';
 export * from './Perform';
 export * from './Students';
+export * from './StudentSubmissions';
 export * from './Submissions';
 export * from './Units';
 export * from './ViewUnit';
