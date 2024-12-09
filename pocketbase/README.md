@@ -130,3 +130,17 @@ All these settings are under the Mail settings.
 9.  Update the `Create rule` and `Update rule` in the `API Rules` for the `submissions` collection to the following value. This step will ensure that only students can create and update submissions.
 
         @request.auth.id = @request.data.unitId.activityId.groupId.usergroups_via_groupId.userId
+
+## Comments Collection
+
+1.  Create a new collection called `comments`.
+2.  Add fields `content`, `submissionId`, and `userId` to the `comments` collection.
+3.  The field `content` in the `comments` collection is of type `Rich Text`. This field should be set to `non-empty`. Value of this field will store comments' contents.
+4.  The field `submissionId` in the `comments` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `submissions` collection.
+5.  The field `userId` in the `submissions` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `users` collection.
+6.  Update the `List/Search Rule`, `View rule`, and `Create rule` in the `API Rules` for the `comments` collection to the following value. This step will ensure that only teachers and owning students can view comments.
+
+        // Teacher can access all the submissions' comments
+        @request.auth.role = 'Teacher' ||
+        // Students should have only access their submissions' comments
+        @request.auth.id = @collection.comments.submissionId.userId

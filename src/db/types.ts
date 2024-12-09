@@ -192,6 +192,22 @@ export type UnsavedSubmission = {
   state?: SubmissionState;
 };
 
+export class Comment {
+  constructor(readonly model: RecordModel) {}
+
+  get id(): string {
+    return this.model.id;
+  }
+
+  get content(): string {
+    return this.model.content;
+  }
+
+  get user(): User | undefined {
+    return this.model.expand?.userId;
+  }
+}
+
 export interface GetSubmissionsResponse extends GetActivityResponse {
   submissions: Submission[];
 }
@@ -199,10 +215,12 @@ export interface GetSubmissionsResponse extends GetActivityResponse {
 export interface GetStudentSubmissionsResponse extends GetSubmissionsResponse {
   student: User;
   unitDatasets: Record<string, Dataset[]>;
+  submissionComments: Record<string, Comment[]>;
 }
 
 export interface GetSubmissionResponse extends GetUnitResponse {
   submission: Submission | null;
+  comments: Comment[];
 }
 
 export const toTextContent = (innerHTML: string): string => {

@@ -30,6 +30,7 @@ export const usePerform = () => {
   const [json, setJson] = useState(getJson(submission));
   const [saved, setSaved] = useState(!!submission);
   const [syncing, setSyncing] = useState(false);
+  const [comments, setComments] = useState(data.comments);
 
   const updateJson = (value: string) => {
     setJson(value);
@@ -89,15 +90,27 @@ export const usePerform = () => {
 
   const save = () => createOrUpdate(null);
 
+  const postComment = async (content: string) => {
+    if (!submission) return;
+    try {
+      const comment = await client.postComment(submission, content);
+      setComments((prev) => [comment, ...prev]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return {
     ...data,
     submission,
     json,
     saved,
+    comments,
     updateJson,
     raiseHand,
     unraiseHand,
     submit,
     save,
+    postComment,
   };
 };

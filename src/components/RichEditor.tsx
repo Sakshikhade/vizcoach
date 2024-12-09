@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import {
   MenuButtonAlignCenter,
   MenuButtonAlignJustify,
@@ -11,6 +12,7 @@ import {
   MenuDivider,
   MenuSelectHeading,
   RichTextEditor,
+  RichTextEditorRef,
 } from 'mui-tiptap';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
@@ -21,8 +23,16 @@ type RichEditorProps = {
 };
 
 export const RichEditor = ({ value, onChange }: RichEditorProps) => {
+  const editorRef = useRef<RichTextEditorRef | null>(null);
+
+  useEffect(() => {
+    if (!editorRef.current || value?.length) return;
+    editorRef.current.editor?.commands.clearContent();
+  }, [value]);
+
   return (
     <RichTextEditor
+      ref={editorRef}
       content={value}
       onUpdate={({ editor }) => onChange(editor.getHTML())}
       extensions={[

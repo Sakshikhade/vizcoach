@@ -1,5 +1,6 @@
 import { LoaderFunctionArgs } from 'react-router-dom';
 import client, {
+  Comment,
   Dataset,
   GetActivityResponse,
   GetStudentsResponse,
@@ -98,11 +99,14 @@ export const submissionLoader = async ({
   ]);
 
   if (!activity || !unit) return null;
+  const comments = submission ? await client.getComments(submission) : [];
+
   return {
     activity,
     unit,
     datasets: await client.getDatasets(unit),
     submission,
+    comments,
   };
 };
 
@@ -130,11 +134,21 @@ export const studentSubmissionsLoader = async ({
     {} as Record<string, Dataset[]>,
   );
 
+  const comments = await Promise.all(
+    submissions.map((submission) => client.getComments(submission)),
+  );
+  const submissionComments = comments.reduce(
+    (record, comment, index) =>
+      Object.assign(record, { [submissions[index].id]: comment }),
+    {} as Record<string, Comment[]>,
+  );
+
   return {
     activity,
     units,
     submissions,
     student,
     unitDatasets,
+    submissionComments,
   };
 };

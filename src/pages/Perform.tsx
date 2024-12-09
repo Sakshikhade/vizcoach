@@ -1,14 +1,13 @@
 import { ChangeEvent, useState } from 'react';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Alert,
   FormControlLabel,
   Paper,
   SpeedDialAction,
   Stack,
   Switch,
+  Tab,
+  Tabs,
   Typography,
 } from '@mui/material';
 import {
@@ -19,8 +18,8 @@ import {
   Save,
   TaskAltRounded,
 } from '@mui/icons-material';
-import { GridExpandMoreIcon } from '@mui/x-data-grid';
 import {
+  Comments,
   Dashboard,
   DatasetTabs,
   JsonEditor,
@@ -31,12 +30,12 @@ import {
 } from 'components';
 import { usePerform } from 'hooks';
 
-enum PerformSection {
-  CONFIGURATION = 'Configuration',
-  ACTIVITY_DESCRIPTION = "Activity's Description",
-  UNIT_DESCRIPTION = "Unit's Description",
-  DATASETS = 'Datasets',
-}
+const PERFORM_TABS = [
+  'Visualization',
+  'Descriptions',
+  'Datasets',
+  'Comments',
+] as const;
 
 export const Perform = () => {
   const {
@@ -46,16 +45,21 @@ export const Perform = () => {
     unit,
     json,
     saved,
+    comments,
     updateJson,
     raiseHand,
     unraiseHand,
     submit,
     save,
+    postComment,
   } = usePerform();
   const [error, setError] = useState<string | null>(null);
   const [showBuilder, setShowBuilder] = useState(true);
+  const [performTab, setPeformTab] = useState<(typeof PERFORM_TABS)[number]>(
+    PERFORM_TABS[0],
+  );
 
-  const onShowBuilderChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const onShowBuilderChange = (_: ChangeEvent<HTMLInputElement>) => {
     setShowBuilder((prev) => !prev);
   };
 
@@ -93,110 +97,107 @@ export const Perform = () => {
         <SubmissionChip submission={submission} />
       </Dashboard.Header>
 
-      <Stack direction="row" gap={2}>
-        <Stack flex="1">
+      <Tabs
+        variant="fullWidth"
+        value={performTab}
+        onChange={(_, label) => setPeformTab(label)}
+      >
+        {PERFORM_TABS.map((tab) => (
+          <Tab
+            key={tab}
+            label={tab}
+            value={tab}
+            disabled={tab === PERFORM_TABS[3] && !submission}
+          />
+        ))}
+      </Tabs>
+
+      {performTab === PERFORM_TABS[0] && (
+        <Stack direction="row" gap={2}>
+          <Stack flex={1}>
+            <Paper variant="outlined">
+              <Stack>
+                <Visualization datasets={datasets} json={json} />
+              </Stack>
+            </Paper>
+          </Stack>
+          <Stack flex={1}>
+            <Paper variant="outlined">
+              <Stack padding={2}>
+                <Stack
+                  marginBottom={2}
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <FormControlLabel
+                    label="Show Builder"
+                    labelPlacement="start"
+                    control={
+                      <Switch
+                        checked={showBuilder}
+                        onChange={onShowBuilderChange}
+                      />
+                    }
+                  />
+                  {!saved && <UnsavedChip />}
+                </Stack>
+                {showBuilder ? (
+                  <VegaLiteBuilder
+                    json={json}
+                    datasets={datasets}
+                    readOnly={submission?.state === 'submitted'}
+                    onJsonChange={onJsonChange}
+                  />
+                ) : (
+                  <JsonEditor
+                    json={json}
+                    readOnly={submission?.state === 'submitted'}
+                    onJsonChange={onJsonChange}
+                  />
+                )}
+                {error && (
+                  <Stack marginTop={2}>
+                    <Alert icon={<ErrorOutlineRounded />} color="error">
+                      {error}
+                    </Alert>
+                  </Stack>
+                )}
+              </Stack>
+            </Paper>
+          </Stack>
+        </Stack>
+      )}
+
+      {performTab === PERFORM_TABS[1] && (
+        <Stack gap={2}>
+          <Typography variant="h5">Activity's Description</Typography>
           <Paper variant="outlined">
             <Stack>
-              <Visualization datasets={datasets} json={json} />
+              <Typography
+                dangerouslySetInnerHTML={{ __html: activity.description }}
+                sx={{ paddingX: 4, paddingY: 2 }}
+              />
+            </Stack>
+          </Paper>
+
+          <Typography variant="h5">Unit's Description</Typography>
+          <Paper variant="outlined">
+            <Stack>
+              <Typography
+                dangerouslySetInnerHTML={{ __html: unit.description }}
+                sx={{ paddingX: 4, paddingY: 2 }}
+              />
             </Stack>
           </Paper>
         </Stack>
-        <Stack flex="1">
-          <Accordion variant="outlined" defaultExpanded>
-            <AccordionSummary
-              expandIcon={<GridExpandMoreIcon />}
-              aria-controls={`${PerformSection.CONFIGURATION}-content`}
-              id={`${PerformSection.CONFIGURATION}-header`}
-            >
-              <Stack
-                direction="row"
-                width="100%"
-                justifyContent="space-between"
-              >
-                <Typography>{PerformSection.CONFIGURATION}</Typography>
-                {!saved && <UnsavedChip />}
-              </Stack>
-            </AccordionSummary>
-            <AccordionDetails>
-              {showBuilder ? (
-                <VegaLiteBuilder
-                  json={json}
-                  datasets={datasets}
-                  readOnly={submission?.state === 'submitted'}
-                  onJsonChange={onJsonChange}
-                />
-              ) : (
-                <JsonEditor
-                  json={json}
-                  readOnly={submission?.state === 'submitted'}
-                  onJsonChange={onJsonChange}
-                />
-              )}
-              {error && (
-                <Stack marginTop={2}>
-                  <Alert icon={<ErrorOutlineRounded />} color="error">
-                    {error}
-                  </Alert>
-                </Stack>
-              )}
-              <Stack marginTop={2} alignItems="end">
-                <FormControlLabel
-                  label="Show Builder"
-                  labelPlacement="start"
-                  control={
-                    <Switch
-                      checked={showBuilder}
-                      onChange={onShowBuilderChange}
-                    />
-                  }
-                />
-              </Stack>
-            </AccordionDetails>
-          </Accordion>
-          <Accordion variant="outlined">
-            <AccordionSummary
-              expandIcon={<GridExpandMoreIcon />}
-              aria-controls={`${PerformSection.ACTIVITY_DESCRIPTION}-content`}
-              id={`${PerformSection.ACTIVITY_DESCRIPTION}-header`}
-            >
-              <Typography>{PerformSection.ACTIVITY_DESCRIPTION}</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography
-                dangerouslySetInnerHTML={{ __html: activity.description }}
-                sx={{ paddingX: 2 }}
-              />
-            </AccordionDetails>
-          </Accordion>
-          <Accordion variant="outlined">
-            <AccordionSummary
-              expandIcon={<GridExpandMoreIcon />}
-              aria-controls={`${PerformSection.UNIT_DESCRIPTION}-content`}
-              id={`${PerformSection.UNIT_DESCRIPTION}-header`}
-            >
-              <Typography>{PerformSection.UNIT_DESCRIPTION}</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography
-                dangerouslySetInnerHTML={{ __html: unit.description }}
-                sx={{ paddingX: 2 }}
-              />
-            </AccordionDetails>
-          </Accordion>
-          <Accordion variant="outlined">
-            <AccordionSummary
-              expandIcon={<GridExpandMoreIcon />}
-              aria-controls={`${PerformSection.DATASETS}-content`}
-              id={`${PerformSection.DATASETS}-header`}
-            >
-              <Typography>{PerformSection.DATASETS}</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <DatasetTabs datasets={datasets} />
-            </AccordionDetails>
-          </Accordion>
-        </Stack>
-      </Stack>
+      )}
+
+      {performTab === PERFORM_TABS[2] && <DatasetTabs datasets={datasets} />}
+
+      {performTab === PERFORM_TABS[3] && (
+        <Comments comments={comments} onPost={postComment} />
+      )}
 
       {submission?.state !== 'submitted' && (
         <Dashboard.SpeedDial

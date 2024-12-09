@@ -20,7 +20,7 @@ export const DatasetTabs = ({ datasets }: DatasetTabsProps) => {
           <Tab key={dataset.name} label={dataset.name} value={index} />
         ))}
       </Tabs>
-      <DatasetTable dataset={datasets[index]} />
+      {index < datasets.length && <DatasetTable dataset={datasets[index]} />}
     </>
   );
 };

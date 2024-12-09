@@ -3,6 +3,7 @@ import { GridColDef } from '@mui/x-data-grid';
 import { autoType, csv } from 'd3';
 import {
   Activity,
+  Comment,
   Dataset,
   DatasetRow,
   Group,
@@ -226,6 +227,16 @@ class PocketbaseClient {
     return this.getSubmissions(activityId, `userId='${studentId}'`);
   }
 
+  async getComments(submission: Submission): Promise<Comment[]> {
+    const models = await this.pb.collection('comments').getFullList({
+      filter: `submissionId='${submission.id}'`,
+      sort: '-created',
+      expand: 'userId',
+    });
+
+    return models.map((model) => new Comment(model));
+  }
+
   async createGroup(group: UnsavedGroup): Promise<Group | null> {
     try {
       const { id } = await this.pb.collection('groups').create(group);
@@ -319,6 +330,25 @@ class PocketbaseClient {
       throw new Error(`Unable to update submission!`);
     }
     return newSubmission;
+  }
+
+  async postComment(submission: Submission, content: string): Promise<Comment> {
+    const user = this.getUser();
+    if (!user) {
+      throw new Error('Only logged-in users can post comments!');
+    }
+
+    const model = await this.pb.collection('comments').create(
+      {
+        userId: user.id,
+        submissionId: submission.id,
+        content,
+      },
+      {
+        expand: 'userId',
+      },
+    );
+    return new Comment(model);
   }
 }
 
