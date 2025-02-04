@@ -350,6 +350,14 @@ class PocketbaseClient {
     );
     return new Comment(model);
   }
+
+  async deleteUnit(unit: Unit): Promise<void> {
+    const user = this.getUser();
+    if (!user || user.role !== 'Teacher') {
+      throw new Error('Only logged-in teachers can delete units!');
+    }
+    await this.pb.collection('units').delete(unit.id);
+  }
 }
 
 const client = new PocketbaseClient();

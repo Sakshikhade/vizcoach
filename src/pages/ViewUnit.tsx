@@ -1,12 +1,30 @@
+import { useNavigate } from 'react-router-dom';
 import { Paper, SpeedDialAction, Stack, Typography } from '@mui/material';
-import { EditNoteRounded, TaskAltRounded } from '@mui/icons-material';
+import {
+  DeleteRounded,
+  EditNoteRounded,
+  TaskAltRounded,
+} from '@mui/icons-material';
 import { Dashboard, DatasetTabs } from 'components';
-import { GetUnitResponse } from 'db';
+import client, { GetUnitResponse } from 'db';
 import { useDashboard } from 'hooks';
 
 export const ViewUnit = () => {
   const { useData } = useDashboard();
   const { activity, unit, datasets } = useData!<GetUnitResponse>();
+  const navigate = useNavigate();
+
+  const onUnitDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this unit?')) {
+      try {
+        await client.deleteUnit(unit);
+        navigate(`/dashboard/activities/${activity.id}/units`);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
   return (
     <>
       <Dashboard.Breadcrumbs title={unit.title}>
@@ -48,6 +66,11 @@ export const ViewUnit = () => {
 
       <Dashboard.SpeedDial label="ViewUnit SpeedDial" icon={<TaskAltRounded />}>
         <SpeedDialAction icon={<EditNoteRounded />} tooltipTitle="Edit Unit" />
+        <SpeedDialAction
+          icon={<DeleteRounded />}
+          tooltipTitle="Delete Unit"
+          onClick={onUnitDelete}
+        />
       </Dashboard.SpeedDial>
     </>
   );
