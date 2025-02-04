@@ -15,7 +15,11 @@ export const ViewUnit = () => {
   const navigate = useNavigate();
 
   const onUnitDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this unit?')) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this unit? This action will delete students' submissions too.",
+      )
+    ) {
       try {
         await client.deleteUnit(unit);
         navigate(`/dashboard/activities/${activity.id}/units`);

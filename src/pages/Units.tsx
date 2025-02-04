@@ -2,13 +2,14 @@ import { useNavigate } from 'react-router-dom';
 import { Paper, SpeedDialAction, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
+  DeleteRounded,
   EditNoteRounded,
   PlaylistAddCheckRounded,
   PlaylistAddRounded,
   TaskAltRounded,
 } from '@mui/icons-material';
 import { Dashboard, UnitCard } from 'components';
-import { GetSubmissionsResponse, Submission } from 'db';
+import client, { GetSubmissionsResponse, Submission } from 'db';
 import { useDashboard } from 'hooks';
 
 export const Units = () => {
@@ -20,6 +21,21 @@ export const Units = () => {
     map.set(submission.unitId, submission);
     return map;
   }, new Map<string, Submission>());
+
+  const onDeleteActivity = async () => {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this activity and associated units? This action will delete students' submissions too.",
+      )
+    ) {
+      try {
+        await client.deleteActivity(activity);
+        navigate('/dashboard/activities');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
   return (
     <>
@@ -90,6 +106,11 @@ export const Units = () => {
           <SpeedDialAction
             icon={<EditNoteRounded />}
             tooltipTitle="Edit Activity"
+          />
+          <SpeedDialAction
+            icon={<DeleteRounded />}
+            tooltipTitle="Delete Activity"
+            onClick={onDeleteActivity}
           />
         </Dashboard.SpeedDial>
       )}

@@ -351,12 +351,20 @@ class PocketbaseClient {
     return new Comment(model);
   }
 
-  async deleteUnit(unit: Unit): Promise<void> {
+  async deleteActivity({ id }: Activity): Promise<void> {
+    const user = this.getUser();
+    if (!user || user.role !== 'Teacher') {
+      throw new Error('Only logged-in teachers can delete activities!');
+    }
+    await this.pb.collection('activities').delete(id);
+  }
+
+  async deleteUnit({ id }: Unit): Promise<void> {
     const user = this.getUser();
     if (!user || user.role !== 'Teacher') {
       throw new Error('Only logged-in teachers can delete units!');
     }
-    await this.pb.collection('units').delete(unit.id);
+    await this.pb.collection('units').delete(id);
   }
 }
 
