@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import client, {
   Comment,
   GetStudentSubmissionsResponse,
@@ -14,6 +14,9 @@ export const useStudentSubmissions = () => {
   const [submissionComments, setSubmissionComments] = useState<
     Record<string, Comment[]>
   >(data.submissionComments);
+  const [submission, setSubmission] = useState<Submission | null>(
+    submissions.length ? submissions[submissions.length - 1] : null,
+  );
 
   const unitsMap = useMemo(
     () =>
@@ -47,18 +50,34 @@ export const useStudentSubmissions = () => {
 
   const postComment = async (submission: Submission, content: string) => {
     try {
-      const comment = await client.postComment(submission, content);
-      setSubmissionComments((prev) => ({
-        ...prev,
-        [submission.id]: [comment, ...prev[submission.id]],
-      }));
+      await client.postComment(submission, content);
     } catch (error) {
       console.error(error);
     }
   };
 
+  // Setting up subscription to listen to new comments
+  useEffect(() => {
+    if (!submission) {
+      return;
+    }
+
+    // Registering to new comment updates
+    client.registerPostCommentCallback(submission, (comment) => {
+      setSubmissionComments((prev) => ({
+        ...prev,
+        [submission.id]: [comment, ...prev[submission.id]],
+      }));
+    });
+
+    // Unregistering from subscriptions
+    return () => client.unregisterPostCommentCallback();
+  }, [submission]);
+
   return {
     ...data,
+    submission,
+    setSubmission,
     getSubmissionUnit,
     getSubmissionDatasets,
     getSubmissionById,

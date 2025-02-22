@@ -21,7 +21,6 @@ import {
   Visualization,
 } from 'components';
 import { useStudentSubmissions } from 'hooks';
-import { Submission } from 'db';
 
 const SUBMISSION_TABS = [
   'Visualization',
@@ -35,16 +34,14 @@ export const StudentSubmissions = () => {
     activity,
     student,
     submissions,
+    submission,
+    setSubmission,
     getSubmissionById,
     getSubmissionUnit,
     getSubmissionDatasets,
     getSubmissionComments,
     postComment,
   } = useStudentSubmissions();
-
-  const [submission, setSubmission] = useState<Submission | null>(
-    submissions.length ? submissions[submissions.length - 1] : null,
-  );
 
   const [submissionTab, setSubmissionTab] = useState<
     (typeof SUBMISSION_TABS)[number]

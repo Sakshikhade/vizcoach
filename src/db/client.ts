@@ -227,14 +227,27 @@ class PocketbaseClient {
     return this.getSubmissions(activityId, `userId='${studentId}'`);
   }
 
-  async getComments(submission: Submission): Promise<Comment[]> {
+  async getComments({ id }: Submission, filter?: string): Promise<Comment[]> {
+    const filters = [`submissionId='${id}'`];
+    if (filter) {
+      filters.push(filter);
+    }
+
     const models = await this.pb.collection('comments').getFullList({
-      filter: `submissionId='${submission.id}'`,
+      filter: filters.join(' && '),
       sort: '-created',
       expand: 'userId',
     });
 
     return models.map((model) => new Comment(model));
+  }
+
+  async getComment(
+    submission: Submission,
+    commentId: string,
+  ): Promise<Comment | null> {
+    const comments = await this.getComments(submission, `id='${commentId}'`);
+    return comments.length ? comments[0] : null;
   }
 
   async createGroup(group: UnsavedGroup): Promise<Group | null> {
@@ -365,6 +378,50 @@ class PocketbaseClient {
       throw new Error('Only logged-in teachers can delete units!');
     }
     await this.pb.collection('units').delete(id);
+  }
+
+  registerPostCommentCallback(
+    submission: Submission,
+    callback: (comment: Comment) => void,
+  ) {
+    const user = this.getUser();
+    if (
+      !user ||
+      (user.role === 'Student' && user.id !== submission.student.id)
+    ) {
+      throw new Error(
+        'Only logged-in teachers or student who own the requested submission can subscribe to new comments!',
+      );
+    }
+    this.pb
+      .collection('comments')
+      .subscribe('*', async ({ action, record }) => {
+        // Only allowing create action to pass through callback
+        if (action !== 'create') {
+          console.warn(
+            `Unsupported action '${action}' for post comment callback!`,
+          );
+          return;
+        }
+
+        // Checking if new comment is on the requested submission
+        if (submission.id !== record.submissionId) {
+          return;
+        }
+
+        const comment = await this.getComment(submission, record.id);
+        if (comment) {
+          callback(comment);
+        }
+      });
+  }
+
+  unregisterPostCommentCallback() {
+    const user = this.getUser();
+    if (!user) {
+      throw new Error('Only logged-in users can unsubscribe to comments!');
+    }
+    this.pb.collection('comments').unsubscribe('*');
   }
 }
 

@@ -93,12 +93,26 @@ export const usePerform = () => {
   const postComment = async (content: string) => {
     if (!submission) return;
     try {
-      const comment = await client.postComment(submission, content);
-      setComments((prev) => [comment, ...prev]);
+      await client.postComment(submission, content);
     } catch (error) {
       console.error(error);
     }
   };
+
+  // Setting up subscription to listen to new comments
+  useEffect(() => {
+    if (!submission) {
+      return;
+    }
+
+    // Registering to new comment updates
+    client.registerPostCommentCallback(submission, (comment) => {
+      setComments((prev) => [comment, ...prev]);
+    });
+
+    // Unregistering from subscriptions
+    return () => client.unregisterPostCommentCallback();
+  }, [submission]);
 
   return {
     ...data,
