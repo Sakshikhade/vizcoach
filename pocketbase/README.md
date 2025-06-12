@@ -27,7 +27,9 @@ All these settings are under the Mail settings.
 ## Users Auth Collection
 
 1. Add a new field called `role` to the default `users` collection of type `Select`. This field should be set to `non-empty` and `single-valued`. Values for the select `Teacher` and `Student`.
-2. Update the `View rule` in the `API Rules` for the `users` collection to `id = @request.auth.id || @request.auth.role = 'Teacher'`. This step will ensure that teachers can view student's records, apart from the requesting user.
+2. Add a new field called `username` to the default `users` collection of type `Plain Text`. This field should be set to `non-empty` and validation pattern `^[a-zA-Z0-9_\-]+$`.
+3. Add an unique constraint on the `username` field ensuring one user per username.
+4. Update `List/Search Rule` and `View rule` in the `API Rules` for the `users` collection to `id = @request.auth.id || @request.auth.role = 'Teacher'`. This step will ensure that teachers can view student's records, apart from the requesting user.
 
 ## Groups Collection
 
@@ -49,14 +51,18 @@ All these settings are under the Mail settings.
 7.  Add an unique constraint on fields `course`, `semester`, and `year`, ensuring one group per semester per course per year.
 8.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `groups` collection to the following value. This step will ensure that only teachers and associated students can view student groups.
 
-        // Teachers can access all groups
-        @request.auth.role = 'Teacher' ||
-        // Students can only access their associated group
-        @request.auth.id = @collection.groups.usergroups_via_groupId.userId
+```
+// Teachers can access all groups
+@request.auth.role = 'Teacher' ||
+// Students can only access their associated group
+@request.auth.id ?= @collection.groups.usergroups_via_groupId.userId
+```
 
 9.  Update the `Create rule`, `Update rule`, and `Delete rule` in the `API Rules` for the `groups` collection to the following value. This step will ensure that only teachers can create, update, and delete groups.
 
-    @request.auth.role = 'Teacher'
+```
+@request.auth.role = 'Teacher'
+```
 
 ## User-Groups Collection
 
@@ -67,10 +73,12 @@ All these settings are under the Mail settings.
 5.  Add an unique constraint on fields `userId` and `groupId`, ensuring one user belongs to one group.
 6.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `usergroups` collection to the following value. This step will ensure that only teachers and associated students can view student groups.
 
-        // Teachers can access all usergroups
-        @request.auth.role = 'Teacher' ||
-        // Students can only access their associated usergroup
-        @request.auth.id = @collection.usergroups.userId
+```
+// Teachers can access all usergroups
+@request.auth.role = 'Teacher' ||
+// Students can only access their associated usergroup
+@request.auth.id ?= @collection.usergroups.userId
+```
 
 ## Activities Collection
 
@@ -82,14 +90,18 @@ All these settings are under the Mail settings.
 6.  The field `scheduled` in the `activities` collection is of type `DateTime`. This field can be empty, meaning activities will post immediately.
 7.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `activities` collection to the following value. This step will ensure that only teachers and associated students can view activities.
 
-        // Teacher can access all the activities
-        @request.auth.role = 'Teacher' ||
-        // Students should have only access if in associated group
-        @request.auth.id = @collection.activities.groupId.usergroups_via_groupId.userId
+```
+// Teacher can access all the activities
+@request.auth.role = 'Teacher' ||
+// Students should have only access if in associated group
+@request.auth.id ?= @collection.activities.groupId.usergroups_via_groupId.userId
+```
 
 8.  Update the `Create rule`, `Update rule`, and `Delete rule` in the `API Rules` for the `activities` collection to the following value. This step will ensure that only teachers can create, update, and delete activities.
 
-        @request.auth.role = 'Teacher'
+```
+@request.auth.role = 'Teacher'
+```
 
 ## Units Collection
 
@@ -102,14 +114,18 @@ All these settings are under the Mail settings.
 7.  The field `activityId` in the `units` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `activities` collection.
 8.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `units` collection to the following value. This step will ensure that only teachers and associated students can view activities.
 
-        // Teacher can access all the units
-        @request.auth.role = 'Teacher' ||
-        // Students should have only access if associated with activity
-        @request.auth.id = @collection.units.activityId.groupId.usergroups_via_groupId.userId
+```
+// Teacher can access all the units
+@request.auth.role = 'Teacher' ||
+// Students should have only access if associated with activity
+@request.auth.id ?= @collection.units.activityId.groupId.usergroups_via_groupId.userId
+```
 
 9.  Update the `Create rule`, `Update rule`, and `Delete rule` in the `API Rules` for the `units` collection to the following value. This step will ensure that only teachers can create, update, and delete units.
 
-        @request.auth.role = 'Teacher'
+```
+@request.auth.role = 'Teacher'
+```
 
 ## Submissions Collection
 
@@ -122,14 +138,18 @@ All these settings are under the Mail settings.
 7.  Add an unique constraint on fields `userId` and `unitId`, ensuring one submission per unit per student.
 8.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `submissions` collection to the following value. This step will ensure that only teachers and owning students can view submissions.
 
-        // Teacher can access all the submissions
-        @request.auth.role = 'Teacher' ||
-        // Students should have only access their submissions
-        @request.auth.id = @collection.submissions.userId
+```
+// Teacher can access all the submissions
+@request.auth.role = 'Teacher' ||
+// Students should have only access their submissions
+@request.auth.id ?= @collection.submissions.userId
+```
 
 9.  Update the `Create rule` and `Update rule` in the `API Rules` for the `submissions` collection to the following value. This step will ensure that only students can create and update submissions.
 
-        @request.auth.id = @request.data.unitId.activityId.groupId.usergroups_via_groupId.userId
+```
+@request.auth.id ?= @request.body.unitId.activityId.groupId.usergroups_via_groupId.userId
+```
 
 ## Comments Collection
 
@@ -138,9 +158,20 @@ All these settings are under the Mail settings.
 3.  The field `content` in the `comments` collection is of type `Rich Text`. This field should be set to `non-empty`. Value of this field will store comments' contents.
 4.  The field `submissionId` in the `comments` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `submissions` collection.
 5.  The field `userId` in the `submissions` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `users` collection.
-6.  Update the `List/Search Rule`, `View rule`, and `Create rule` in the `API Rules` for the `comments` collection to the following value. This step will ensure that only teachers and owning students can view comments.
+6.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `comments` collection to the following value. This step will ensure that only teachers and owning students can view comments.
 
-        // Teacher can access all the submissions' comments
-        @request.auth.role = 'Teacher' ||
-        // Students should have only access their submissions' comments
-        @request.auth.id = @collection.comments.submissionId.userId
+```
+// Teacher can access all the submissions' comments
+@request.auth.role = 'Teacher' ||
+// Students should have only access their submissions' comments
+@request.auth.id ?= @collection.comments.submissionId.userId
+```
+
+7. Update the `Create rule` in the `API Rules` for the `comments` collection to the following value. This step will ensure that only teachers and students with its submission can create comments.
+
+```
+// Teacher can access all the submissions' comments
+@request.auth.role = 'Teacher' ||
+// Students should have only access their submissions' comments
+@request.auth.id ?= @request.body.submissionId.userId
+```

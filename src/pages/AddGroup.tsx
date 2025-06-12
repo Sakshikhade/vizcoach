@@ -123,7 +123,7 @@ export const AddGroup = () => {
 
       <FormField
         label="Which Students CSV to attach?"
-        error={errors.csv}
+        error={errors['csv+']}
         required
       >
         <Button
@@ -134,13 +134,13 @@ export const AddGroup = () => {
           startIcon={<CloudUpload />}
           sx={{ width: 'fit-content', marginTop: 1 }}
         >
-          Upload Students CSV ({group.csv?.name || 'Not Selected'})
+          Upload Students CSV ({group['csv+']?.name || 'Not Selected'})
           <VisuallyHiddenInput
             type="file"
             accept=".csv"
             onChange={({ target }) =>
               setField(
-                'csv',
+                'csv+',
                 target.files && target.files.length
                   ? target.files[0]
                   : undefined,

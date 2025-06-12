@@ -48,7 +48,7 @@ export const UNSAVED_GROUP_FIELDS = [
   'course',
   'semester',
   'year',
-  'csv',
+  'csv+',
 ] as const;
 
 export type UnsavedGroupField = (typeof UNSAVED_GROUP_FIELDS)[number];
@@ -57,7 +57,7 @@ export type UnsavedGroup = Partial<{
   course: string;
   semester: string;
   year: number;
-  csv: File;
+  'csv+': File;
 }>;
 
 export interface GetStudentsResponse {

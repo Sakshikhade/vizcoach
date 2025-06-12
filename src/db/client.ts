@@ -33,8 +33,8 @@ class PocketbaseClient {
   }
 
   getUser(): User | null {
-    const { isValid, model } = this.pb.authStore;
-    return isValid ? (model as User) : null;
+    const { isValid, record } = this.pb.authStore;
+    return isValid ? (record as any) : null;
   }
 
   async getGroups(filter?: string): Promise<Group[]> {
@@ -97,7 +97,7 @@ class PocketbaseClient {
     const filters = [];
     if (user.role === 'Student') {
       filters.push(
-        `groupId.usergroups_via_groupId.userId='${user.id}'`,
+        `groupId.usergroups_via_groupId.userId?='${user.id}'`,
         `(scheduled='' || scheduled<'${new Date().toISOString()}')`,
       );
     }
@@ -417,10 +417,6 @@ class PocketbaseClient {
   }
 
   unregisterPostCommentCallback() {
-    const user = this.getUser();
-    if (!user) {
-      throw new Error('Only logged-in users can unsubscribe to comments!');
-    }
     this.pb.collection('comments').unsubscribe('*');
   }
 }

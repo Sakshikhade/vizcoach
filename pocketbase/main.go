@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gocarina/gocsv"
 	"github.com/google/uuid"
@@ -15,9 +18,10 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/forms"
 	"github.com/pocketbase/pocketbase/mails"
-	"github.com/pocketbase/pocketbase/models"
+	"github.com/pocketbase/pocketbase/plugins/ghupdate"
 	"github.com/pocketbase/pocketbase/plugins/jsvm"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
+	"github.com/pocketbase/pocketbase/tools/hook"
 )
 
 const (
@@ -31,7 +35,7 @@ const (
 	PasswordConfirmKey   = "passwordConfirm"
 	RoleKey              = "role"
 	StudentRole          = "Student"
-	CSVKey               = "csv"
+	CSVFileKey           = "csv+"
 	UserIdKey            = "userId"
 	GroupIdKey           = "groupId"
 )
@@ -42,55 +46,22 @@ type Student struct {
 	Name     string `csv:"name"`
 }
 
-func GetStudents(app *pocketbase.PocketBase, e *core.RecordCreateEvent) ([]*Student, error) {
-	// Fetching the CSV file from the request
-	header, err := e.HttpContext.FormFile(CSVKey)
-	if err != nil {
-		app.Logger().Error(err.Error())
-		return nil, errors.New("unable to retreive csv from request")
-	}
-
-	// Opening the CSV file
-	file, err := header.Open()
-	if err != nil {
-		app.Logger().Error(err.Error())
-		return nil, errors.New("unable to open csv file")
-	}
-	defer file.Close()
-
-	// Copying bytes from the file to a buffer
-	buf := bytes.NewBuffer(nil)
-	if _, err := io.Copy(buf, file); err != nil {
-		app.Logger().Error(err.Error())
-		return nil, errors.New("unable to read bytes from the csv file")
-	}
-
-	// Unmarshalling CSV bytes to students slice
-	students := []*Student{}
-	if err := gocsv.UnmarshalBytes(buf.Bytes(), &students); err != nil {
-		app.Logger().Error(err.Error())
-		return nil, errors.New("unable to unmarshall bytes from the csv file")
-	}
-
-	return students, nil
-}
-
 func CreateStudentAccount(app *pocketbase.PocketBase, student *Student) error {
 
 	// Loading users collection from name
-	users, err := app.Dao().FindCollectionByNameOrId(UsersCollection)
+	users, err := app.FindCollectionByNameOrId(UsersCollection)
 	if err != nil {
 		app.Logger().Error(err.Error())
 		return apis.NewApiError(500, fmt.Sprintf("Unable to load %q collection", UsersCollection), nil)
 	}
 
 	// Creating new record form
-	record := models.NewRecord(users)
+	record := core.NewRecord(users)
 	form := forms.NewRecordUpsert(app, record)
 
 	// Setting default password as UUID
 	password := uuid.New()
-	form.LoadData(map[string]any{
+	form.Load(map[string]any{
 		UsernameKey:        student.Username,
 		EmailKey:           student.Email,
 		NameKey:            student.Name,
@@ -112,12 +83,12 @@ func CreateStudentAccount(app *pocketbase.PocketBase, student *Student) error {
 func SendPasswordResetEmail(app *pocketbase.PocketBase, student *Student) error {
 
 	// Checking if SMTP is enabled
-	if !app.Settings().Smtp.Enabled {
+	if !app.Settings().SMTP.Enabled {
 		return errors.New("SMTP is disabled in the settings")
 	}
 
 	// Loading auth record from database using student's email
-	record, err := app.Dao().FindAuthRecordByEmail(UsersCollection, student.Email)
+	record, err := app.FindAuthRecordByEmail(UsersCollection, student.Email)
 	if err != nil {
 		return err
 	}
@@ -131,45 +102,66 @@ func SendPasswordResetEmail(app *pocketbase.PocketBase, student *Student) error 
 	return nil
 }
 
-func OnGroupBeforeCreateRequest(app *pocketbase.PocketBase, e *core.RecordCreateEvent) error {
-
-	// Loading students from request
-	students, err := GetStudents(app, e)
+func OnGroupCreateRequest(app *pocketbase.PocketBase, e *core.RecordRequestEvent) error {
+	err := e.Request.ParseMultipartForm(10 << 20) // Max 10 MB
 	if err != nil {
-		return apis.NewBadRequestError(err.Error(), nil)
+		return e.BadRequestError("CSV should be less than 10 MB!", err)
+	}
+	header := e.Request.MultipartForm.File[CSVFileKey][0]
+
+	// Opening the CSV file
+	file, err := header.Open()
+	if err != nil {
+		app.Logger().Error(err.Error())
+		return e.InternalServerError("Unable to open CSV file!", err)
+	}
+	defer file.Close()
+
+	// Copying bytes from the file to a buffer
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, file); err != nil {
+		app.Logger().Error(err.Error())
+		return e.InternalServerError("Unable to read bytes from the CSV file!", err)
+	}
+
+	// Unmarshalling CSV bytes to students slice
+	students := []*Student{}
+	if err := gocsv.UnmarshalBytes(buf.Bytes(), &students); err != nil {
+		app.Logger().Error(err.Error())
+		return e.InternalServerError("Unable to unmarshall bytes from the CSV file", err)
 	}
 
 	for _, student := range students {
 		// Creating student account
 		if err := CreateStudentAccount(app, student); err != nil {
-			return err
+			return e.InternalServerError("Unable to create student's account!", err)
 		}
 	}
 
-	return nil
+	return e.Next()
 }
 
-func CreateStudentGroupLink(app *pocketbase.PocketBase, e *core.RecordCreateEvent, student *Student) error {
+func CreateStudentGroupLink(app *pocketbase.PocketBase, e *core.RecordEvent, student *Student) error {
 
 	// Fetching records to link
 	groupId := e.Record.Id
-	studentAuthRecord, err := app.Dao().FindAuthRecordByEmail(UsersCollection, student.Email)
+	studentAuthRecord, err := app.FindAuthRecordByEmail(UsersCollection, student.Email)
 	if err != nil {
 		return err
 	}
 
 	// Loading usergroups collection from name
-	collection, err := app.Dao().FindCollectionByNameOrId(UserGroupsCollection)
+	collection, err := app.FindCollectionByNameOrId(UserGroupsCollection)
 	if err != nil {
 		app.Logger().Error(err.Error())
 		return apis.NewApiError(500, fmt.Sprintf("Unable to load %q collection", UserGroupsCollection), nil)
 	}
 
 	// Creating new record form
-	record := models.NewRecord(collection)
+	record := core.NewRecord(collection)
 	form := forms.NewRecordUpsert(app, record)
 
-	form.LoadData(map[string]any{
+	form.Load(map[string]any{
 		UserIdKey:  studentAuthRecord.Id,
 		GroupIdKey: groupId,
 	})
@@ -184,11 +176,38 @@ func CreateStudentGroupLink(app *pocketbase.PocketBase, e *core.RecordCreateEven
 	return nil
 }
 
-func OnGroupAfterCreateRequest(app *pocketbase.PocketBase, e *core.RecordCreateEvent) error {
-	// Loading students from request
-	students, err := GetStudents(app, e)
+func OnGroupAfterCreateSuccess(app *pocketbase.PocketBase, e *core.RecordEvent) error {
+	// Loading students from CSV
+	csvFilePath := e.Record.BaseFilesPath() + "/" + e.Record.GetString("csv")
+
+	// Opening file system
+	fsys, err := app.NewFilesystem()
 	if err != nil {
-		return apis.NewBadRequestError(err.Error(), nil)
+		app.Logger().Error(err.Error())
+		return errors.New("Unable to open file system!")
+	}
+	defer fsys.Close()
+
+	// Opening file
+	file, err := fsys.GetReader(csvFilePath)
+	if err != nil {
+		app.Logger().Error(err.Error())
+		return errors.New("Unable to read the file!")
+	}
+	defer file.Close()
+
+	// Copying bytes from the file to a buffer
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, file); err != nil {
+		app.Logger().Error(err.Error())
+		return errors.New("unable to read bytes from the csv file")
+	}
+
+	// Unmarshalling CSV bytes to students slice
+	students := []*Student{}
+	if err := gocsv.UnmarshalBytes(buf.Bytes(), &students); err != nil {
+		app.Logger().Error(err.Error())
+		return errors.New("unable to unmarshall bytes from the csv file")
 	}
 
 	for _, student := range students {
@@ -203,7 +222,7 @@ func OnGroupAfterCreateRequest(app *pocketbase.PocketBase, e *core.RecordCreateE
 		}
 	}
 
-	return nil
+	return e.Next()
 }
 
 func main() {
@@ -222,28 +241,47 @@ func main() {
 		TemplateLang: migratecmd.TemplateLangJS,
 	})
 
-	// Serves static files from the provided public dir (if exists)
-	// This is mentioned in the documentation - no idea whether we need it or not.
-	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS("./pb_public"), false))
-		return nil
+	// GitHub selfupdate
+	ghupdate.MustRegister(app, app.RootCmd, ghupdate.Config{})
+
+	// static route to serves files from the provided public dir
+	// (if publicDir exists and the route path is not already defined)
+	app.OnServe().Bind(&hook.Handler[*core.ServeEvent]{
+		Func: func(e *core.ServeEvent) error {
+			if !e.Router.HasRoute(http.MethodGet, "/{path...}") {
+				e.Router.GET("/{path...}", apis.Static(os.DirFS(defaultPublicDir()), true))
+			}
+
+			return e.Next()
+		},
+		Priority: 999, // execute as latest as possible to allow users to provide their own route
 	})
 
 	// ----- VIZCOACH RELATED EXTENSIONS ----- //
 
 	// Adding hook to peform actions before saving the group.
 	// Creating student accounts from the csv file uploaded with the student group record.
-	app.OnRecordBeforeCreateRequest(GroupsCollection).Add(func(e *core.RecordCreateEvent) error {
-		return OnGroupBeforeCreateRequest(app, e)
+	app.OnRecordCreateRequest(GroupsCollection).BindFunc(func(e *core.RecordRequestEvent) error {
+		return OnGroupCreateRequest(app, e)
 	})
 
 	// Adding hook to perform actions after saving the group.
 	// Creating student accounts to group links.
-	app.OnRecordAfterCreateRequest(GroupsCollection).Add(func(e *core.RecordCreateEvent) error {
-		return OnGroupAfterCreateRequest(app, e)
+	app.OnRecordAfterCreateSuccess(GroupsCollection).BindFunc(func(e *core.RecordEvent) error {
+		return OnGroupAfterCreateSuccess(app, e)
 	})
 
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// the default pb_public dir location is relative to the executable
+func defaultPublicDir() string {
+	if strings.HasPrefix(os.Args[0], os.TempDir()) {
+		// most likely ran with go run
+		return "./pb_public"
+	}
+
+	return filepath.Join(os.Args[0], "../pb_public")
 }

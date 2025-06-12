@@ -30,7 +30,7 @@
     "d3": "^7.9.0",
     "dayjs": "^1.11.11",
     "mui-tiptap": "^1.9.2",
-    "pocketbase": "^0.21.3",
+    "pocketbase": "^0.26.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
