@@ -278,6 +278,39 @@ class PocketbaseClient {
     }
   }
 
+  async updateActivity(activity: Activity): Promise<Activity | null> {
+    try {
+      const updateData: any = {
+        title: activity.title,
+        description: activity.description,
+        groupId: activity.group.id,
+      };
+
+      // Only include scheduled if it's a valid date
+      if (activity.scheduled && !isNaN(activity.scheduled.getTime())) {
+        updateData.scheduled = activity.scheduled.toISOString();
+      }
+
+      await this.pb.collection('activities').update(activity.id, updateData);
+      return this.getActivity(activity.id);
+    } catch {
+      return null;
+    }
+  }
+
+  async updateUnit(unit: Unit): Promise<Unit | null> {
+    try {
+      await this.pb.collection('units').update(unit.id, {
+        title: unit.title,
+        description: unit.description,
+        datasets: unit.datasets,
+      });
+      return this.getUnit(unit.activityId, unit.id);
+    } catch {
+      return null;
+    }
+  }
+
   async createSubmission(
     activityId: string,
     unitId: string,

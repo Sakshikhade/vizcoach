@@ -47,6 +47,19 @@ export const activityLoader = async ({
   return { activity, units };
 };
 
+export const editActivityLoader = async ({ params }: LoaderFunctionArgs) => {
+  const { activityId } = params;
+  if (!activityId) return null;
+
+  const [activity, groups] = await Promise.all([
+    client.getActivity(activityId),
+    client.getGroups(),
+  ]);
+  if (!activity) return null;
+
+  return { activity, groups };
+};
+
 export const unitLoader = async ({
   params,
 }: LoaderFunctionArgs): Promise<GetUnitResponse | null> => {

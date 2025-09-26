@@ -55,12 +55,18 @@ func CreateStudentAccount(app *pocketbase.PocketBase, student *Student) error {
 		return apis.NewApiError(500, fmt.Sprintf("Unable to load %q collection", UsersCollection), nil)
 	}
 
+	// If a user with the same email already exists, skip creation
+	if existing, _ := app.FindAuthRecordByEmail(UsersCollection, student.Email); existing != nil {
+		app.Logger().Debug(fmt.Sprintf("User with email %q already exists. Skipping create.", student.Email))
+		return nil
+	}
+
 	// Creating new record form
 	record := core.NewRecord(users)
 	form := forms.NewRecordUpsert(app, record)
 
-	// Setting default password as UUID
-	password := uuid.New()
+	// Setting default password as UUID string
+	password := uuid.NewString()
 	form.Load(map[string]any{
 		UsernameKey:        student.Username,
 		EmailKey:           student.Email,

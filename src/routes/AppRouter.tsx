@@ -5,6 +5,8 @@ import {
   AddActivity,
   AddGroup,
   AddUnit,
+  EditActivity,
+  EditUnit,
   Groups,
   Login,
   NotFound,
@@ -18,6 +20,7 @@ import {
 import {
   activitiesLoader,
   activityLoader,
+  editActivityLoader,
   groupsLoader,
   studentsLoader,
   studentSubmissionsLoader,
@@ -79,6 +82,18 @@ export const router = createBrowserRouter([
             loader: activityLoader,
           },
           {
+            path: ':activityId/edit-activity',
+            element: (
+              <AuthorizedRoute
+                navigateTo="/dashboard"
+                allowedRoles={['Teacher']}
+              >
+                <EditActivity />
+              </AuthorizedRoute>
+            ),
+            loader: editActivityLoader,
+          },
+          {
             path: ':activityId/units/:unitId/view',
             element: (
               <AuthorizedRoute
@@ -86,6 +101,18 @@ export const router = createBrowserRouter([
                 allowedRoles={['Teacher']}
               >
                 <ViewUnit />
+              </AuthorizedRoute>
+            ),
+            loader: unitLoader,
+          },
+          {
+            path: ':activityId/units/:unitId/edit-unit',
+            element: (
+              <AuthorizedRoute
+                navigateTo="/dashboard"
+                allowedRoles={['Teacher']}
+              >
+                <EditUnit />
               </AuthorizedRoute>
             ),
             loader: unitLoader,

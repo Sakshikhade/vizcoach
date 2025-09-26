@@ -69,7 +69,11 @@ export const ViewUnit = () => {
       </Stack>
 
       <Dashboard.SpeedDial label="ViewUnit SpeedDial" icon={<TaskAltRounded />}>
-        <SpeedDialAction icon={<EditNoteRounded />} tooltipTitle="Edit Unit" />
+        <SpeedDialAction
+          icon={<EditNoteRounded />}
+          tooltipTitle="Edit Unit"
+          onClick={() => navigate(`../${unit.id}/edit-unit`)}
+        />
         <SpeedDialAction
           icon={<DeleteRounded />}
           tooltipTitle="Delete Unit"

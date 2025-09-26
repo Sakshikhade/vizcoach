@@ -106,6 +106,7 @@ export const Units = () => {
           <SpeedDialAction
             icon={<EditNoteRounded />}
             tooltipTitle="Edit Activity"
+            onClick={() => navigate(`../${activity.id}/edit-activity`)}
           />
           <SpeedDialAction
             icon={<DeleteRounded />}
