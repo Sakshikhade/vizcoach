@@ -3,13 +3,15 @@ import { GridColDef } from '@mui/x-data-grid';
 
 export type UserRole = 'Teacher' | 'Student';
 
-export interface User {
-  id: string;
-  avatar: string;
-  name: string;
-  email: string;
-  username: string;
-  role: UserRole;
+export class User {
+  constructor(readonly model: RecordModel) {}
+
+  get id(): string { return this.model.id; }
+  get avatar(): string { return this.model.avatar || ''; }
+  get name(): string { return this.model.name || this.model.username || 'Unknown'; }
+  get email(): string { return this.model.email || ''; }
+  get username(): string { return this.model.username || ''; }
+  get role(): UserRole { return this.model.role || 'Student'; }
 }
 
 export class Group {
@@ -228,3 +230,200 @@ export const toTextContent = (innerHTML: string): string => {
   element.innerHTML = innerHTML;
   return element.textContent || innerHTML;
 };
+
+// Chat System Types
+export type ChatRoomType = 'group' | 'private';
+
+export class ChatRoom {
+  constructor(readonly model: RecordModel) {}
+
+  get id(): string {
+    return this.model.id;
+  }
+
+  get name(): string {
+    return this.model.name;
+  }
+
+  get type(): ChatRoomType {
+    return this.model.type;
+  }
+
+  get description(): string {
+    return this.model.description;
+  }
+
+  get groupId(): string | undefined {
+    return this.model.groupId;
+  }
+
+  get participants(): string[] {
+    // Parse JSON string if it's a string, otherwise return as array
+    if (typeof this.model.participants === 'string') {
+      try {
+        return JSON.parse(this.model.participants);
+      } catch {
+        return [];
+      }
+    }
+    return this.model.participants || [];
+  }
+
+  get createdBy(): string {
+    return this.model.createdBy;
+  }
+
+  get isActive(): boolean {
+    return this.model.isActive;
+  }
+
+  get created(): Date {
+    return new Date(this.model.created);
+  }
+
+  get updated(): Date {
+    return new Date(this.model.updated);
+  }
+
+  get group(): Group | undefined {
+    return this.model.expand?.groupId;
+  }
+
+  get creator(): User | undefined {
+    return this.model.expand?.createdBy;
+  }
+}
+
+export class GroupChat {
+  constructor(readonly model: RecordModel) {}
+
+  get id(): string {
+    return this.model.id;
+  }
+
+  get name(): string {
+    return this.model.name;
+  }
+
+  get description(): string {
+    return this.model.description;
+  }
+
+  get groupId(): string {
+    return this.model.groupId;
+  }
+
+  get participants(): string[] {
+    // Parse JSON string if it's a string, otherwise return as array
+    if (typeof this.model.participants === 'string') {
+      try {
+        return JSON.parse(this.model.participants);
+      } catch {
+        return [];
+      }
+    }
+    return this.model.participants || [];
+  }
+
+  get createdBy(): string {
+    return this.model.createdBy;
+  }
+
+  get isActive(): boolean {
+    return this.model.isActive;
+  }
+
+  get created(): Date {
+    return new Date(this.model.created);
+  }
+
+  get updated(): Date {
+    return new Date(this.model.updated);
+  }
+
+  get group(): Group | undefined {
+    return this.model.expand?.groupId;
+  }
+
+  get creator(): User | undefined {
+    return this.model.expand?.createdBy;
+  }
+}
+
+export type ChatMessageType = 'text' | 'system';
+
+export class ChatMessage {
+  constructor(readonly model: RecordModel) {}
+
+  get id(): string {
+    return this.model.id;
+  }
+
+  get roomId(): string {
+    return this.model.roomId;
+  }
+
+  get userId(): string {
+    return this.model.userId;
+  }
+
+  get content(): string {
+    return this.model.content;
+  }
+
+  get type(): ChatMessageType {
+    return this.model.type || 'text';
+  }
+
+  get replyTo(): string | undefined {
+    return this.model.replyTo;
+  }
+
+  get created(): Date {
+    return new Date(this.model.created);
+  }
+
+  get updated(): Date {
+    return new Date(this.model.updated);
+  }
+
+  get user(): User | undefined {
+    return this.model.expand?.userId;
+  }
+
+  get room(): ChatRoom | undefined {
+    return this.model.expand?.roomId;
+  }
+
+  get replyToMessage(): ChatMessage | undefined {
+    return this.model.expand?.replyTo;
+  }
+}
+
+export type UnsavedChatRoom = {
+  name: string;
+  type: ChatRoomType;
+  description?: string;
+  groupId?: string;
+  participants: string[];
+};
+
+export type UnsavedChatMessage = {
+  roomId: string;
+  content: string;
+  type?: ChatMessageType;
+  replyTo?: string;
+};
+
+export interface GetChatRoomsResponse {
+  rooms: ChatRoom[];
+}
+
+export interface GetChatRoomResponse {
+  room: ChatRoom;
+  messages: ChatMessage[];
+}
+
+export interface GetChatMessagesResponse {
+  messages: ChatMessage[];
+}

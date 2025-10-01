@@ -5,6 +5,7 @@ import {
   AddActivity,
   AddGroup,
   AddUnit,
+  Chat,
   EditActivity,
   EditUnit,
   Groups,
@@ -182,6 +183,17 @@ export const router = createBrowserRouter([
             loader: studentsLoader,
           },
         ],
+      },
+      {
+        path: 'chat',
+        element: (
+          <AuthorizedRoute
+            navigateTo="/dashboard"
+            allowedRoles={['Teacher', 'Student']}
+          >
+            <Chat />
+          </AuthorizedRoute>
+        ),
       },
       {
         path: '',
