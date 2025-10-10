@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/main.2770967b.css","mappings":"AAAA,EACE,SAEA,WAAU,CADV,SACA,CAGF,MACE,mCACA","sources":["index.scss"],"sourcesContent":["* {\r\n  margin: 0;\r\n  padding: 0;\r\n  min-width: 0;\r\n}\r\n\r\n:root {\r\n  -webkit-font-smoothing: antialiased;\r\n  -moz-osx-font-smoothing: grayscale;\r\n}\r\n"],"names":[],"sourceRoot":""}
