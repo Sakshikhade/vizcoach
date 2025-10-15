@@ -1,70 +1,149 @@
-# Getting Started with Create React App
+# VizCoach
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+VizCoach is an innovative classroom orchestration toolkit for visualization education that aims to revolutionize how we teach and learn data visualization. This NSF-funded project empowers educators with the tools to effectively teach data visualization theories and design principles, addressing the critical need for software tools that help students learn visualization design theories and principles in modern data-driven decision-making processes.
 
-## Available Scripts
+## Project Description
 
-In the project directory, you can run:
+VizCoach is a comprehensive educational platform designed to address two significant issues in visualization education:
 
-### `npm start`
+1. **The need for software tools that help students learn visualization design theories and principles**
+2. **The lack of understanding of how classroom orchestration can improve visualization education**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The platform enables instructors to create and moderate visualization-related classroom activities, providing real-time feedback to students while offering immediate feedback on student submissions. This promotes active learning and helps prepare students for the workforce by developing essential data analysis and visualization skills.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Getting Started
 
-### `npm test`
+### Prerequisites
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Before running VizCoach, ensure you have the following installed on your system:
 
-### `npm run build`
+- **Node.js** (version 16 or higher)
+- **npm** (comes with Node.js)
+- **Go** (version 1.19 or higher) - for PocketBase backend
+- **Git** - for cloning the repository
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Installation and Setup
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Follow these step-by-step instructions to get VizCoach running on your computer:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### 1. Clone the Repository
 
-### `npm run eject`
+```bash
+git clone https://github.com/svl-at-asu/viz-coach.git
+cd viz-coach
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+#### 2. Install Frontend Dependencies
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+npm install
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+#### 3. Set Up the Backend (PocketBase)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Navigate to the PocketBase directory and set up the backend:
 
-## Learn More
+**For Windows:**
+```cmd
+cd pocketbase
+chmod +x *.sh
+./install.sh
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+**For Mac/Linux:**
+```bash
+cd pocketbase
+chmod +x *.sh
+./install.sh
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+#### 4. Start the Development Servers
 
-### Code Splitting
+**Terminal 1 - Start PocketBase Backend:**
+```bash
+cd pocketbase
+./dev.sh
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+**Terminal 2 - Start React Frontend:**
+```bash
+npm start
+```
 
-### Analyzing the Bundle Size
+#### 5. Access the Application
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- **Frontend**: Open [http://localhost:3000](http://localhost:3000) in your browser
+- **PocketBase Admin**: Open [http://localhost:8090/_/](http://localhost:8090/_/) in your browser
 
-### Making a Progressive Web App
+#### 6. Configure PocketBase
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+1. Set the application name to `VizCoach` in the PocketBase admin panel
+2. Follow the detailed setup instructions in `pocketbase/README.md` to configure:
+   - User authentication and roles
+   - Database collections (groups, activities, units, submissions, comments)
+   - SMTP settings for email functionality
 
-### Advanced Configuration
+## Features
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+VizCoach provides a comprehensive set of features for visualization education:
 
-### Deployment
+### For Educators (Teachers)
+- **Activity Management**: Create, schedule, and manage visualization activities
+- **Group Management**: Organize students into groups by semester, year, and course
+- **Unit Creation**: Design structured learning units with datasets and descriptions
+- **Real-time Monitoring**: Track student progress and submissions in real-time
+- **Feedback System**: Provide immediate feedback and comments on student work
+- **Student Management**: Import students via CSV and manage user accounts
+- **Reference Materials**: Upload and share reference images and materials
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### For Students
+- **Interactive Visualization Builder**: Create visualizations using Vega-Lite with an intuitive interface
+- **JSON Editor**: Direct JSON editing for advanced users with syntax validation
+- **Dataset Exploration**: Browse and analyze provided datasets through interactive tables
+- **Real-time Feedback**: Receive immediate feedback on visualization submissions
+- **Help System**: Raise hand for assistance and receive teacher support
+- **Progress Tracking**: Monitor submission status and save work in progress
+- **Comment System**: Engage in discussions with teachers and peers
 
-### `npm run build` fails to minify
+### Core Functionality
+- **Vega-Lite Integration**: Built-in support for creating and editing Vega-Lite visualizations
+- **Multi-dataset Support**: Work with multiple CSV datasets simultaneously
+- **Responsive Design**: Modern, mobile-friendly interface
+- **Real-time Collaboration**: Live updates and feedback system
+- **Role-based Access Control**: Secure authentication and authorization
+- **Data Visualization Tools**: Comprehensive toolkit for creating effective visualizations
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Technology Stack
+
+### Frontend
+- **React 18.3.1** - Modern React with hooks and functional components
+- **TypeScript 4.9.4** - Type-safe JavaScript development
+- **Material-UI (MUI) 5.16.0** - Modern React component library
+- **React Router 6.23.1** - Client-side routing
+- **Vega-Lite 5.17.0** - Grammar of graphics for data visualization
+- **D3.js 7.9.0** - Data visualization library
+- **Monaco Editor** - Code editor for JSON editing
+- **TipTap** - Rich text editor for content creation
+
+### Backend
+- **PocketBase 0.26.1** - Backend-as-a-Service with Go
+- **Go 1.19+** - Backend runtime
+- **SQLite** - Embedded database
+- **RESTful API** - REST API for data operations
+
+## References
+
+### Tools, Frameworks, and Libraries
+- [React](https://reactjs.org/) - JavaScript library for building user interfaces
+- [Material-UI](https://mui.com/) - React component library implementing Material Design
+- [Vega-Lite](https://vega.github.io/vega-lite/) - Grammar of graphics for data visualization
+- [D3.js](https://d3js.org/) - Data-driven document manipulation
+- [PocketBase](https://pocketbase.io/) - Backend-as-a-Service with Go
+- [TypeScript](https://www.typescriptlang.org/) - Typed superset of JavaScript
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/) - Code editor for the web
+- [TipTap](https://tiptap.dev/) - Headless rich text editor
+
+
+## Support
+
+For technical support or questions about VizCoach, please refer to the documentation in the `pocketbase/README.md` file or contact the development team.
