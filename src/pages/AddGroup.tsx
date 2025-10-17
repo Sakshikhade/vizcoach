@@ -7,9 +7,10 @@ import {
   MenuItem,
   Paper,
   Select,
-  SpeedDialAction,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
-import { CloudUpload, GroupAdd, Save } from '@mui/icons-material';
+import { CloudUpload, Save } from '@mui/icons-material';
 import { YearCalendar } from '@mui/x-date-pickers';
 import { Dashboard, FormField, VisuallyHiddenInput } from 'components';
 import client, {
@@ -102,7 +103,18 @@ export const AddGroup = () => {
       <Dashboard.Header
         heading="Add Class"
         subtitle="Create new class."
-      />
+      >
+        <Tooltip title="Save Group">
+          <IconButton
+            onClick={onSave}
+            color="primary"
+            size="large"
+            disabled={saving}
+          >
+            <Save />
+          </IconButton>
+        </Tooltip>
+      </Dashboard.Header>
 
       <Alert
         variant="outlined"
@@ -196,15 +208,6 @@ export const AddGroup = () => {
         </Paper>
       </FormField>
 
-      {!saving && (
-        <Dashboard.SpeedDial label="Add Group SpeedDial" icon={<GroupAdd />}>
-          <SpeedDialAction
-            icon={<Save />}
-            tooltipTitle="Save Group"
-            onClick={onSave}
-          />
-        </Dashboard.SpeedDial>
-      )}
     </>
   );
 };

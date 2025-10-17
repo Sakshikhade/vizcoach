@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Addchart, Save } from '@mui/icons-material';
+import { Save } from '@mui/icons-material';
 import {
   Alert,
   MenuItem,
   Paper,
   Select,
-  SpeedDialAction,
   TextField,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import { DateCalendar } from '@mui/x-date-pickers';
 import { Dashboard, FormField, RichEditor } from 'components';
@@ -91,7 +92,17 @@ export const AddActivity = () => {
       <Dashboard.Header
         heading="Add Assignment"
         subtitle="Create new assignment for a class."
-      />
+      >
+        <Tooltip title="Save Activity">
+          <IconButton
+            onClick={onSave}
+            color="primary"
+            size="large"
+          >
+            <Save />
+          </IconButton>
+        </Tooltip>
+      </Dashboard.Header>
 
       <Alert variant="outlined" severity={errors.generic ? 'error' : 'info'}>
         {errors.generic ? (
@@ -169,14 +180,6 @@ export const AddActivity = () => {
           />
         </Paper>
       </FormField>
-
-      <Dashboard.SpeedDial label="Add Activity SpeedDial" icon={<Addchart />}>
-        <SpeedDialAction
-          icon={<Save />}
-          tooltipTitle="Save Activity"
-          onClick={onSave}
-        />
-      </Dashboard.SpeedDial>
     </>
   );
 };

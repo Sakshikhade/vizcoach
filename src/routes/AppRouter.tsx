@@ -10,6 +10,7 @@ import {
   Groups,
   Login,
   NotFound,
+  OrchestrationView,
   Perform,
   Students,
   StudentSubmissions,
@@ -182,6 +183,21 @@ export const router = createBrowserRouter([
             loader: studentsLoader,
           },
         ],
+      },
+      {
+        path: 'orchestration',
+        element: (
+          <AuthorizedRoute navigateTo="/dashboard" allowedRoles={['Teacher']}>
+            <OrchestrationView />
+          </AuthorizedRoute>
+        ),
+        loader: async () => {
+          const [activities, groups] = await Promise.all([
+            activitiesLoader(),
+            groupsLoader(),
+          ]);
+          return { activities, groups };
+        },
       },
       {
         path: '',

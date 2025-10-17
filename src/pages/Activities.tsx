@@ -1,7 +1,7 @@
 import { ChangeEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FormControl, SpeedDialAction, TextField } from '@mui/material';
-import { Addchart, BarChart } from '@mui/icons-material';
+import { FormControl, TextField, IconButton, Tooltip, Stack } from '@mui/material';
+import { Addchart } from '@mui/icons-material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { ActivityCard, Dashboard } from 'components';
 import { Activity } from 'db';
@@ -42,14 +42,27 @@ export const Activities = () => {
             : 'Welcome, track your assigned work.'
         }
       >
-        <FormControl>
-          <TextField
-            id="outlined-basic"
-            label="Filter"
-            variant="outlined"
-            onChange={onChange}
-          />
-        </FormControl>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <FormControl>
+            <TextField
+              id="outlined-basic"
+              label="Filter"
+              variant="outlined"
+              onChange={onChange}
+            />
+          </FormControl>
+          {user?.role === 'Teacher' && (
+            <Tooltip title="Add Assignment">
+              <IconButton
+                onClick={() => navigate('add-activity')}
+                color="primary"
+                size="large"
+              >
+                <Addchart />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Stack>
       </Dashboard.Header>
 
       <Grid2 container rowSpacing={1} columnSpacing={1}>
@@ -61,16 +74,6 @@ export const Activities = () => {
           );
         })}
       </Grid2>
-
-      {user?.role === 'Teacher' && (
-        <Dashboard.SpeedDial label="Assignments SpeedDial" icon={<BarChart />}>
-          <SpeedDialAction
-            icon={<Addchart />}
-            tooltipTitle="Add Assignment"
-            onClick={() => navigate('add-activity')}
-          />
-        </Dashboard.SpeedDial>
-      )}
     </>
   );
 };

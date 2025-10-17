@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Box, Button, SpeedDialAction, TextField, Typography } from '@mui/material';
-import { AddTask, CloudUpload, Save } from '@mui/icons-material';
+import { Alert, Box, Button, TextField, Typography, IconButton, Tooltip } from '@mui/material';
+import { CloudUpload, Save } from '@mui/icons-material';
 import {
   Dashboard,
   FormField,
@@ -170,7 +170,17 @@ export const EditUnit = () => {
       <Dashboard.Header
         heading="Edit Task"
         subtitle={`Update task details for "${activity.title}" assignment.`}
-      />
+      >
+        <Tooltip title="Save Changes">
+          <IconButton
+            onClick={onSave}
+            color="primary"
+            size="large"
+          >
+            <Save />
+          </IconButton>
+        </Tooltip>
+      </Dashboard.Header>
 
       <Alert variant="outlined" severity={errors.generic ? 'error' : 'info'}>
         {errors.generic ? (
@@ -309,14 +319,6 @@ export const EditUnit = () => {
           </Box>
         )}
       </FormField>
-
-      <Dashboard.SpeedDial label="Edit Task SpeedDial" icon={<AddTask />}>
-        <SpeedDialAction
-          icon={<Save />}
-          tooltipTitle="Save Changes"
-          onClick={onSave}
-        />
-      </Dashboard.SpeedDial>
     </>
   );
 };
