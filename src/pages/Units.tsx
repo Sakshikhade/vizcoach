@@ -1,6 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Avatar, IconButton, ListItemIcon, Menu, MenuItem, Paper, Stack, Typography } from '@mui/material';
+import {
+  Avatar,
+  IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   DeleteRounded,
@@ -75,23 +84,44 @@ export const Units = () => {
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
               transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-              <MenuItem onClick={() => { closeMenu(); navigate(`../${activity.id}/add-unit`); }}>
+              <MenuItem
+                onClick={() => {
+                  closeMenu();
+                  navigate(`../${activity.id}/add-unit`);
+                }}
+              >
                 <ListItemIcon>
                   <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
-                    <PlaylistAddRounded fontSize="small" sx={{ color: 'black' }} />
+                    <PlaylistAddRounded
+                      fontSize="small"
+                      sx={{ color: 'black' }}
+                    />
                   </Avatar>
                 </ListItemIcon>
                 Add Unit
               </MenuItem>
-              <MenuItem onClick={() => { closeMenu(); navigate(`../${activity.id}/submissions`); }}>
+              <MenuItem
+                onClick={() => {
+                  closeMenu();
+                  navigate(`../${activity.id}/submissions`);
+                }}
+              >
                 <ListItemIcon>
                   <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
-                    <PlaylistAddCheckRounded fontSize="small" sx={{ color: 'black' }} />
+                    <PlaylistAddCheckRounded
+                      fontSize="small"
+                      sx={{ color: 'black' }}
+                    />
                   </Avatar>
                 </ListItemIcon>
                 View Submissions
               </MenuItem>
-              <MenuItem onClick={() => { closeMenu(); navigate(`../${activity.id}/edit-activity`); }}>
+              <MenuItem
+                onClick={() => {
+                  closeMenu();
+                  navigate(`../${activity.id}/edit-activity`);
+                }}
+              >
                 <ListItemIcon>
                   <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
                     <EditNoteRounded fontSize="small" sx={{ color: 'black' }} />
@@ -99,7 +129,12 @@ export const Units = () => {
                 </ListItemIcon>
                 Edit Activity
               </MenuItem>
-              <MenuItem onClick={() => { closeMenu(); onDeleteActivity(); }}>
+              <MenuItem
+                onClick={() => {
+                  closeMenu();
+                  onDeleteActivity();
+                }}
+              >
                 <ListItemIcon>
                   <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
                     <DeleteRounded fontSize="small" sx={{ color: 'black' }} />
@@ -148,8 +183,6 @@ export const Units = () => {
           );
         })}
       </Grid2>
-
-
     </>
   );
 };

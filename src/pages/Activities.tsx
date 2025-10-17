@@ -71,8 +71,6 @@ export const Activities = () => {
           );
         })}
       </Grid2>
-
-
     </>
   );
 };

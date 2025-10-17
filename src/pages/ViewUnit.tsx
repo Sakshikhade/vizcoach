@@ -1,6 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Avatar, IconButton, ListItemIcon, Menu, MenuItem, Paper, Stack, Typography } from '@mui/material';
+import {
+  Avatar,
+  IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { DeleteRounded, EditNoteRounded, MoreVert } from '@mui/icons-material';
 import { Dashboard, DatasetTabs } from 'components';
 import client, { GetUnitResponse } from 'db';
@@ -60,7 +69,12 @@ export const ViewUnit = () => {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
-          <MenuItem onClick={() => { closeMenu(); navigate(`../${unit.id}/edit-unit`); }}>
+          <MenuItem
+            onClick={() => {
+              closeMenu();
+              navigate(`../${unit.id}/edit-unit`);
+            }}
+          >
             <ListItemIcon>
               <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
                 <EditNoteRounded fontSize="small" sx={{ color: 'black' }} />
@@ -68,7 +82,12 @@ export const ViewUnit = () => {
             </ListItemIcon>
             Edit Unit
           </MenuItem>
-          <MenuItem onClick={() => { closeMenu(); onUnitDelete(); }}>
+          <MenuItem
+            onClick={() => {
+              closeMenu();
+              onUnitDelete();
+            }}
+          >
             <ListItemIcon>
               <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
                 <DeleteRounded fontSize="small" sx={{ color: 'black' }} />
@@ -99,8 +118,6 @@ export const ViewUnit = () => {
           <DatasetTabs datasets={datasets} />
         </Paper>
       </Stack>
-
-      
     </>
   );
 };

@@ -15,7 +15,7 @@ const StudentSelectionModal: React.FC<StudentSelectionModalProps> = ({
   onClose,
   group,
   onConfirm,
-  client
+  client,
 }) => {
   const [students, setStudents] = useState<User[]>([]);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
@@ -45,15 +45,15 @@ const StudentSelectionModal: React.FC<StudentSelectionModalProps> = ({
   };
 
   const handleStudentToggle = (studentId: string) => {
-    setSelectedStudents(prev => 
-      prev.includes(studentId) 
-        ? prev.filter(id => id !== studentId)
-        : [...prev, studentId]
+    setSelectedStudents((prev) =>
+      prev.includes(studentId)
+        ? prev.filter((id) => id !== studentId)
+        : [...prev, studentId],
     );
   };
 
   const handleSelectAll = () => {
-    setSelectedStudents(students.map(s => s.id));
+    setSelectedStudents(students.map((s) => s.id));
   };
 
   const handleSelectNone = () => {
@@ -121,11 +121,13 @@ const StudentSelectionModal: React.FC<StudentSelectionModalProps> = ({
             </div>
           ) : students.length === 0 ? (
             <div className="flex justify-center items-center h-32">
-              <div className="text-gray-500">No students found in this group</div>
+              <div className="text-gray-500">
+                No students found in this group
+              </div>
             </div>
           ) : (
             <div className="space-y-2">
-              {students.map(student => (
+              {students.map((student) => (
                 <div
                   key={student.id}
                   className="flex items-center p-3 border rounded-lg hover:bg-gray-50"
@@ -137,10 +139,7 @@ const StudentSelectionModal: React.FC<StudentSelectionModalProps> = ({
                     onChange={() => handleStudentToggle(student.id)}
                     className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label
-                    htmlFor={student.id}
-                    className="flex-1 cursor-pointer"
-                  >
+                  <label htmlFor={student.id} className="flex-1 cursor-pointer">
                     <div className="font-medium">{student.name}</div>
                     <div className="text-sm text-gray-500">{student.email}</div>
                   </label>

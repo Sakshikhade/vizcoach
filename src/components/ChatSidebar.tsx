@@ -23,14 +23,19 @@ type ChatSidebarProps = {
   onRoomSelect: (roomId: string) => void;
 };
 
-export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) => {
+export const ChatSidebar = ({
+  selectedRoomId,
+  onRoomSelect,
+}: ChatSidebarProps) => {
   const { user } = useDashboard();
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [groups, setGroups] = useState<GroupType[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeUserSection, setActiveUserSection] = useState<'teachers' | 'students'>('teachers');
+  const [activeUserSection, setActiveUserSection] = useState<
+    'teachers' | 'students'
+  >('teachers');
   const [userGroups, setUserGroups] = useState<GroupType[]>([]);
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null);
@@ -40,7 +45,7 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
       // Load all users first, then chat rooms
       await loadAllUsers();
       await loadChatRooms();
-      
+
       if (user?.role === 'Teacher') {
         loadGroups();
         loadUsers();
@@ -49,7 +54,7 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
         loadUserGroups();
       }
     };
-    
+
     initializeChat();
   }, [user]);
 
@@ -88,7 +93,7 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
     try {
       const usersData = await client.getAllUsers();
       // Filter out the current user
-      const otherUsers = usersData.filter(u => u.id !== user?.id);
+      const otherUsers = usersData.filter((u) => u.id !== user?.id);
       setUsers(otherUsers);
     } catch (error) {
       console.error('Failed to load users:', error);
@@ -98,7 +103,10 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
   const loadAllUsers = async () => {
     try {
       const usersData = await client.getAllUsers();
-      console.log('Loaded all users for room naming:', usersData.map(u => ({ id: u.id, name: u.name, role: u.role })));
+      console.log(
+        'Loaded all users for room naming:',
+        usersData.map((u) => ({ id: u.id, name: u.name, role: u.role })),
+      );
       setAllUsers(usersData);
     } catch (error) {
       console.error('Failed to load all users:', error);
@@ -109,27 +117,68 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
     try {
       const usersData = await client.getAllUsers();
       console.log('=== TEACHER LOADING DEBUG ===');
-      console.log('All users for teacher filtering:', usersData.map(u => ({ id: u.id, name: u.name, role: u.role, email: u.email })));
-      console.log('Current user:', { id: user?.id, name: user?.name, role: user?.role });
-      
+      console.log(
+        'All users for teacher filtering:',
+        usersData.map((u) => ({
+          id: u.id,
+          name: u.name,
+          role: u.role,
+          email: u.email,
+        })),
+      );
+      console.log('Current user:', {
+        id: user?.id,
+        name: user?.name,
+        role: user?.role,
+      });
+
       // Filter to show only teachers (excluding current user)
-      const teachers = usersData.filter(u => u.id !== user?.id && u.role === 'Teacher');
-      console.log('Filtered teachers:', teachers.map(t => ({ id: t.id, name: t.name, role: t.role })));
-      
+      const teachers = usersData.filter(
+        (u) => u.id !== user?.id && u.role === 'Teacher',
+      );
+      console.log(
+        'Filtered teachers:',
+        teachers.map((t) => ({ id: t.id, name: t.name, role: t.role })),
+      );
+
       // If no teachers found, let's see what roles we have
       if (teachers.length === 0) {
-        console.log('No teachers found. All user roles:', usersData.map(u => ({ id: u.id, name: u.name, role: u.role, roleType: typeof u.role })));
-        
-        // Try different role variations
-        const teachersVariations = usersData.filter(u => 
-          u.id !== user?.id && 
-          (u.role === 'Teacher' || (u.role as any) === 'teacher' || (u.role as any) === 'TEACHER' || u.role === undefined || u.role === null || (u.role as any) === '')
+        console.log(
+          'No teachers found. All user roles:',
+          usersData.map((u) => ({
+            id: u.id,
+            name: u.name,
+            role: u.role,
+            roleType: typeof u.role,
+          })),
         );
-        console.log('Teachers with variations:', teachersVariations.map(t => ({ id: t.id, name: t.name, role: t.role })));
-        
+
+        // Try different role variations
+        const teachersVariations = usersData.filter(
+          (u) =>
+            u.id !== user?.id &&
+            (u.role === 'Teacher' ||
+              (u.role as any) === 'teacher' ||
+              (u.role as any) === 'TEACHER' ||
+              u.role === undefined ||
+              u.role === null ||
+              (u.role as any) === ''),
+        );
+        console.log(
+          'Teachers with variations:',
+          teachersVariations.map((t) => ({
+            id: t.id,
+            name: t.name,
+            role: t.role,
+          })),
+        );
+
         // Show all other users as fallback
-        const allOtherUsers = usersData.filter(u => u.id !== user?.id);
-        console.log('Showing all other users as fallback:', allOtherUsers.map(u => ({ id: u.id, name: u.name, role: u.role })));
+        const allOtherUsers = usersData.filter((u) => u.id !== user?.id);
+        console.log(
+          'Showing all other users as fallback:',
+          allOtherUsers.map((u) => ({ id: u.id, name: u.name, role: u.role })),
+        );
         setUsers(allOtherUsers);
       } else {
         setUsers(teachers);
@@ -144,13 +193,30 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
     try {
       const usersData = await client.getAllUsers();
       console.log('=== STUDENT LOADING DEBUG ===');
-      console.log('All users for student filtering:', usersData.map(u => ({ id: u.id, name: u.name, role: u.role, email: u.email })));
-      console.log('Current user:', { id: user?.id, name: user?.name, role: user?.role });
-      
+      console.log(
+        'All users for student filtering:',
+        usersData.map((u) => ({
+          id: u.id,
+          name: u.name,
+          role: u.role,
+          email: u.email,
+        })),
+      );
+      console.log('Current user:', {
+        id: user?.id,
+        name: user?.name,
+        role: user?.role,
+      });
+
       // Filter to show only students (excluding current user)
-      const students = usersData.filter(u => u.id !== user?.id && u.role === 'Student');
-      console.log('Filtered students:', students.map(s => ({ id: s.id, name: s.name, role: s.role })));
-      
+      const students = usersData.filter(
+        (u) => u.id !== user?.id && u.role === 'Student',
+      );
+      console.log(
+        'Filtered students:',
+        students.map((s) => ({ id: s.id, name: s.name, role: s.role })),
+      );
+
       setUsers(students);
       console.log('=== END STUDENT LOADING DEBUG ===');
     } catch (error) {
@@ -161,7 +227,10 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
   const loadUserGroups = async () => {
     try {
       const groupsData = await client.getUserGroups();
-      console.log('User groups:', groupsData.map(g => ({ id: g.id, title: g.title })));
+      console.log(
+        'User groups:',
+        groupsData.map((g) => ({ id: g.id, title: g.title })),
+      );
       setUserGroups(groupsData);
     } catch (error) {
       console.error('Failed to load user groups:', error);
@@ -170,10 +239,10 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
 
   const handleCreateGroupChat = (group: GroupType) => {
     // Check if a group chat already exists for this group
-    const existingRoom = rooms.find(room => 
-      room.type === 'group' && room.groupId === group.id
+    const existingRoom = rooms.find(
+      (room) => room.type === 'group' && room.groupId === group.id,
     );
-    
+
     if (existingRoom) {
       console.log('Found existing group chat:', existingRoom.id);
       onRoomSelect(existingRoom.id);
@@ -191,18 +260,18 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
     try {
       console.log('Creating group chat for:', selectedGroup.title);
       console.log('Selected students:', selectedStudentIds);
-      
+
       // Create participants list: teacher + selected students
       const participants = [user.id, ...selectedStudentIds];
       console.log('Group chat participants:', participants);
-      
+
       const groupChat = await client.createGroupChat(
         selectedGroup.id,
         `${selectedGroup.title} Chat`,
         `Group chat for ${selectedGroup.title}`,
-        participants
+        participants,
       );
-      
+
       if (groupChat) {
         console.log('Created group chat:', groupChat.id);
         // Convert GroupChat to ChatRoom for compatibility with existing UI
@@ -221,10 +290,10 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
           collectionName: 'chat_rooms',
           expand: {
             groupId: groupChat.group,
-            createdBy: groupChat.creator
-          }
+            createdBy: groupChat.creator,
+          },
         });
-        setRooms(prev => [room, ...prev]);
+        setRooms((prev) => [room, ...prev]);
         onRoomSelect(room.id);
       } else {
         console.error('Failed to create group chat - no room returned');
@@ -232,12 +301,20 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
       }
     } catch (error: any) {
       console.error('Failed to create group chat:', error);
-      
+
       // Show user-friendly error message
-      if (error.message?.includes('No groups found') || error.message?.includes('Group with ID') || error.message?.includes('Group validation failed')) {
-        alert('Cannot create group chat: No groups found. Please create groups first by going to the Groups page.');
+      if (
+        error.message?.includes('No groups found') ||
+        error.message?.includes('Group with ID') ||
+        error.message?.includes('Group validation failed')
+      ) {
+        alert(
+          'Cannot create group chat: No groups found. Please create groups first by going to the Groups page.',
+        );
       } else {
-        alert(`Failed to create group chat: ${error.message || 'Unknown error'}`);
+        alert(
+          `Failed to create group chat: ${error.message || 'Unknown error'}`,
+        );
       }
     }
   };
@@ -245,33 +322,38 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
   const createPrivateChat = async (targetUser: User) => {
     try {
       console.log('Creating private chat with:', targetUser.name);
-      
+
       // First check local state for existing room
-      const existingRoomLocal = rooms.find(room => 
-        room.type === 'private' && 
-        room.participants.includes(targetUser.id) &&
-        room.participants.includes(user!.id)
+      const existingRoomLocal = rooms.find(
+        (room) =>
+          room.type === 'private' &&
+          room.participants.includes(targetUser.id) &&
+          room.participants.includes(user!.id),
       );
-      
+
       if (existingRoomLocal) {
-        console.log('Found existing room in local state:', existingRoomLocal.id);
+        console.log(
+          'Found existing room in local state:',
+          existingRoomLocal.id,
+        );
         onRoomSelect(existingRoomLocal.id);
         return;
       }
 
       // If not found locally, check all chat rooms from database
       const allRooms = await client.getChatRooms();
-      const existingRoom = allRooms.find(room => 
-        room.type === 'private' && 
-        room.participants.includes(targetUser.id) &&
-        room.participants.includes(user!.id)
+      const existingRoom = allRooms.find(
+        (room) =>
+          room.type === 'private' &&
+          room.participants.includes(targetUser.id) &&
+          room.participants.includes(user!.id),
       );
-      
+
       if (existingRoom) {
         console.log('Found existing room in database:', existingRoom.id);
         // Add to local state if not already there
-        setRooms(prev => {
-          const exists = prev.find(r => r.id === existingRoom.id);
+        setRooms((prev) => {
+          const exists = prev.find((r) => r.id === existingRoom.id);
           return exists ? prev : [existingRoom, ...prev];
         });
         onRoomSelect(existingRoom.id);
@@ -285,10 +367,10 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
         description: `Private chat between ${user!.name} and ${targetUser.name}`,
         participants: [user!.id, targetUser.id],
       });
-      
+
       if (room) {
         console.log('Created new room:', room.id);
-        setRooms(prev => [room, ...prev]);
+        setRooms((prev) => [room, ...prev]);
         onRoomSelect(room.id);
       }
     } catch (error) {
@@ -308,10 +390,10 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
       return room.name;
     }
     // For private chats, show the other participant's name
-    const otherParticipantId = room.participants.find(id => id !== user?.id);
+    const otherParticipantId = room.participants.find((id) => id !== user?.id);
     if (otherParticipantId) {
       // Find the other participant in all users
-      const otherUser = allUsers.find(u => u.id === otherParticipantId);
+      const otherUser = allUsers.find((u) => u.id === otherParticipantId);
       if (otherUser) {
         return `Chat with ${otherUser.name}`;
       } else {
@@ -323,10 +405,14 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
           currentUserId: user?.id,
           currentUserName: user?.name,
           currentUserRole: user?.role,
-          allUsers: allUsers.map(u => ({ id: u.id, name: u.name, role: u.role })),
-          roomParticipants: room.participants
+          allUsers: allUsers.map((u) => ({
+            id: u.id,
+            name: u.name,
+            role: u.role,
+          })),
+          roomParticipants: room.participants,
         });
-        
+
         // If we can't find the user in allUsers, try to determine role from room name
         // This is a fallback for existing rooms with old naming
         if (room.name.includes('Student') && user?.role === 'Student') {
@@ -366,7 +452,7 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={() => window.location.href = '/dashboard/groups'}
+          onClick={() => (window.location.href = '/dashboard/groups')}
         >
           Create Group
         </Button>
@@ -401,9 +487,7 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
                   onClick={() => onRoomSelect(room.id)}
                 >
                   <ListItemAvatar>
-                    <Avatar>
-                      {getRoomIcon(room)}
-                    </Avatar>
+                    <Avatar>{getRoomIcon(room)}</Avatar>
                   </ListItemAvatar>
                   <ListItemText
                     primary={getRoomName(room)}
@@ -430,7 +514,7 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
                   size="small"
                   startIcon={<Add />}
                   onClick={() => handleCreateGroupChat(group)}
-                  disabled={rooms.some(room => room.groupId === group.id)}
+                  disabled={rooms.some((room) => room.groupId === group.id)}
                 >
                   {group.title}
                 </Button>
@@ -457,7 +541,12 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
                     onClick={() => createPrivateChat(targetUser)}
                     sx={{ justifyContent: 'flex-start' }}
                   >
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      spacing={1}
+                      sx={{ width: '100%' }}
+                    >
                       <Avatar sx={{ width: 24, height: 24 }}>
                         {targetUser.name.charAt(0).toUpperCase()}
                       </Avatar>
@@ -465,7 +554,11 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
                         <Typography variant="body2" noWrap>
                           {targetUser.name}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary" noWrap>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          noWrap
+                        >
                           {targetUser.role}
                         </Typography>
                       </Box>
@@ -499,7 +592,7 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
                       border: 1,
                       borderColor: 'divider',
                       borderRadius: 1,
-                      bgcolor: 'background.paper'
+                      bgcolor: 'background.paper',
                     }}
                   >
                     <Typography variant="body2" noWrap>
@@ -520,13 +613,13 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
               Group Chats
             </Typography>
             <Stack spacing={1}>
-              {rooms.filter(room => room.type === 'group').length === 0 ? (
+              {rooms.filter((room) => room.type === 'group').length === 0 ? (
                 <Typography variant="body2" color="text.secondary">
                   No group chats available
                 </Typography>
               ) : (
                 rooms
-                  .filter(room => room.type === 'group')
+                  .filter((room) => room.type === 'group')
                   .map((room) => (
                     <Button
                       key={room.id}
@@ -540,7 +633,11 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
                         <Typography variant="body2" noWrap>
                           {room.name}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary" noWrap>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          noWrap
+                        >
                           {room.description}
                         </Typography>
                       </Box>
@@ -554,63 +651,78 @@ export const ChatSidebar = ({ selectedRoomId, onRoomSelect }: ChatSidebarProps) 
             <Typography variant="subtitle2" gutterBottom>
               Start Private Chat
             </Typography>
-          
-          {/* Toggle buttons for Teachers/Students */}
-          <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-            <Button
-              variant={activeUserSection === 'teachers' ? 'contained' : 'outlined'}
-              size="small"
-              onClick={() => setActiveUserSection('teachers')}
-              sx={{ flex: 1 }}
-            >
-              Teachers
-            </Button>
-            <Button
-              variant={activeUserSection === 'students' ? 'contained' : 'outlined'}
-              size="small"
-              onClick={() => setActiveUserSection('students')}
-              sx={{ flex: 1 }}
-            >
-              Students
-            </Button>
-          </Stack>
 
-          <Stack spacing={1} sx={{ maxHeight: 200, overflow: 'auto' }}>
-            {users.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
-                {activeUserSection === 'teachers' ? 'No teachers available' : 'No students available'}
-              </Typography>
-            ) : (
-              users.map((targetUser) => (
-                <Button
-                  key={targetUser.id}
-                  variant="outlined"
-                  size="small"
-                  startIcon={<Message />}
-                  onClick={() => createPrivateChat(targetUser)}
-                  sx={{ justifyContent: 'flex-start' }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
-                    <Avatar sx={{ width: 24, height: 24 }}>
-                      {targetUser.name.charAt(0).toUpperCase()}
-                    </Avatar>
-                    <Box sx={{ textAlign: 'left', flex: 1 }}>
-                      <Typography variant="body2" noWrap>
-                        {targetUser.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" noWrap>
-                        {targetUser.role}
-                      </Typography>
-                    </Box>
-                  </Stack>
-                </Button>
-              ))
-            )}
-          </Stack>
-        </Box>
+            {/* Toggle buttons for Teachers/Students */}
+            <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+              <Button
+                variant={
+                  activeUserSection === 'teachers' ? 'contained' : 'outlined'
+                }
+                size="small"
+                onClick={() => setActiveUserSection('teachers')}
+                sx={{ flex: 1 }}
+              >
+                Teachers
+              </Button>
+              <Button
+                variant={
+                  activeUserSection === 'students' ? 'contained' : 'outlined'
+                }
+                size="small"
+                onClick={() => setActiveUserSection('students')}
+                sx={{ flex: 1 }}
+              >
+                Students
+              </Button>
+            </Stack>
+
+            <Stack spacing={1} sx={{ maxHeight: 200, overflow: 'auto' }}>
+              {users.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  {activeUserSection === 'teachers'
+                    ? 'No teachers available'
+                    : 'No students available'}
+                </Typography>
+              ) : (
+                users.map((targetUser) => (
+                  <Button
+                    key={targetUser.id}
+                    variant="outlined"
+                    size="small"
+                    startIcon={<Message />}
+                    onClick={() => createPrivateChat(targetUser)}
+                    sx={{ justifyContent: 'flex-start' }}
+                  >
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      spacing={1}
+                      sx={{ width: '100%' }}
+                    >
+                      <Avatar sx={{ width: 24, height: 24 }}>
+                        {targetUser.name.charAt(0).toUpperCase()}
+                      </Avatar>
+                      <Box sx={{ textAlign: 'left', flex: 1 }}>
+                        <Typography variant="body2" noWrap>
+                          {targetUser.name}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          noWrap
+                        >
+                          {targetUser.role}
+                        </Typography>
+                      </Box>
+                    </Stack>
+                  </Button>
+                ))
+              )}
+            </Stack>
+          </Box>
         </>
       )}
-      
+
       {/* Student Selection Modal */}
       {selectedGroup && (
         <StudentSelectionModal

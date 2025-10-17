@@ -59,7 +59,7 @@ class PocketbaseClient {
       sort: '-created',
       filter: filters.join(' && '),
     });
-    
+
     for (const model of models) {
       const { totalItems } = await this.pb
         .collection('usergroups')
@@ -68,7 +68,7 @@ class PocketbaseClient {
         });
       groups.push(new Group(model, totalItems));
     }
-    
+
     return groups;
   }
 
@@ -95,9 +95,10 @@ class PocketbaseClient {
     if (!user) return [];
 
     // Check if user is a member of this group (for students) or if user is a teacher
-    const userGroup = await this.pb.collection('usergroups').getFirstListItem(
-      `groupId='${groupId}' && userId='${user.id}'`
-    ).catch(() => null);
+    const userGroup = await this.pb
+      .collection('usergroups')
+      .getFirstListItem(`groupId='${groupId}' && userId='${user.id}'`)
+      .catch(() => null);
 
     // If user is not in the group and not a teacher, return empty array
     if (!userGroup && user.role !== 'Teacher') return [];
@@ -540,29 +541,33 @@ class PocketbaseClient {
         participants: room.participants,
         createdBy: user.id,
         groupId: room.groupId,
-        userRole: user.role
+        userRole: user.role,
       });
-      
+
       // For group chats, verify the group exists
       if (room.type === 'group' && room.groupId) {
         try {
           console.log('Validating group existence for ID:', room.groupId);
           const group = await this.getGroup(room.groupId);
           console.log('Group validation result:', group);
-          
+
           if (!group) {
             console.log('Group not found, throwing error');
-            throw new Error(`Group with ID ${room.groupId} not found. Please create groups first by going to the Groups page.`);
+            throw new Error(
+              `Group with ID ${room.groupId} not found. Please create groups first by going to the Groups page.`,
+            );
           }
-          
+
           console.log('Group validation passed:', group.title);
         } catch (groupError: any) {
           console.error('Group validation failed:', groupError);
           // Re-throw the error to prevent the chat room creation
-          throw new Error(`Cannot create group chat: No groups found. Please create groups first by going to the Groups page.`);
+          throw new Error(
+            `Cannot create group chat: No groups found. Please create groups first by going to the Groups page.`,
+          );
         }
       }
-      
+
       // Ensure participants is properly formatted as JSON string for PocketBase
       const roomData = {
         name: room.name,
@@ -573,19 +578,19 @@ class PocketbaseClient {
         createdBy: user.id,
         isActive: true,
       };
-      
+
       console.log('Room data being sent:', roomData);
-      
+
       const model = await this.pb.collection('chat_rooms').create(roomData, {
         expand: 'groupId,createdBy',
       });
-      
+
       console.log('Created chat room:', {
         roomId: model.id,
         participants: model.participants,
-        roomName: model.name
+        roomName: model.name,
       });
-      
+
       return new ChatRoom(model);
     } catch (error: any) {
       console.error('Failed to create chat room:', error);
@@ -597,12 +602,12 @@ class PocketbaseClient {
         url: error?.url,
         isAbort: error?.isAbort,
         isClientError: error?.isClientError,
-        isServerError: error?.isServerError
+        isServerError: error?.isServerError,
       });
-      
+
       // Log the full error object to see all properties
       console.error('Full error object:', error);
-      
+
       // Log the detailed error data
       if (error?.data?.data) {
         console.error('Validation errors:', error.data.data);
@@ -611,80 +616,87 @@ class PocketbaseClient {
           console.error('GroupId validation error:', error.data.data.groupId);
         }
       }
-      
+
       return null;
     }
   }
 
-    // GroupChat methods - using existing chat_rooms collection
-    async createGroupChat(groupId: string, name: string, description: string, participants: string[]): Promise<GroupChat | null> {
-      const user = this.getUser();
-      if (!user) {
-        throw new Error('Authentication required to create group chats');
-      }
+  // GroupChat methods - using existing chat_rooms collection
+  async createGroupChat(
+    groupId: string,
+    name: string,
+    description: string,
+    participants: string[],
+  ): Promise<GroupChat | null> {
+    const user = this.getUser();
+    if (!user) {
+      throw new Error('Authentication required to create group chats');
+    }
 
-      try {
-        // Skip group validation for now due to access rule issues
-        // TODO: Re-enable group validation once access rules are fixed
-        // const group = await this.getGroup(groupId);
-        // if (!group) {
-        //   throw new Error(`Group with ID ${groupId} not found. Please create groups first by going to the Groups page.`);
-        // }
+    try {
+      // Skip group validation for now due to access rule issues
+      // TODO: Re-enable group validation once access rules are fixed
+      // const group = await this.getGroup(groupId);
+      // if (!group) {
+      //   throw new Error(`Group with ID ${groupId} not found. Please create groups first by going to the Groups page.`);
+      // }
 
-        const groupChatData = {
-          name: name,
-          type: 'group',
-          description: description,
-          groupId: groupId,
-          participants: JSON.stringify(participants),
-          createdBy: user.id,
-          isActive: true,
-        };
+      const groupChatData = {
+        name: name,
+        type: 'group',
+        description: description,
+        groupId: groupId,
+        participants: JSON.stringify(participants),
+        createdBy: user.id,
+        isActive: true,
+      };
 
-        const model = await this.pb.collection('chat_rooms').create(groupChatData, {
+      const model = await this.pb
+        .collection('chat_rooms')
+        .create(groupChatData, {
           expand: 'groupId,createdBy',
         });
 
-        return new GroupChat(model);
-      } catch (error: any) {
-        console.error('Failed to create group chat:', error);
-        return null;
-      }
+      return new GroupChat(model);
+    } catch (error: any) {
+      console.error('Failed to create group chat:', error);
+      return null;
     }
+  }
 
-    async getGroupChats(): Promise<GroupChat[]> {
-      const user = this.getUser();
-      if (!user) return [];
+  async getGroupChats(): Promise<GroupChat[]> {
+    const user = this.getUser();
+    if (!user) return [];
 
-      try {
-        const models = await this.pb.collection('chat_rooms').getFullList({
-          sort: '-created',
-          filter: "type = 'group'",
-          expand: 'groupId,createdBy',
-        });
+    try {
+      const models = await this.pb.collection('chat_rooms').getFullList({
+        sort: '-created',
+        filter: "type = 'group'",
+        expand: 'groupId,createdBy',
+      });
 
-        return models.map(model => new GroupChat(model));
-      } catch (error: any) {
-        console.error('Failed to get group chats:', error);
-        return [];
-      }
+      return models.map((model) => new GroupChat(model));
+    } catch (error: any) {
+      console.error('Failed to get group chats:', error);
+      return [];
     }
+  }
 
-    async getGroupChat(groupChatId: string): Promise<GroupChat | null> {
-      const user = this.getUser();
-      if (!user) return null;
+  async getGroupChat(groupChatId: string): Promise<GroupChat | null> {
+    const user = this.getUser();
+    if (!user) return null;
 
-      try {
-        const model = await this.pb.collection('chat_rooms').getOne(groupChatId, {
-          expand: 'groupId,createdBy',
-        });
+    try {
+      const model = await this.pb.collection('chat_rooms').getOne(groupChatId, {
+        expand: 'groupId,createdBy',
+      });
 
-        return new GroupChat(model);
-      } catch (error: any) {
-        console.error('Failed to get group chat:', error);
-        return null;
-      }
+      return new GroupChat(model);
+    } catch (error: any) {
+      console.error('Failed to get group chat:', error);
+      return null;
     }
+  }
 
   async getChatMessages(roomId: string, limit = 50): Promise<ChatMessage[]> {
     const user = this.getUser();
@@ -707,7 +719,7 @@ class PocketbaseClient {
         roomType: room.type,
         roomParticipants: room.participants,
         roomName: room.name,
-        roomGroupId: room.groupId
+        roomGroupId: room.groupId,
       });
       throw new Error('User is not a participant in this chat room');
     }
@@ -721,7 +733,9 @@ class PocketbaseClient {
     return models.items.map((model) => new ChatMessage(model));
   }
 
-  async postChatMessage(message: UnsavedChatMessage): Promise<ChatMessage | null> {
+  async postChatMessage(
+    message: UnsavedChatMessage,
+  ): Promise<ChatMessage | null> {
     const user = this.getUser();
     if (!user) {
       throw new Error('Authentication required to post messages');
@@ -742,19 +756,22 @@ class PocketbaseClient {
         roomType: room.type,
         roomParticipants: room.participants,
         roomName: room.name,
-        roomGroupId: room.groupId
+        roomGroupId: room.groupId,
       });
       throw new Error('User is not a participant in this chat room');
     }
 
     try {
-      const model = await this.pb.collection('chat_messages').create({
-        ...message,
-        userId: user.id,
-        type: message.type || 'text',
-      }, {
-        expand: 'userId,replyTo',
-      });
+      const model = await this.pb.collection('chat_messages').create(
+        {
+          ...message,
+          userId: user.id,
+          type: message.type || 'text',
+        },
+        {
+          expand: 'userId,replyTo',
+        },
+      );
       return new ChatMessage(model);
     } catch {
       return null;
@@ -770,50 +787,57 @@ class PocketbaseClient {
       throw new Error('Authentication required to subscribe to chat messages');
     }
 
-      // First get the chat room to check if user is a participant
-      this.getChatRoom(roomId).then(room => {
+    // First get the chat room to check if user is a participant
+    this.getChatRoom(roomId)
+      .then((room) => {
         if (!room) {
           throw new Error('Chat room not found');
         }
 
         // Check if user is a participant in the room
         if (!room.participants.includes(user.id)) {
-          console.log('User not participant in room (registerChatMessageCallback):', {
-            userId: user.id,
-            roomId: roomId,
-            roomParticipants: room.participants,
-            roomName: room.name
-          });
+          console.log(
+            'User not participant in room (registerChatMessageCallback):',
+            {
+              userId: user.id,
+              roomId: roomId,
+              roomParticipants: room.participants,
+              roomName: room.name,
+            },
+          );
           throw new Error('User is not a participant in this chat room');
         }
 
-      this.pb
-        .collection('chat_messages')
-        .subscribe('*', async ({ action, record }) => {
-          if (action !== 'create') {
-            return;
-          }
+        this.pb
+          .collection('chat_messages')
+          .subscribe('*', async ({ action, record }) => {
+            if (action !== 'create') {
+              return;
+            }
 
-          // Strict filtering - only process messages for the specific room
-          if (record.roomId !== roomId) {
-            return;
-          }
+            // Strict filtering - only process messages for the specific room
+            if (record.roomId !== roomId) {
+              return;
+            }
 
-          const message = await this.getChatMessage(record.id);
-          if (message && message.roomId === roomId) {
-            callback(message);
-          }
-        });
-    }).catch(error => {
-      console.error('Failed to setup chat message subscription:', error);
-    });
+            const message = await this.getChatMessage(record.id);
+            if (message && message.roomId === roomId) {
+              callback(message);
+            }
+          });
+      })
+      .catch((error) => {
+        console.error('Failed to setup chat message subscription:', error);
+      });
   }
 
   async getChatMessage(messageId: string): Promise<ChatMessage | null> {
     try {
-      const model = await this.pb.collection('chat_messages').getOne(messageId, {
-        expand: 'userId,replyTo',
-      });
+      const model = await this.pb
+        .collection('chat_messages')
+        .getOne(messageId, {
+          expand: 'userId,replyTo',
+        });
       return new ChatMessage(model);
     } catch {
       return null;
@@ -828,14 +852,30 @@ class PocketbaseClient {
     try {
       console.log('=== GET ALL USERS DEBUG ===');
       console.log('Current user:', this.getUser());
-      
+
       const models = await this.pb.collection('_pb_users_auth_').getFullList({
         sort: 'name',
       });
-      console.log('Raw user models from PocketBase:', models.map(m => ({ id: m.id, name: m.name, role: m.role, email: m.email })));
-      
+      console.log(
+        'Raw user models from PocketBase:',
+        models.map((m) => ({
+          id: m.id,
+          name: m.name,
+          role: m.role,
+          email: m.email,
+        })),
+      );
+
       const users = models.map((model) => new User(model));
-      console.log('Processed users:', users.map(u => ({ id: u.id, name: u.name, role: u.role, email: u.email })));
+      console.log(
+        'Processed users:',
+        users.map((u) => ({
+          id: u.id,
+          name: u.name,
+          role: u.role,
+          email: u.email,
+        })),
+      );
       console.log('=== END GET ALL USERS DEBUG ===');
       return users;
     } catch (error) {

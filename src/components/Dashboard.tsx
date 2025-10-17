@@ -116,11 +116,13 @@ const DashboardSpeedDial = ({
   <SpeedDial
     ariaLabel={label}
     sx={{ position: 'fixed', bottom: '2rem', right: '2rem' }}
-    icon={staticIcon ? (
-      <SpeedDialIcon icon={icon} openIcon={icon} />
-    ) : (
-      <SpeedDialIcon openIcon={icon} />
-    )}
+    icon={
+      staticIcon ? (
+        <SpeedDialIcon icon={icon} openIcon={icon} />
+      ) : (
+        <SpeedDialIcon openIcon={icon} />
+      )
+    }
     FabProps={{ onClick }}
     open={open}
   >
