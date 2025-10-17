@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   Alert,
+  Chip,
   FormControl,
   InputLabel,
   MenuItem,
@@ -46,11 +47,43 @@ export const StudentSubmissions = () => {
   const [submissionTab, setSubmissionTab] = useState<
     (typeof SUBMISSION_TABS)[number]
   >(SUBMISSION_TABS[0]);
+  const [activeChartId, setActiveChartId] = useState<string | null>(null);
 
-  const json = useMemo(
-    () => JSON.stringify(submission?.json || {}, null, 4),
-    [submission],
-  );
+  const charts = useMemo(() => {
+    if (!submission?.json) return [];
+    // Handle both old format (single object) and new format (array of charts)
+    if (Array.isArray(submission.json)) {
+      return submission.json.map((chart: any) => ({
+        ...chart,
+        json:
+          typeof chart.json === 'string'
+            ? chart.json
+            : JSON.stringify(chart.json, null, 4),
+      }));
+    }
+    return [
+      {
+        id: 'chart-1',
+        title: 'Chart 1',
+        json:
+          typeof submission.json === 'string'
+            ? submission.json
+            : JSON.stringify(submission.json, null, 4),
+      },
+    ];
+  }, [submission]);
+
+  const activeChart = useMemo(() => {
+    if (!activeChartId) return charts[0];
+    return charts.find((chart) => chart.id === activeChartId) || charts[0];
+  }, [charts, activeChartId]);
+
+  const json = useMemo(() => {
+    if (!activeChart?.json) return '{}';
+    return typeof activeChart.json === 'string'
+      ? activeChart.json
+      : JSON.stringify(activeChart.json, null, 4);
+  }, [activeChart]);
 
   const unit = useMemo(
     () => (submission ? getSubmissionUnit(submission) : null),
@@ -136,20 +169,51 @@ export const StudentSubmissions = () => {
           </Tabs>
 
           {submissionTab === SUBMISSION_TABS[0] && (
-            <Stack direction="row" gap={2}>
-              <Stack flex={1}>
+            <Stack gap={2}>
+              {/* Chart Tabs */}
+              {charts.length > 1 && (
                 <Paper variant="outlined">
-                  <Stack>
-                    <Visualization datasets={datasets} json={json} />
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    padding={2}
+                    gap={2}
+                  >
+                    <Typography variant="h6">Charts</Typography>
+                    <Stack direction="row" gap={1} flex={1}>
+                      {charts.map((chart) => (
+                        <Chip
+                          key={chart.id}
+                          label={chart.title}
+                          onClick={() => setActiveChartId(chart.id)}
+                          color={
+                            activeChartId === chart.id ? 'primary' : 'default'
+                          }
+                          variant={
+                            activeChartId === chart.id ? 'filled' : 'outlined'
+                          }
+                        />
+                      ))}
+                    </Stack>
                   </Stack>
                 </Paper>
-              </Stack>
-              <Stack flex={1}>
-                <Paper variant="outlined">
-                  <Stack>
-                    <JsonEditor json={json} readOnly={true} />
-                  </Stack>
-                </Paper>
+              )}
+
+              <Stack direction="row" gap={2}>
+                <Stack flex={1}>
+                  <Paper variant="outlined">
+                    <Stack>
+                      <Visualization datasets={datasets} json={json} />
+                    </Stack>
+                  </Paper>
+                </Stack>
+                <Stack flex={1}>
+                  <Paper variant="outlined">
+                    <Stack>
+                      <JsonEditor json={json} readOnly={true} />
+                    </Stack>
+                  </Paper>
+                </Stack>
               </Stack>
             </Stack>
           )}

@@ -583,6 +583,8 @@ class PocketbaseClient {
   }
 
   // Chat System Methods
+  private submissionSubscriptionId: (() => void) | null = null;
+
   registerSubmissionUpdateCallback(
     submissionId: string,
     activityId: string,
@@ -594,6 +596,11 @@ class PocketbaseClient {
       throw new Error('Only logged-in users can subscribe to submissions');
     }
 
+    // Unsubscribe from any existing subscription first
+    if (this.submissionSubscriptionId) {
+      this.unregisterSubmissionUpdateCallback();
+    }
+
     this.pb
       .collection('submissions')
       .subscribe('*', async ({ action, record }) => {
@@ -601,11 +608,26 @@ class PocketbaseClient {
         if (record.id !== submissionId) return;
         const updated = await this.getSubmission(activityId, unitId);
         if (updated) callback(updated);
+      })
+      .then((unsubscribe) => {
+        this.submissionSubscriptionId = unsubscribe;
+      })
+      .catch((error) => {
+        console.error('Failed to subscribe to submission updates:', error);
       });
   }
 
   unregisterSubmissionUpdateCallback() {
-    this.pb.collection('submissions').unsubscribe('*');
+    if (this.submissionSubscriptionId) {
+      this.submissionSubscriptionId();
+      this.submissionSubscriptionId = null;
+    }
+  }
+
+  // Cleanup all subscriptions
+  cleanup() {
+    this.unregisterSubmissionUpdateCallback();
+    this.unregisterPostCommentCallback();
   }
   async getChatRooms(): Promise<ChatRoom[]> {
     const user = this.getUser();

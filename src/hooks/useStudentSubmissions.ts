@@ -84,7 +84,13 @@ export const useStudentSubmissions = () => {
     });
 
     // Unregistering from subscriptions
-    return () => client.unregisterPostCommentCallback();
+    return () => {
+      try {
+        client.unregisterPostCommentCallback();
+      } catch (error) {
+        console.warn('Failed to unsubscribe from post comment updates:', error);
+      }
+    };
   }, [submission]);
 
   return {

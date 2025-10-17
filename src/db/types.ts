@@ -148,6 +148,7 @@ export interface Unit extends RecordModel {
   description: string;
   datasets: string[];
   order: number;
+  reference?: string[];
 }
 
 export type UnsavedUnit = Partial<{
@@ -156,6 +157,7 @@ export type UnsavedUnit = Partial<{
   datasets: File[];
   activityId: string;
   order: number;
+  reference: File[];
 }>;
 
 export type UnsavedUnitField = keyof UnsavedUnit;
