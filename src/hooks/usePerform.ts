@@ -90,6 +90,20 @@ export const usePerform = () => {
 
   const save = () => createOrUpdate(null);
 
+  const resubmit = () => {
+    if (syncing) return;
+    setSyncing(true);
+    const unsavedSubmission = {
+      json: JSON.parse(json),
+      state: null,
+    };
+    client
+      .resubmit(activity.id, unit.id, unsavedSubmission)
+      .then(setSubmission)
+      .catch(console.error)
+      .finally(() => setSyncing(false));
+  };
+
   const postComment = async (content: string) => {
     if (!submission) return;
     try {
@@ -114,17 +128,31 @@ export const usePerform = () => {
     return () => client.unregisterPostCommentCallback();
   }, [submission]);
 
+  // Subscribe to teacher updates on the current submission (state/score changes)
+  useEffect(() => {
+    if (!submission) return;
+    client.registerSubmissionUpdateCallback(
+      submission.id,
+      activity.id,
+      unit.id,
+      (updated) => setSubmission(updated),
+    );
+    return () => client.unregisterSubmissionUpdateCallback();
+  }, [submission, activity.id, unit.id]);
+
   return {
     ...data,
     submission,
     json,
     saved,
+    // expose attempt and score via submission getters in UI
     comments,
     updateJson,
     raiseHand,
     unraiseHand,
     submit,
     save,
+    resubmit,
     postComment,
   };
 };

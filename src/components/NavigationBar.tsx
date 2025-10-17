@@ -39,7 +39,7 @@ export const NavigationBar = () => {
 const NavigationPages = () => {
   const navigate = useNavigate();
   const { user } = useDashboard();
-  
+
   return (
     <>
       {user?.role === 'Teacher' && (

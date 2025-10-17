@@ -16,7 +16,6 @@ export * from './Loading';
 export * from './NavigationBar';
 export * from './RichEditor';
 export * from './StudentCard';
-export * from './StudentSelectionModal';
 export * from './SubmissionCard';
 export * from './UnitCard';
 export * from './VegaLiteBuilder';

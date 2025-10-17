@@ -52,6 +52,7 @@ export const Perform = () => {
     submit,
     save,
     postComment,
+    resubmit,
   } = usePerform();
   const [error, setError] = useState<string | null>(null);
   const [showBuilder, setShowBuilder] = useState(true);
@@ -94,7 +95,19 @@ export const Perform = () => {
         heading={unit.title}
         subtitle="Create visualization for this unit."
       >
-        <SubmissionChip submission={submission} />
+        <Stack direction="row" gap={2} alignItems="center">
+          <SubmissionChip submission={submission} />
+          {submission && (
+            <Typography variant="body2" color="text.secondary">
+              Attempt: {submission.attempt}
+            </Typography>
+          )}
+          {submission?.score != null && (
+            <Typography variant="body2" color="text.secondary">
+              Score: {submission.score}
+            </Typography>
+          )}
+        </Stack>
       </Dashboard.Header>
 
       <Tabs
@@ -226,6 +239,19 @@ export const Perform = () => {
             icon={<CheckCircleOutlineRounded />}
             tooltipTitle="Submit Submission"
             onClick={submit}
+          />
+        </Dashboard.SpeedDial>
+      )}
+
+      {submission?.state === 'submitted' && (
+        <Dashboard.SpeedDial
+          label="Resubmit"
+          icon={<TaskAltRounded />}
+        >
+          <SpeedDialAction
+            icon={<CheckCircleOutlineRounded />}
+            tooltipTitle={"Resubmit (new attempt)"}
+            onClick={resubmit}
           />
         </Dashboard.SpeedDial>
       )}

@@ -17,7 +17,7 @@ export const Chat = () => {
 
   const loadSelectedRoom = async () => {
     if (!selectedRoomId) return;
-    
+
     try {
       const room = await client.getChatRoom(selectedRoomId);
       setSelectedRoom(room || undefined);

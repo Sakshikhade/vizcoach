@@ -116,6 +116,7 @@ export const StudentSubmissions = () => {
             </Select>
           </FormControl>
         )}
+        {submission && null}
       </Dashboard.Header>
 
       {!submission ? (

@@ -50,7 +50,20 @@ export const SubmissionCard = ({
   const unitSubmissions = useMemo(
     () =>
       submissions.reduce((map, submission) => {
-        map.set(submission.unitId, submission);
+        const existing = map.get(submission.unitId);
+        if (!existing) {
+          map.set(submission.unitId, submission);
+          return map;
+        }
+        const existingAttempt = (existing as any).attempt || 1;
+        const incomingAttempt = (submission as any).attempt || 1;
+        if (
+          incomingAttempt > existingAttempt ||
+          (incomingAttempt === existingAttempt &&
+            submission.updated.getTime() > existing.updated.getTime())
+        ) {
+          map.set(submission.unitId, submission);
+        }
         return map;
       }, new Map<string, Submission>()),
     [submissions],
@@ -88,7 +101,10 @@ export const SubmissionCard = ({
                 submission={unitSubmissions.get(selectedUnit.id)}
               />
             ) : (
-              <AllSubmissionsFooter units={units} submissions={submissions} />
+              <AllSubmissionsFooter
+                units={units}
+                unitSubmissions={unitSubmissions}
+              />
             )}
             <ArrowForward />
           </Stack>
@@ -171,20 +187,21 @@ const SelectedSubmissionFooter = ({
 
 type AllSubmissionsFooterProps = {
   units: Unit[];
-  submissions: Submission[];
+  unitSubmissions: Map<string, Submission>;
 };
 
 const AllSubmissionsFooter = ({
   units,
-  submissions,
+  unitSubmissions,
 }: AllSubmissionsFooterProps) => {
-  if (!submissions.length) {
+  if (!unitSubmissions.size) {
     return <NotAttemptedChip />;
-  } else if (submissions.some(({ state }) => state === 'help')) {
+  } else if (
+    [...unitSubmissions.values()].some(({ state }) => state === 'help')
+  ) {
     return <RaisedHandChip />;
   } else if (
-    submissions.filter(({ state }) => state === 'submitted').length ===
-    units.length
+    units.every((u) => unitSubmissions.get(u.id)?.state === 'submitted')
   ) {
     return <SubmittedChip />;
   } else {

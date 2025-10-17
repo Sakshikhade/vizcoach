@@ -35,7 +35,7 @@ export const ChatWindow = ({ room }: ChatWindowProps) => {
     loadAllUsers();
     loadMessages();
     setupMessageSubscription();
-    
+
     return () => {
       client.unregisterChatMessageCallback();
     };
@@ -61,7 +61,7 @@ export const ChatWindow = ({ room }: ChatWindowProps) => {
     client.registerChatMessageCallback(room.id, (message) => {
       // Double-check that the message belongs to this room
       if (message.roomId === room.id) {
-        setMessages(prev => [...prev, message]);
+        setMessages((prev) => [...prev, message]);
       }
     });
   };
@@ -80,7 +80,7 @@ export const ChatWindow = ({ room }: ChatWindowProps) => {
   };
 
   const getUserName = (userId: string) => {
-    const foundUser = allUsers.find(u => u.id === userId);
+    const foundUser = allUsers.find((u) => u.id === userId);
     return foundUser?.name || 'Unknown User';
   };
 
@@ -105,7 +105,6 @@ export const ChatWindow = ({ room }: ChatWindowProps) => {
     }
   };
 
-
   const formatMessageTime = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       hour: '2-digit',
@@ -120,7 +119,14 @@ export const ChatWindow = ({ room }: ChatWindowProps) => {
 
   if (loading) {
     return (
-      <Paper sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Paper
+        sx={{
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <Typography>Loading messages...</Typography>
       </Paper>
     );
@@ -170,7 +176,9 @@ export const ChatWindow = ({ room }: ChatWindowProps) => {
                   primary={
                     <Box
                       sx={{
-                        bgcolor: isOwnMessage(message) ? 'primary.main' : 'grey.100',
+                        bgcolor: isOwnMessage(message)
+                          ? 'primary.main'
+                          : 'grey.100',
                         color: isOwnMessage(message) ? 'white' : 'text.primary',
                         p: 1.5,
                         borderRadius: 2,
@@ -194,7 +202,9 @@ export const ChatWindow = ({ room }: ChatWindowProps) => {
                       direction="row"
                       spacing={1}
                       sx={{
-                        justifyContent: isOwnMessage(message) ? 'flex-end' : 'flex-start',
+                        justifyContent: isOwnMessage(message)
+                          ? 'flex-end'
+                          : 'flex-start',
                         mt: 0.5,
                       }}
                     >
@@ -218,10 +228,7 @@ export const ChatWindow = ({ room }: ChatWindowProps) => {
       <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
         <Stack direction="row" spacing={1} alignItems="flex-end">
           <Box sx={{ flex: 1 }}>
-            <RichEditor
-              value={newMessage}
-              onChange={setNewMessage}
-            />
+            <RichEditor value={newMessage} onChange={setNewMessage} />
           </Box>
           <IconButton
             onClick={sendMessage}

@@ -5,11 +5,11 @@ import {
   Activity,
   ChatMessage,
   ChatRoom,
-  GroupChat,
   Comment,
   Dataset,
   DatasetRow,
   Group,
+  SubmissionState,
   Submission,
   Unit,
   UnsavedActivity,
@@ -59,7 +59,7 @@ class PocketbaseClient {
       sort: '-created',
       filter: filters.join(' && '),
     });
-    
+
     for (const model of models) {
       const { totalItems } = await this.pb
         .collection('usergroups')
@@ -68,7 +68,7 @@ class PocketbaseClient {
         });
       groups.push(new Group(model, totalItems));
     }
-    
+
     return groups;
   }
 
@@ -95,9 +95,10 @@ class PocketbaseClient {
     if (!user) return [];
 
     // Check if user is a member of this group (for students) or if user is a teacher
-    const userGroup = await this.pb.collection('usergroups').getFirstListItem(
-      `groupId='${groupId}' && userId='${user.id}'`
-    ).catch(() => null);
+    const userGroup = await this.pb
+      .collection('usergroups')
+      .getFirstListItem(`groupId='${groupId}' && userId='${user.id}'`)
+      .catch(() => null);
 
     // If user is not in the group and not a teacher, return empty array
     if (!userGroup && user.role !== 'Teacher') return [];
@@ -264,7 +265,14 @@ class PocketbaseClient {
       activityId,
       `unitId='${unitId}'`,
     );
-    return submissions.length ? submissions[0] : null;
+    // Return latest attempt (highest attempt number or latest updated)
+    const latest = submissions.sort((a, b) => {
+      if ((a as any).attempt !== undefined && (b as any).attempt !== undefined) {
+        return b.attempt - a.attempt || b.updated.getTime() - a.updated.getTime();
+      }
+      return b.updated.getTime() - a.updated.getTime();
+    })[0];
+    return latest || null;
   }
 
   async getStudentSubmissions(
@@ -295,6 +303,20 @@ class PocketbaseClient {
   ): Promise<Comment | null> {
     const comments = await this.getComments(submission, `id='${commentId}'`);
     return comments.length ? comments[0] : null;
+  }
+
+  async getSubmissionById(submissionId: string): Promise<Submission | null> {
+    const user = this.getUser();
+    if (!user) return null;
+    try {
+      const model = await this.pb.collection('submissions').getOne(submissionId, {
+        expand: user.role === 'Teacher' ? 'userId' : '',
+      });
+      const student = user.role === 'Teacher' ? model.expand?.userId : user;
+      return new Submission(model, student as any);
+    } catch {
+      return null;
+    }
   }
 
   async createGroup(group: UnsavedGroup): Promise<Group | null> {
@@ -376,14 +398,27 @@ class PocketbaseClient {
       );
     }
 
-    // Creating submission's record in the database
+    // Determine next attempt number for this user+unit
+    const previous = await this.getSubmissions(activityId, `unitId='${unitId}' && userId='${user.id}'`);
+    const nextAttempt = previous.length
+      ? Math.max(...previous.map((s: any) => s.attempt || 1)) + 1
+      : 1;
+
+    // Creating submission's record in the database with attempt
     const { json, state } = unsavedSubmission;
-    await this.pb.collection('submissions').create({
+    const data: any = {
       json,
       unitId,
       userId: user.id,
-      state,
-    });
+      attempt: nextAttempt,
+    };
+    if (state === 'help' || state === 'submitted') {
+      data.state = state;
+    } else {
+      // attempting => clear state
+      data.state = '';
+    }
+    await this.pb.collection('submissions').create(data);
 
     // Fetching newly created submission
     const submission = await this.getSubmission(activityId, unitId);
@@ -399,8 +434,8 @@ class PocketbaseClient {
     unsavedSubmission: UnsavedSubmission,
   ) {
     const user = this.getUser();
-    if (!user || user?.role !== 'Student') {
-      throw new Error('Only logged-in student can update submissions!');
+    if (!user) {
+      throw new Error('Only logged-in users can update submissions!');
     }
 
     const oldSubmission = await this.getSubmission(activityId, unitId);
@@ -411,11 +446,18 @@ class PocketbaseClient {
     }
 
     // Updating submission's record in the database
-    await this.pb.collection('submissions').update(oldSubmission.id, {
-      ...unsavedSubmission,
+    const updateData: any = {
       unitId,
       userId: user.id,
-    });
+      attempt: (oldSubmission as any).attempt || 1,
+      json: unsavedSubmission.json,
+    };
+    if (unsavedSubmission.state === 'help' || unsavedSubmission.state === 'submitted') {
+      updateData.state = unsavedSubmission.state;
+    } else {
+      updateData.state = '';
+    }
+    await this.pb.collection('submissions').update(oldSubmission.id, updateData);
 
     // Fetching updated submission
     const newSubmission = await this.getSubmission(activityId, unitId);
@@ -423,6 +465,31 @@ class PocketbaseClient {
       throw new Error(`Unable to update submission!`);
     }
     return newSubmission;
+  }
+
+  async updateSubmissionById(
+    submissionId: string,
+    data: Partial<{ state: SubmissionState; score: number }>,
+  ) {
+    const user = this.getUser();
+    if (!user || user.role !== 'Teacher') {
+      throw new Error('Only logged-in teachers can modify submissions!');
+    }
+    const update: any = { ...data };
+    if (data.hasOwnProperty('state') && data.state == null) {
+      // PocketBase select field clear
+      update.state = '';
+    }
+    await this.pb.collection('submissions').update(submissionId, update);
+  }
+
+  async resubmit(
+    activityId: string,
+    unitId: string,
+    unsavedSubmission: UnsavedSubmission,
+  ): Promise<Submission> {
+    // Force a new attempt by calling createSubmission to allocate next attempt
+    return this.createSubmission(activityId, unitId, unsavedSubmission);
   }
 
   async postComment(submission: Submission, content: string): Promise<Comment> {
@@ -501,6 +568,30 @@ class PocketbaseClient {
   }
 
   // Chat System Methods
+  registerSubmissionUpdateCallback(
+    submissionId: string,
+    activityId: string,
+    unitId: string,
+    callback: (submission: Submission) => void,
+  ) {
+    const user = this.getUser();
+    if (!user) {
+      throw new Error('Only logged-in users can subscribe to submissions');
+    }
+
+    this.pb
+      .collection('submissions')
+      .subscribe('*', async ({ action, record }) => {
+        if (action !== 'update') return;
+        if (record.id !== submissionId) return;
+        const updated = await this.getSubmission(activityId, unitId);
+        if (updated) callback(updated);
+      });
+  }
+
+  unregisterSubmissionUpdateCallback() {
+    this.pb.collection('submissions').unsubscribe('*');
+  }
   async getChatRooms(): Promise<ChatRoom[]> {
     const user = this.getUser();
     if (!user) {
@@ -539,53 +630,31 @@ class PocketbaseClient {
         roomType: room.type,
         participants: room.participants,
         createdBy: user.id,
-        groupId: room.groupId,
-        userRole: user.role
+        userRole: user.role,
       });
-      
-      // For group chats, verify the group exists
-      if (room.type === 'group' && room.groupId) {
-        try {
-          console.log('Validating group existence for ID:', room.groupId);
-          const group = await this.getGroup(room.groupId);
-          console.log('Group validation result:', group);
-          
-          if (!group) {
-            console.log('Group not found, throwing error');
-            throw new Error(`Group with ID ${room.groupId} not found. Please create groups first by going to the Groups page.`);
-          }
-          
-          console.log('Group validation passed:', group.title);
-        } catch (groupError: any) {
-          console.error('Group validation failed:', groupError);
-          // Re-throw the error to prevent the chat room creation
-          throw new Error(`Cannot create group chat: No groups found. Please create groups first by going to the Groups page.`);
-        }
-      }
-      
+
       // Ensure participants is properly formatted as JSON string for PocketBase
       const roomData = {
         name: room.name,
         type: room.type,
         description: room.description || '',
-        groupId: room.groupId || null,
         participants: JSON.stringify(room.participants), // Convert array to JSON string
         createdBy: user.id,
         isActive: true,
       };
-      
+
       console.log('Room data being sent:', roomData);
-      
+
       const model = await this.pb.collection('chat_rooms').create(roomData, {
-        expand: 'groupId,createdBy',
+        expand: 'createdBy',
       });
-      
+
       console.log('Created chat room:', {
         roomId: model.id,
         participants: model.participants,
-        roomName: model.name
+        roomName: model.name,
       });
-      
+
       return new ChatRoom(model);
     } catch (error: any) {
       console.error('Failed to create chat room:', error);
@@ -597,94 +666,21 @@ class PocketbaseClient {
         url: error?.url,
         isAbort: error?.isAbort,
         isClientError: error?.isClientError,
-        isServerError: error?.isServerError
+        isServerError: error?.isServerError,
       });
-      
+
       // Log the full error object to see all properties
       console.error('Full error object:', error);
-      
+
       // Log the detailed error data
       if (error?.data?.data) {
         console.error('Validation errors:', error.data.data);
-        // Log specific groupId error if it exists
-        if (error.data.data.groupId) {
-          console.error('GroupId validation error:', error.data.data.groupId);
-        }
       }
-      
+
       return null;
     }
   }
 
-    // GroupChat methods - using existing chat_rooms collection
-    async createGroupChat(groupId: string, name: string, description: string, participants: string[]): Promise<GroupChat | null> {
-      const user = this.getUser();
-      if (!user) {
-        throw new Error('Authentication required to create group chats');
-      }
-
-      try {
-        // Skip group validation for now due to access rule issues
-        // TODO: Re-enable group validation once access rules are fixed
-        // const group = await this.getGroup(groupId);
-        // if (!group) {
-        //   throw new Error(`Group with ID ${groupId} not found. Please create groups first by going to the Groups page.`);
-        // }
-
-        const groupChatData = {
-          name: name,
-          type: 'group',
-          description: description,
-          groupId: groupId,
-          participants: JSON.stringify(participants),
-          createdBy: user.id,
-          isActive: true,
-        };
-
-        const model = await this.pb.collection('chat_rooms').create(groupChatData, {
-          expand: 'groupId,createdBy',
-        });
-
-        return new GroupChat(model);
-      } catch (error: any) {
-        console.error('Failed to create group chat:', error);
-        return null;
-      }
-    }
-
-    async getGroupChats(): Promise<GroupChat[]> {
-      const user = this.getUser();
-      if (!user) return [];
-
-      try {
-        const models = await this.pb.collection('chat_rooms').getFullList({
-          sort: '-created',
-          filter: "type = 'group'",
-          expand: 'groupId,createdBy',
-        });
-
-        return models.map(model => new GroupChat(model));
-      } catch (error: any) {
-        console.error('Failed to get group chats:', error);
-        return [];
-      }
-    }
-
-    async getGroupChat(groupChatId: string): Promise<GroupChat | null> {
-      const user = this.getUser();
-      if (!user) return null;
-
-      try {
-        const model = await this.pb.collection('chat_rooms').getOne(groupChatId, {
-          expand: 'groupId,createdBy',
-        });
-
-        return new GroupChat(model);
-      } catch (error: any) {
-        console.error('Failed to get group chat:', error);
-        return null;
-      }
-    }
 
   async getChatMessages(roomId: string, limit = 50): Promise<ChatMessage[]> {
     const user = this.getUser();
@@ -707,7 +703,6 @@ class PocketbaseClient {
         roomType: room.type,
         roomParticipants: room.participants,
         roomName: room.name,
-        roomGroupId: room.groupId
       });
       throw new Error('User is not a participant in this chat room');
     }
@@ -721,7 +716,9 @@ class PocketbaseClient {
     return models.items.map((model) => new ChatMessage(model));
   }
 
-  async postChatMessage(message: UnsavedChatMessage): Promise<ChatMessage | null> {
+  async postChatMessage(
+    message: UnsavedChatMessage,
+  ): Promise<ChatMessage | null> {
     const user = this.getUser();
     if (!user) {
       throw new Error('Authentication required to post messages');
@@ -742,19 +739,21 @@ class PocketbaseClient {
         roomType: room.type,
         roomParticipants: room.participants,
         roomName: room.name,
-        roomGroupId: room.groupId
       });
       throw new Error('User is not a participant in this chat room');
     }
 
     try {
-      const model = await this.pb.collection('chat_messages').create({
-        ...message,
-        userId: user.id,
-        type: message.type || 'text',
-      }, {
-        expand: 'userId,replyTo',
-      });
+      const model = await this.pb.collection('chat_messages').create(
+        {
+          ...message,
+          userId: user.id,
+          type: message.type || 'text',
+        },
+        {
+          expand: 'userId,replyTo',
+        },
+      );
       return new ChatMessage(model);
     } catch {
       return null;
@@ -770,50 +769,57 @@ class PocketbaseClient {
       throw new Error('Authentication required to subscribe to chat messages');
     }
 
-      // First get the chat room to check if user is a participant
-      this.getChatRoom(roomId).then(room => {
+    // First get the chat room to check if user is a participant
+    this.getChatRoom(roomId)
+      .then((room) => {
         if (!room) {
           throw new Error('Chat room not found');
         }
 
         // Check if user is a participant in the room
         if (!room.participants.includes(user.id)) {
-          console.log('User not participant in room (registerChatMessageCallback):', {
-            userId: user.id,
-            roomId: roomId,
-            roomParticipants: room.participants,
-            roomName: room.name
-          });
+          console.log(
+            'User not participant in room (registerChatMessageCallback):',
+            {
+              userId: user.id,
+              roomId: roomId,
+              roomParticipants: room.participants,
+              roomName: room.name,
+            },
+          );
           throw new Error('User is not a participant in this chat room');
         }
 
-      this.pb
-        .collection('chat_messages')
-        .subscribe('*', async ({ action, record }) => {
-          if (action !== 'create') {
-            return;
-          }
+        this.pb
+          .collection('chat_messages')
+          .subscribe('*', async ({ action, record }) => {
+            if (action !== 'create') {
+              return;
+            }
 
-          // Strict filtering - only process messages for the specific room
-          if (record.roomId !== roomId) {
-            return;
-          }
+            // Strict filtering - only process messages for the specific room
+            if (record.roomId !== roomId) {
+              return;
+            }
 
-          const message = await this.getChatMessage(record.id);
-          if (message && message.roomId === roomId) {
-            callback(message);
-          }
-        });
-    }).catch(error => {
-      console.error('Failed to setup chat message subscription:', error);
-    });
+            const message = await this.getChatMessage(record.id);
+            if (message && message.roomId === roomId) {
+              callback(message);
+            }
+          });
+      })
+      .catch((error) => {
+        console.error('Failed to setup chat message subscription:', error);
+      });
   }
 
   async getChatMessage(messageId: string): Promise<ChatMessage | null> {
     try {
-      const model = await this.pb.collection('chat_messages').getOne(messageId, {
-        expand: 'userId,replyTo',
-      });
+      const model = await this.pb
+        .collection('chat_messages')
+        .getOne(messageId, {
+          expand: 'userId,replyTo',
+        });
       return new ChatMessage(model);
     } catch {
       return null;
@@ -828,14 +834,30 @@ class PocketbaseClient {
     try {
       console.log('=== GET ALL USERS DEBUG ===');
       console.log('Current user:', this.getUser());
-      
+
       const models = await this.pb.collection('_pb_users_auth_').getFullList({
         sort: 'name',
       });
-      console.log('Raw user models from PocketBase:', models.map(m => ({ id: m.id, name: m.name, role: m.role, email: m.email })));
-      
+      console.log(
+        'Raw user models from PocketBase:',
+        models.map((m) => ({
+          id: m.id,
+          name: m.name,
+          role: m.role,
+          email: m.email,
+        })),
+      );
+
       const users = models.map((model) => new User(model));
-      console.log('Processed users:', users.map(u => ({ id: u.id, name: u.name, role: u.role, email: u.email })));
+      console.log(
+        'Processed users:',
+        users.map((u) => ({
+          id: u.id,
+          name: u.name,
+          role: u.role,
+          email: u.email,
+        })),
+      );
       console.log('=== END GET ALL USERS DEBUG ===');
       return users;
     } catch (error) {
