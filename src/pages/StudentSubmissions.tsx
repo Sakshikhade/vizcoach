@@ -150,7 +150,9 @@ export const StudentSubmissions = () => {
                   <Paper variant="outlined">
                     <Stack>
                       <Typography
-                        dangerouslySetInnerHTML={{ __html: activity.description }}
+                        dangerouslySetInnerHTML={{
+                          __html: activity.description,
+                        }}
                         sx={{ paddingX: 4, paddingY: 2 }}
                       />
                     </Stack>

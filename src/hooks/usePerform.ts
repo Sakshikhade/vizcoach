@@ -58,17 +58,22 @@ export const usePerform = () => {
     if (syncing || submission?.state === 'submitted') return;
     setSyncing(true);
 
-    /**
-     * Students can save submission even if no database record exists.
-     * This check ensures to either create or update the submission.
-     */
-    const unsavedSubmission = {
-      json: JSON.parse(json),
-      state,
-    };
+    // Build payload safely; if JSON is invalid, bail and reset syncing
+    let payload: { json: object; state: SubmissionState };
+    try {
+      payload = {
+        json: JSON.parse(json),
+        state,
+      };
+    } catch (e) {
+      console.error('Invalid JSON, cannot save/update submission.', e);
+      setSyncing(false);
+      return;
+    }
+
     const promise = !submission
-      ? client.createSubmission(activity.id, unit.id, unsavedSubmission)
-      : client.updateSubmission(activity.id, unit.id, unsavedSubmission);
+      ? client.createSubmission(activity.id, unit.id, payload)
+      : client.updateSubmission(activity.id, unit.id, payload);
 
     promise
       .then(setSubmission)
@@ -113,6 +118,16 @@ export const usePerform = () => {
     // Unregistering from subscriptions
     return () => client.unregisterPostCommentCallback();
   }, [submission]);
+
+  // Autosave every 30 seconds while attempting (not submitted)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (submission?.state === 'submitted') return;
+      if (saved) return;
+      save();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [submission?.state, saved, save]);
 
   return {
     ...data,

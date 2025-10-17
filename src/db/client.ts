@@ -254,6 +254,23 @@ class PocketbaseClient {
     return comments.length ? comments[0] : null;
   }
 
+  async getSubmissionById(submissionId: string): Promise<Submission | null> {
+    const user = this.getUser();
+    if (!user) return null;
+    try {
+      const model = await this.pb
+        .collection('submissions')
+        .getOne(submissionId, {
+          expand: user.role === 'Teacher' ? 'userId' : '',
+        });
+      const student =
+        user.role === 'Teacher' ? (model as any).expand?.userId : user;
+      return new Submission(model, student as any);
+    } catch {
+      return null;
+    }
+  }
+
   async createGroup(group: UnsavedGroup): Promise<Group | null> {
     try {
       const { id } = await this.pb.collection('groups').create(group);
@@ -309,12 +326,12 @@ class PocketbaseClient {
         description: unit.description,
         datasets: unit.datasets,
       };
-      
+
       // Only include reference if it exists
       if (unit.reference) {
         updateData.reference = unit.reference;
       }
-      
+
       console.log('Updating unit with data:', updateData);
       await this.pb.collection('units').update(unit.id, updateData);
       return this.getUnit(unit.activityId, unit.id);
@@ -344,12 +361,18 @@ class PocketbaseClient {
 
     // Creating submission's record in the database
     const { json, state } = unsavedSubmission;
-    await this.pb.collection('submissions').create({
+    const payload: any = {
       json,
       unitId,
       userId: user.id,
-      state,
-    });
+    };
+    // PocketBase select field: clear by sending empty string
+    if (state === 'help' || state === 'submitted') {
+      payload.state = state;
+    } else {
+      payload.state = '';
+    }
+    await this.pb.collection('submissions').create(payload);
 
     // Fetching newly created submission
     const submission = await this.getSubmission(activityId, unitId);
@@ -377,11 +400,23 @@ class PocketbaseClient {
     }
 
     // Updating submission's record in the database
-    await this.pb.collection('submissions').update(oldSubmission.id, {
-      ...unsavedSubmission,
+    const updatePayload: any = {
+      json: unsavedSubmission.json,
       unitId,
       userId: user.id,
-    });
+    };
+    // PocketBase select field: clear by sending empty string
+    if (
+      unsavedSubmission.state === 'help' ||
+      unsavedSubmission.state === 'submitted'
+    ) {
+      updatePayload.state = unsavedSubmission.state;
+    } else {
+      updatePayload.state = '';
+    }
+    await this.pb
+      .collection('submissions')
+      .update(oldSubmission.id, updatePayload);
 
     // Fetching updated submission
     const newSubmission = await this.getSubmission(activityId, unitId);
@@ -465,9 +500,29 @@ class PocketbaseClient {
   unregisterPostCommentCallback() {
     this.pb.collection('comments').unsubscribe('*');
   }
+
+  registerSubmissionUpdateCallback(
+    submissionId: string,
+    callback: (submission: Submission) => void,
+  ) {
+    const user = this.getUser();
+    if (!user) {
+      throw new Error('Only logged-in users can subscribe to submissions');
+    }
+    this.pb
+      .collection('submissions')
+      .subscribe('*', async ({ action, record }) => {
+        if (!['create', 'update'].includes(action)) return;
+        if (record.id !== submissionId) return;
+        const updated = await this.getSubmissionById(submissionId);
+        if (updated) callback(updated);
+      });
+  }
+
+  unregisterSubmissionUpdateCallback() {
+    this.pb.collection('submissions').unsubscribe('*');
+  }
 }
 
 const client = new PocketbaseClient();
 export default client;
-
-

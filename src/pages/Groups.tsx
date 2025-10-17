@@ -38,9 +38,7 @@ export const Groups = () => {
     [allGroups],
   );
 
-  const [filters, setFilters] = useState<(string | number)[]>([
-    ALL_CLASSES,
-  ]);
+  const [filters, setFilters] = useState<(string | number)[]>([ALL_CLASSES]);
 
   const onChange = (event: SelectChangeEvent<typeof filters>) => {
     const { value } = event.target;

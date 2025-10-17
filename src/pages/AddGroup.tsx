@@ -99,10 +99,7 @@ export const AddGroup = () => {
         </Dashboard.Breadcrumbs.Link>
       </Dashboard.Breadcrumbs>
 
-      <Dashboard.Header
-        heading="Add Class"
-        subtitle="Create new class."
-      />
+      <Dashboard.Header heading="Add Class" subtitle="Create new class." />
 
       <Alert
         variant="outlined"
@@ -115,8 +112,8 @@ export const AddGroup = () => {
           <>Please wait while we create student accounts...</>
         ) : (
           <>
-            Assignments linked to a class will be visible to students in
-            the class.
+            Assignments linked to a class will be visible to students in the
+            class.
           </>
         )}
       </Alert>

@@ -7,11 +7,7 @@ import {
   IconButton,
   Alert,
 } from '@mui/material';
-import {
-  CloudUpload,
-  Delete,
-  Image as ImageIcon,
-} from '@mui/icons-material';
+import { CloudUpload, Delete, Image as ImageIcon } from '@mui/icons-material';
 import { VisuallyHiddenInput } from './VisuallyHiddenInput';
 
 interface ImageUploadProps {
@@ -37,12 +33,14 @@ export const ImageUpload = ({
     if (!newFiles) return;
 
     const fileArray = Array.from(newFiles);
-    const validFiles = fileArray.filter(file => 
-      file.type.startsWith('image/') && file.size <= 10 * 1024 * 1024 // 10MB limit
+    const validFiles = fileArray.filter(
+      (file) => file.type.startsWith('image/') && file.size <= 10 * 1024 * 1024, // 10MB limit
     );
 
     if (validFiles.length !== fileArray.length) {
-      alert('Some files were skipped. Only image files under 10MB are allowed.');
+      alert(
+        'Some files were skipped. Only image files under 10MB are allowed.',
+      );
     }
 
     const updatedFiles = [...files, ...validFiles].slice(0, maxFiles);
@@ -75,14 +73,18 @@ export const ImageUpload = ({
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
         {label} ({files.length}/{maxFiles})
       </Typography>
-      
+
       <Box
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         sx={{
           border: '2px dashed',
-          borderColor: dragOver ? 'primary.main' : error ? 'error.main' : 'grey.300',
+          borderColor: dragOver
+            ? 'primary.main'
+            : error
+              ? 'error.main'
+              : 'grey.300',
           borderRadius: 2,
           p: 2,
           textAlign: 'center',
@@ -106,7 +108,7 @@ export const ImageUpload = ({
             multiple
           />
         </Button>
-        
+
         <Typography variant="caption" display="block" sx={{ mt: 1 }}>
           Drag and drop images here, or click to select
         </Typography>

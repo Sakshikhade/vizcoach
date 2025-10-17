@@ -245,6 +245,3 @@ export const toTextContent = (innerHTML: string): string => {
   element.innerHTML = innerHTML;
   return element.textContent || innerHTML;
 };
-
-
-

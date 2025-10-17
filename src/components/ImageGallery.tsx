@@ -8,7 +8,11 @@ type ImageGalleryProps = {
   title: string;
 };
 
-export const ImageGallery = ({ record, imageNames, title }: ImageGalleryProps) => {
+export const ImageGallery = ({
+  record,
+  imageNames,
+  title,
+}: ImageGalleryProps) => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,8 +29,8 @@ export const ImageGallery = ({ record, imageNames, title }: ImageGalleryProps) =
       try {
         setLoading(true);
         const token = await client.pb.files.getToken();
-        const urls = imageNames.map(name => 
-          client.pb.files.getURL(record, name, { token })
+        const urls = imageNames.map((name) =>
+          client.pb.files.getURL(record, name, { token }),
         );
         setImageUrls(urls);
         setError(null);
@@ -47,7 +51,15 @@ export const ImageGallery = ({ record, imageNames, title }: ImageGalleryProps) =
 
   if (loading) {
     return (
-      <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 100 }}>
+      <Box
+        sx={{
+          marginTop: 2,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: 100,
+        }}
+      >
         <CircularProgress />
       </Box>
     );
@@ -68,13 +80,15 @@ export const ImageGallery = ({ record, imageNames, title }: ImageGalleryProps) =
           {title}
         </Typography>
       )}
-      <Box sx={{ 
-        display: 'flex', 
-        gap: 2, 
-        flexWrap: 'wrap',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start'
-      }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 2,
+          flexWrap: 'wrap',
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start',
+        }}
+      >
         {imageUrls.map((url, index) => (
           <Box
             key={index}

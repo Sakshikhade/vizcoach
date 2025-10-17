@@ -154,10 +154,7 @@ export const AddUnit = () => {
         </Button>
       </FormField>
 
-      <FormField
-        label="Reference Images (Optional)"
-        error={errors.reference}
-      >
+      <FormField label="Reference Images (Optional)" error={errors.reference}>
         <ImageUpload
           files={unit.reference || []}
           onChange={(files) => setField('reference', files)}

@@ -68,7 +68,11 @@ export const ViewUnit = () => {
           <Paper variant="outlined" sx={{ padding: 3 }}>
             <ImageGallery
               record={unit}
-              imageNames={Array.isArray(unit.reference) ? unit.reference : [unit.reference]}
+              imageNames={
+                Array.isArray(unit.reference)
+                  ? unit.reference
+                  : [unit.reference]
+              }
               title="Reference Images"
             />
           </Paper>
@@ -85,7 +89,11 @@ export const ViewUnit = () => {
         <SpeedDialAction
           icon={<EditNoteRounded />}
           tooltipTitle="Edit Task"
-          onClick={() => navigate(`/dashboard/activities/${activity.id}/units/${unit.id}/edit-unit`)}
+          onClick={() =>
+            navigate(
+              `/dashboard/activities/${activity.id}/units/${unit.id}/edit-unit`,
+            )
+          }
         />
         <SpeedDialAction
           icon={<DeleteRounded />}

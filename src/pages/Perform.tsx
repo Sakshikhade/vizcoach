@@ -188,13 +188,20 @@ export const Perform = () => {
               {/* Reference Images Section */}
               {unit.reference && (
                 <Stack>
-                  <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: 600 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ marginBottom: 2, fontWeight: 600 }}
+                  >
                     Reference Images
                   </Typography>
                   <Paper variant="outlined" sx={{ padding: 3 }}>
                     <ImageGallery
                       record={unit}
-                      imageNames={Array.isArray(unit.reference) ? unit.reference : [unit.reference]}
+                      imageNames={
+                        Array.isArray(unit.reference)
+                          ? unit.reference
+                          : [unit.reference]
+                      }
                       title=""
                     />
                   </Paper>

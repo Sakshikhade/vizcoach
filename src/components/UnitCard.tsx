@@ -26,7 +26,12 @@ export interface UnitCardProps {
   activityId?: string;
 }
 
-export const UnitCard = ({ unit, submission, locked, activityId }: UnitCardProps) => {
+export const UnitCard = ({
+  unit,
+  submission,
+  locked,
+  activityId,
+}: UnitCardProps) => {
   const { id, title, description, order, datasets, reference } = unit;
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -43,9 +48,11 @@ export const UnitCard = ({ unit, submission, locked, activityId }: UnitCardProps
       try {
         setLoadingImages(true);
         const token = await client.pb.files.getToken();
-        const referenceArray = Array.isArray(reference) ? reference : [reference];
-        const urls = referenceArray.map(name => 
-          client.pb.files.getURL(unit, name, { token })
+        const referenceArray = Array.isArray(reference)
+          ? reference
+          : [reference];
+        const urls = referenceArray.map((name) =>
+          client.pb.files.getURL(unit, name, { token }),
         );
         setImageUrls(urls);
       } catch (err) {
@@ -61,7 +68,9 @@ export const UnitCard = ({ unit, submission, locked, activityId }: UnitCardProps
 
   const onClick = () => {
     if (activityId) {
-      navigate(`/dashboard/activities/${activityId}/units/${id}/${user?.role === 'Teacher' ? 'view' : 'perform'}`);
+      navigate(
+        `/dashboard/activities/${activityId}/units/${id}/${user?.role === 'Teacher' ? 'view' : 'perform'}`,
+      );
     } else {
       // Fallback to relative navigation if activityId is not provided
       navigate(`${id}/${user?.role === 'Teacher' ? 'view' : 'perform'}`);
@@ -98,11 +107,15 @@ export const UnitCard = ({ unit, submission, locked, activityId }: UnitCardProps
                   Complete previous units to unlock this unit.
                 </Alert>
               )}
-              
+
               {/* Reference Images Preview */}
               {!locked && reference && (
                 <Box sx={{ mt: 2 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1, fontWeight: 500 }}
+                  >
                     Reference Images:
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -153,7 +166,8 @@ export const UnitCard = ({ unit, submission, locked, activityId }: UnitCardProps
                             }}
                             onError={(e) => {
                               console.error('Error loading image:', url);
-                              (e.target as HTMLImageElement).style.display = 'none';
+                              (e.target as HTMLImageElement).style.display =
+                                'none';
                             }}
                           />
                         </Box>
@@ -174,7 +188,11 @@ export const UnitCard = ({ unit, submission, locked, activityId }: UnitCardProps
                           fontWeight: 'bold',
                         }}
                       >
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ fontSize: '0.6rem' }}
+                        >
                           +{imageUrls.length - 3}
                         </Typography>
                       </Box>
