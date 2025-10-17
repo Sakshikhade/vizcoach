@@ -2,7 +2,6 @@ export * from './Activities';
 export * from './AddActivity';
 export * from './AddGroup';
 export * from './AddUnit';
-export * from './Chat';
 export * from './EditActivity';
 export * from './EditUnit';
 export * from './Groups';

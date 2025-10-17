@@ -22,7 +22,7 @@ import dayjs from 'dayjs';
 
 type FormErrorState = UnsavedActivity & { generic?: string };
 
-const GROUP_PLACEHOLDER = 'Select a Student Group';
+const GROUP_PLACEHOLDER = 'Select a Class';
 
 export const AddActivity = () => {
   const { useData } = useDashboard();
@@ -82,15 +82,15 @@ export const AddActivity = () => {
 
   return (
     <>
-      <Dashboard.Breadcrumbs title="Add Activity">
+      <Dashboard.Breadcrumbs title="Add Assignment">
         <Dashboard.Breadcrumbs.Link href="/dashboard/activities">
-          Activities
+          Assignments
         </Dashboard.Breadcrumbs.Link>
       </Dashboard.Breadcrumbs>
 
       <Dashboard.Header
-        heading="Add Activity"
-        subtitle="Create new activity for a student group."
+        heading="Add Assignment"
+        subtitle="Create new assignment for a class."
       />
 
       <Alert variant="outlined" severity={errors.generic ? 'error' : 'info'}>
@@ -98,15 +98,15 @@ export const AddActivity = () => {
           errors.generic
         ) : (
           <>
-            Activities will hold related units together and are meant to
+            Assignments will hold related tasks together and are meant to
             describe the assignment's general idea or theme that students will
-            perform in related units.
+            perform in related tasks.
           </>
         )}
       </Alert>
 
       <FormField
-        label="What's the activity's title?"
+        label="What's the assignment's title?"
         error={errors.title}
         required
       >
@@ -119,7 +119,7 @@ export const AddActivity = () => {
       </FormField>
 
       <FormField
-        label="What's the activity's description?"
+        label="What's the assignment's description?"
         error={errors.description}
         required
       >
@@ -130,7 +130,7 @@ export const AddActivity = () => {
       </FormField>
 
       <FormField
-        label="Which Student Group should attempt this activity?"
+        label="Which class should attempt this assignment?"
         error={errors.groupId}
         required
       >

@@ -17,7 +17,7 @@ import { Dashboard, GroupCard } from 'components';
 import { Group } from 'db';
 import { useDashboard } from 'hooks';
 
-const ALL_STUDENT_GROUPS = 'All Student Groups';
+const ALL_CLASSES = 'All Classes';
 
 export const Groups = () => {
   const { useData } = useDashboard();
@@ -38,20 +38,18 @@ export const Groups = () => {
     [allGroups],
   );
 
-  const [filters, setFilters] = useState<(string | number)[]>([
-    ALL_STUDENT_GROUPS,
-  ]);
+  const [filters, setFilters] = useState<(string | number)[]>([ALL_CLASSES]);
 
   const onChange = (event: SelectChangeEvent<typeof filters>) => {
     const { value } = event.target;
     let filters = typeof value === 'string' ? value.split(',') : value;
-    filters = filters.filter((filter) => filter !== ALL_STUDENT_GROUPS);
-    if (!filters.length) filters.push(ALL_STUDENT_GROUPS);
+    filters = filters.filter((filter) => filter !== ALL_CLASSES);
+    if (!filters.length) filters.push(ALL_CLASSES);
     setFilters(filters);
   };
 
   useEffect(() => {
-    if (filters.includes(ALL_STUDENT_GROUPS)) {
+    if (filters.includes(ALL_CLASSES)) {
       setGroups(allGroups);
     } else {
       const filteredGroups = allGroups.filter(({ course, semester, year }) => {
@@ -67,11 +65,11 @@ export const Groups = () => {
 
   return (
     <>
-      <Dashboard.Breadcrumbs title="Student Groups" />
+      <Dashboard.Breadcrumbs title="Classes" />
 
       <Dashboard.Header
-        heading="Student Groups"
-        subtitle="Create, manage, and track student groups."
+        heading="Classes"
+        subtitle="Create, manage, and track your classes."
       >
         <FormControl>
           <InputLabel id="filter-select-label">Filter</InputLabel>
@@ -110,10 +108,10 @@ export const Groups = () => {
         })}
       </Grid2>
 
-      <Dashboard.SpeedDial label="Groups SpeedDial" icon={<GroupIcon />}>
+      <Dashboard.SpeedDial label="Classes SpeedDial" icon={<GroupIcon />}>
         <SpeedDialAction
           icon={<GroupAdd />}
-          tooltipTitle="Add Student Group"
+          tooltipTitle="Add Class"
           onClick={() => navigate('add-group')}
         />
       </Dashboard.SpeedDial>

@@ -11,12 +11,12 @@ import { Dashboard, SubmissionCard } from 'components';
 import { GetSubmissionsResponse, Submission, User } from 'db';
 import { useDashboard, useDatasets } from 'hooks';
 
-const ALL_UNITS = 'All Units';
+const ALL_TASKS = 'All Tasks';
 
 export const Submissions = () => {
   const { useData } = useDashboard();
   const { activity, units, submissions } = useData!<GetSubmissionsResponse>();
-  const [unitId, setUnitId] = useState<string>(ALL_UNITS);
+  const [unitId, setUnitId] = useState<string>(ALL_TASKS);
 
   const selectedUnit = units.find(({ id }) => id === unitId);
   const datasets = useDatasets(selectedUnit);
@@ -38,7 +38,7 @@ export const Submissions = () => {
     <>
       <Dashboard.Breadcrumbs title="Submissions">
         <Dashboard.Breadcrumbs.Link href="/dashboard/activities">
-          Activities
+          Assignments
         </Dashboard.Breadcrumbs.Link>
         <Dashboard.Breadcrumbs.Link
           href={`/dashboard/activities/${activity.id}/units`}
@@ -52,18 +52,18 @@ export const Submissions = () => {
         subtitle={`Track ${activity.group.title}'s submissions for ${activity.title}`}
       >
         <FormControl sx={{ width: '20rem', textOverflow: 'ellipsis' }}>
-          <InputLabel id="units-select-label">Units</InputLabel>
+          <InputLabel id="units-select-label">Tasks</InputLabel>
           <Select
             labelId="units-select-label"
             value={unitId}
             input={<OutlinedInput id="filter-select" label="Chip" />}
             onChange={(event) => setUnitId(event.target.value)}
           >
-            <MenuItem value={ALL_UNITS}>{ALL_UNITS}</MenuItem>
+            <MenuItem value={ALL_TASKS}>{ALL_TASKS}</MenuItem>
             {units.map((unit) => {
               return (
                 <MenuItem key={unit.id} value={unit.id}>
-                  {`Unit-${unit.order}: ${unit.title}`}
+                  {`Task-${unit.order}: ${unit.title}`}
                 </MenuItem>
               );
             })}

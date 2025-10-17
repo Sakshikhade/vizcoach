@@ -50,20 +50,7 @@ export const SubmissionCard = ({
   const unitSubmissions = useMemo(
     () =>
       submissions.reduce((map, submission) => {
-        const existing = map.get(submission.unitId);
-        if (!existing) {
-          map.set(submission.unitId, submission);
-          return map;
-        }
-        const existingAttempt = (existing as any).attempt || 1;
-        const incomingAttempt = (submission as any).attempt || 1;
-        if (
-          incomingAttempt > existingAttempt ||
-          (incomingAttempt === existingAttempt &&
-            submission.updated.getTime() > existing.updated.getTime())
-        ) {
-          map.set(submission.unitId, submission);
-        }
+        map.set(submission.unitId, submission);
         return map;
       }, new Map<string, Submission>()),
     [submissions],
@@ -101,10 +88,7 @@ export const SubmissionCard = ({
                 submission={unitSubmissions.get(selectedUnit.id)}
               />
             ) : (
-              <AllSubmissionsFooter
-                units={units}
-                unitSubmissions={unitSubmissions}
-              />
+              <AllSubmissionsFooter units={units} submissions={submissions} />
             )}
             <ArrowForward />
           </Stack>
@@ -187,21 +171,20 @@ const SelectedSubmissionFooter = ({
 
 type AllSubmissionsFooterProps = {
   units: Unit[];
-  unitSubmissions: Map<string, Submission>;
+  submissions: Submission[];
 };
 
 const AllSubmissionsFooter = ({
   units,
-  unitSubmissions,
+  submissions,
 }: AllSubmissionsFooterProps) => {
-  if (!unitSubmissions.size) {
+  if (!submissions.length) {
     return <NotAttemptedChip />;
-  } else if (
-    [...unitSubmissions.values()].some(({ state }) => state === 'help')
-  ) {
+  } else if (submissions.some(({ state }) => state === 'help')) {
     return <RaisedHandChip />;
   } else if (
-    units.every((u) => unitSubmissions.get(u.id)?.state === 'submitted')
+    submissions.filter(({ state }) => state === 'submitted').length ===
+    units.length
   ) {
     return <SubmittedChip />;
   } else {

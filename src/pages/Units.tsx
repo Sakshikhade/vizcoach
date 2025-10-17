@@ -25,7 +25,7 @@ export const Units = () => {
   const onDeleteActivity = async () => {
     if (
       window.confirm(
-        "Are you sure you want to delete this activity and associated units? This action will delete students' submissions too.",
+        "Are you sure you want to delete this assignment and associated tasks? This action will delete students' submissions too.",
       )
     ) {
       try {
@@ -41,7 +41,7 @@ export const Units = () => {
     <>
       <Dashboard.Breadcrumbs title={activity.title}>
         <Dashboard.Breadcrumbs.Link href="/dashboard/activities">
-          Activities
+          Assignments
         </Dashboard.Breadcrumbs.Link>
       </Dashboard.Breadcrumbs>
 
@@ -49,8 +49,8 @@ export const Units = () => {
         heading={activity.title}
         subtitle={
           user?.role === 'Teacher'
-            ? "Create, manage, and track activity's units."
-            : 'Track your progress for this activity.'
+            ? "Create, manage, and track assignment's tasks."
+            : 'Track your progress for this assignment.'
         }
       />
 
@@ -59,8 +59,8 @@ export const Units = () => {
           <Typography
             dangerouslySetInnerHTML={{ __html: activity.description }}
             sx={{
-              minHeight: '20rem',
-              maxHeight: '20rem',
+              minHeight: 'auto',
+              maxHeight: '30rem',
               overflowY: 'auto',
               paddingX: 4,
               paddingY: 2,
@@ -85,6 +85,7 @@ export const Units = () => {
                   index !== 0 &&
                   submissionMap.get(units[index - 1].id)?.state !== 'submitted'
                 }
+                activityId={activity.id}
               />
             </Grid2>
           );
@@ -92,10 +93,10 @@ export const Units = () => {
       </Grid2>
 
       {user?.role === 'Teacher' && (
-        <Dashboard.SpeedDial label="Units SpeedDial" icon={<TaskAltRounded />}>
+        <Dashboard.SpeedDial label="Tasks SpeedDial" icon={<TaskAltRounded />}>
           <SpeedDialAction
             icon={<PlaylistAddRounded />}
-            tooltipTitle="Add Unit"
+            tooltipTitle="Add Task"
             onClick={() => navigate(`../${activity.id}/add-unit`)}
           />
           <SpeedDialAction
@@ -105,12 +106,12 @@ export const Units = () => {
           />
           <SpeedDialAction
             icon={<EditNoteRounded />}
-            tooltipTitle="Edit Activity"
+            tooltipTitle="Edit Assignment"
             onClick={() => navigate(`../${activity.id}/edit-activity`)}
           />
           <SpeedDialAction
             icon={<DeleteRounded />}
-            tooltipTitle="Delete Activity"
+            tooltipTitle="Delete Assignment"
             onClick={onDeleteActivity}
           />
         </Dashboard.SpeedDial>
