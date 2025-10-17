@@ -10,13 +10,13 @@ export const Students = () => {
     <>
       <Dashboard.Breadcrumbs title={group.title}>
         <Dashboard.Breadcrumbs.Link href="/dashboard/groups">
-          Student Groups
+          Classes
         </Dashboard.Breadcrumbs.Link>
       </Dashboard.Breadcrumbs>
 
       <Dashboard.Header
         heading={group.title}
-        subtitle={`${group.studentsCount} student${group.studentsCount > 1 ? 's' : ''} in ${group.title}'s student group.`}
+        subtitle={`${group.studentsCount} student${group.studentsCount > 1 ? 's' : ''} in ${group.title}'s class.`}
       />
 
       <Grid2 container rowSpacing={1} columnSpacing={1}>

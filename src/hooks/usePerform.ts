@@ -11,14 +11,41 @@ const DEFAULT_JSON = `{
     "width": "container"
 }`;
 
+const DEFAULT_CHARTS = [
+  {
+    id: 'chart-1',
+    title: 'Chart 1',
+    json: DEFAULT_JSON,
+  },
+];
+
 const unsavedPrompt = (event: BeforeUnloadEvent) => {
   event.preventDefault();
   return 'Your progess is not saved. Do you want to continue?';
 };
 
-const getJson = (submission: Submission | null) => {
-  if (!submission) return DEFAULT_JSON;
-  return JSON.stringify(submission.json, null, 4);
+const getCharts = (submission: Submission | null) => {
+  if (!submission) return DEFAULT_CHARTS;
+  // If submission has charts array, use it; otherwise convert single json to charts format
+  if (Array.isArray(submission.json)) {
+    return submission.json.map((chart: any) => ({
+      ...chart,
+      json:
+        typeof chart.json === 'string'
+          ? chart.json
+          : JSON.stringify(chart.json, null, 4),
+    }));
+  }
+  return [
+    {
+      id: 'chart-1',
+      title: 'Chart 1',
+      json:
+        typeof submission.json === 'string'
+          ? submission.json
+          : JSON.stringify(submission.json, null, 4),
+    },
+  ];
 };
 
 export const usePerform = () => {
@@ -27,32 +54,51 @@ export const usePerform = () => {
   const { activity, unit } = data;
 
   const [submission, setSubmission] = useState(data.submission);
-  const [json, setJson] = useState(getJson(submission));
+  const [charts, setCharts] = useState(getCharts(submission));
+  const [activeChartId, setActiveChartId] = useState('chart-1');
   const [saved, setSaved] = useState(!!submission);
   const [syncing, setSyncing] = useState(false);
   const [comments, setComments] = useState(data.comments);
 
+  const activeChart =
+    charts.find((chart) => chart.id === activeChartId) || charts[0];
+  const json =
+    typeof activeChart?.json === 'string'
+      ? activeChart.json
+      : JSON.stringify(activeChart?.json || {}, null, 4);
+
   const updateJson = (value: string) => {
-    setJson(value);
-    setSaved(!!submission && value === getJson(submission));
+    setCharts((prev) =>
+      prev.map((chart) =>
+        chart.id === activeChartId ? { ...chart, json: value } : chart,
+      ),
+    );
+    setSaved(false);
   };
 
   /**
-   * This useEffect is expected to set the JSON and saved statues when submission is saved,
-   * including by raising or unraising hands, we set the JSON and saved indicator.
+   * This useEffect is expected to set the charts and saved status when submission is saved,
+   * including by raising or unraising hands, we set the charts and saved indicator.
    */
   useEffect(() => {
-    setJson(getJson(submission));
+    setCharts(getCharts(submission));
     setSaved(!!submission);
   }, [submission]);
 
   /**
-   * This useEffect will unsure that any time submission is saved,
-   * including by raising or unraising hands, we set, or unset, the onneforeunload hook.
+   * This useEffect will ensure that any time submission is saved,
+   * including by raising or unraising hands, we set, or unset, the onbeforeunload hook.
    */
   useEffect(() => {
-    window.onbeforeunload = json === getJson(submission) ? null : unsavedPrompt;
-  }, [submission, json]);
+    const isSaved =
+      submission &&
+      charts.length > 0 &&
+      charts.every(
+        (chart) =>
+          chart.json === JSON.stringify(JSON.parse(chart.json), null, 4),
+      );
+    window.onbeforeunload = isSaved ? null : unsavedPrompt;
+  }, [submission, charts]);
 
   const createOrUpdate = (state: SubmissionState) => {
     if (syncing || submission?.state === 'submitted') return;
@@ -62,8 +108,15 @@ export const usePerform = () => {
      * Students can save submission even if no database record exists.
      * This check ensures to either create or update the submission.
      */
+    // Convert charts to array of parsed JSON objects
+    const chartsData = charts.map((chart) => ({
+      id: chart.id,
+      title: chart.title,
+      json:
+        typeof chart.json === 'string' ? JSON.parse(chart.json) : chart.json,
+    }));
     const unsavedSubmission = {
-      json: JSON.parse(json),
+      json: chartsData,
       state,
     };
     const promise = !submission
@@ -90,6 +143,45 @@ export const usePerform = () => {
 
   const save = () => createOrUpdate(null);
 
+  const addChart = () => {
+    const newChartId = `chart-${Date.now()}`;
+    const newChart = {
+      id: newChartId,
+      title: `Chart ${charts.length + 1}`,
+      json: DEFAULT_JSON,
+    };
+    setCharts((prev) => [...prev, newChart]);
+    setActiveChartId(newChartId);
+  };
+
+  const removeChart = (chartId: string) => {
+    if (charts.length <= 1) return; // Keep at least one chart
+    setCharts((prev) => prev.filter((chart) => chart.id !== chartId));
+    if (activeChartId === chartId) {
+      setActiveChartId(charts[0]?.id || 'chart-1');
+    }
+  };
+
+  const resubmit = () => {
+    if (syncing) return;
+    setSyncing(true);
+    const chartsData = charts.map((chart) => ({
+      id: chart.id,
+      title: chart.title,
+      json:
+        typeof chart.json === 'string' ? JSON.parse(chart.json) : chart.json,
+    }));
+    const unsavedSubmission = {
+      json: chartsData,
+      state: null,
+    };
+    client
+      .resubmit(activity.id, unit.id, unsavedSubmission)
+      .then(setSubmission)
+      .catch(console.error)
+      .finally(() => setSyncing(false));
+  };
+
   const postComment = async (content: string) => {
     if (!submission) return;
     try {
@@ -111,20 +203,51 @@ export const usePerform = () => {
     });
 
     // Unregistering from subscriptions
-    return () => client.unregisterPostCommentCallback();
+    return () => {
+      try {
+        client.unregisterPostCommentCallback();
+      } catch (error) {
+        console.warn('Failed to unsubscribe from post comment updates:', error);
+      }
+    };
   }, [submission]);
+
+  // Subscribe to teacher updates on the current submission (state/score changes)
+  useEffect(() => {
+    if (!submission) return;
+    client.registerSubmissionUpdateCallback(
+      submission.id,
+      activity.id,
+      unit.id,
+      (updated) => setSubmission(updated),
+    );
+    return () => {
+      try {
+        client.unregisterSubmissionUpdateCallback();
+      } catch (error) {
+        console.warn('Failed to unsubscribe from submission updates:', error);
+      }
+    };
+  }, [submission, activity.id, unit.id]);
 
   return {
     ...data,
     submission,
+    charts,
+    activeChartId,
     json,
     saved,
+    // expose attempt and score via submission getters in UI
     comments,
     updateJson,
     raiseHand,
     unraiseHand,
     submit,
     save,
+    resubmit,
+    addChart,
+    removeChart,
+    setActiveChartId,
     postComment,
   };
 };

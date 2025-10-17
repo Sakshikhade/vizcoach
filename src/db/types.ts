@@ -148,6 +148,7 @@ export interface Unit extends RecordModel {
   description: string;
   datasets: string[];
   order: number;
+  reference?: string[];
 }
 
 export type UnsavedUnit = Partial<{
@@ -156,6 +157,7 @@ export type UnsavedUnit = Partial<{
   datasets: File[];
   activityId: string;
   order: number;
+  reference: File[];
 }>;
 
 export type UnsavedUnitField = keyof UnsavedUnit;
@@ -189,7 +191,17 @@ export class Submission {
   }
 
   get state(): SubmissionState {
-    return this.model.state;
+    const value = (this.model as any).state;
+    return value === '' ? null : value;
+  }
+
+  get attempt(): number {
+    return this.model.attempt || 1;
+  }
+
+  get score(): number | null {
+    const value = (this.model as any).score;
+    return typeof value === 'number' ? value : null;
   }
 
   get updated(): Date {
@@ -244,7 +256,7 @@ export const toTextContent = (innerHTML: string): string => {
 };
 
 // Chat System Types
-export type ChatRoomType = 'group' | 'private';
+export type ChatRoomType = 'private';
 
 export class ChatRoom {
   constructor(readonly model: RecordModel) {}
@@ -265,10 +277,6 @@ export class ChatRoom {
     return this.model.description;
   }
 
-  get groupId(): string | undefined {
-    return this.model.groupId;
-  }
-
   get participants(): string[] {
     // Parse JSON string if it's a string, otherwise return as array
     if (typeof this.model.participants === 'string') {
@@ -295,66 +303,6 @@ export class ChatRoom {
 
   get updated(): Date {
     return new Date(this.model.updated);
-  }
-
-  get group(): Group | undefined {
-    return this.model.expand?.groupId;
-  }
-
-  get creator(): User | undefined {
-    return this.model.expand?.createdBy;
-  }
-}
-
-export class GroupChat {
-  constructor(readonly model: RecordModel) {}
-
-  get id(): string {
-    return this.model.id;
-  }
-
-  get name(): string {
-    return this.model.name;
-  }
-
-  get description(): string {
-    return this.model.description;
-  }
-
-  get groupId(): string {
-    return this.model.groupId;
-  }
-
-  get participants(): string[] {
-    // Parse JSON string if it's a string, otherwise return as array
-    if (typeof this.model.participants === 'string') {
-      try {
-        return JSON.parse(this.model.participants);
-      } catch {
-        return [];
-      }
-    }
-    return this.model.participants || [];
-  }
-
-  get createdBy(): string {
-    return this.model.createdBy;
-  }
-
-  get isActive(): boolean {
-    return this.model.isActive;
-  }
-
-  get created(): Date {
-    return new Date(this.model.created);
-  }
-
-  get updated(): Date {
-    return new Date(this.model.updated);
-  }
-
-  get group(): Group | undefined {
-    return this.model.expand?.groupId;
   }
 
   get creator(): User | undefined {
@@ -416,7 +364,6 @@ export type UnsavedChatRoom = {
   name: string;
   type: ChatRoomType;
   description?: string;
-  groupId?: string;
   participants: string[];
 };
 

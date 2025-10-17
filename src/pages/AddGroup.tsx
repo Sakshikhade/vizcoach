@@ -92,16 +92,13 @@ export const AddGroup = () => {
 
   return (
     <>
-      <Dashboard.Breadcrumbs title="Add Student Group">
+      <Dashboard.Breadcrumbs title="Add Class">
         <Dashboard.Breadcrumbs.Link href="/dashboard/groups">
-          Student Groups
+          Classes
         </Dashboard.Breadcrumbs.Link>
       </Dashboard.Breadcrumbs>
 
-      <Dashboard.Header
-        heading="Add Student Group"
-        subtitle="Create new student group."
-      />
+      <Dashboard.Header heading="Add Class" subtitle="Create new class." />
 
       <Alert
         variant="outlined"
@@ -114,8 +111,8 @@ export const AddGroup = () => {
           <>Please wait while we create student accounts...</>
         ) : (
           <>
-            Activities linked to a student group will be visible to students in
-            the group.
+            Assignments linked to a class will be visible to students in the
+            class.
           </>
         )}
       </Alert>

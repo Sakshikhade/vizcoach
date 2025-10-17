@@ -3,6 +3,7 @@ import client, {
   Comment,
   GetStudentSubmissionsResponse,
   Submission,
+  SubmissionState,
   Unit,
 } from 'db';
 import { useDashboard } from './useDashboard';
@@ -37,6 +38,16 @@ export const useStudentSubmissions = () => {
     [submissions],
   );
 
+  const getLatestSubmissionForUnit = (unitId: string): Submission | null => {
+    const unitSubs = submissions.filter((s) => s.unitId === unitId);
+    if (!unitSubs.length) return null;
+    return unitSubs.sort((a: any, b: any) => {
+      const aAttempt = a.attempt || 1;
+      const bAttempt = b.attempt || 1;
+      return bAttempt - aAttempt || b.updated.getTime() - a.updated.getTime();
+    })[0];
+  };
+
   const getSubmissionUnit = (submission: Submission) =>
     unitsMap[submission.unitId];
 
@@ -56,6 +67,8 @@ export const useStudentSubmissions = () => {
     }
   };
 
+  // Removed teacher-only mutation helpers
+
   // Setting up subscription to listen to new comments
   useEffect(() => {
     if (!submission) {
@@ -71,7 +84,13 @@ export const useStudentSubmissions = () => {
     });
 
     // Unregistering from subscriptions
-    return () => client.unregisterPostCommentCallback();
+    return () => {
+      try {
+        client.unregisterPostCommentCallback();
+      } catch (error) {
+        console.warn('Failed to unsubscribe from post comment updates:', error);
+      }
+    };
   }, [submission]);
 
   return {

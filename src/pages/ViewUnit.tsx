@@ -1,17 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Avatar,
-  IconButton,
-  ListItemIcon,
-  Menu,
-  MenuItem,
   Paper,
   Stack,
   Typography,
 } from '@mui/material';
-import { DeleteRounded, EditNoteRounded, MoreVert } from '@mui/icons-material';
-import { Dashboard, DatasetTabs } from 'components';
+import {
+  DeleteRounded,
+  EditNoteRounded,
+  TaskAltRounded,
+} from '@mui/icons-material';
+import { Dashboard, DatasetTabs, ImageGallery } from 'components';
 import client, { GetUnitResponse } from 'db';
 import { useDashboard } from 'hooks';
 
@@ -25,7 +24,7 @@ export const ViewUnit = () => {
   const onUnitDelete = async () => {
     if (
       window.confirm(
-        "Are you sure you want to delete this unit? This action will delete students' submissions too.",
+        "Are you sure you want to delete this task? This action will delete students' submissions too.",
       )
     ) {
       try {
@@ -46,7 +45,7 @@ export const ViewUnit = () => {
     <>
       <Dashboard.Breadcrumbs title={unit.title}>
         <Dashboard.Breadcrumbs.Link href="/dashboard/activities">
-          Activities
+          Assignments
         </Dashboard.Breadcrumbs.Link>
         <Dashboard.Breadcrumbs.Link
           href={`/dashboard/activities/${activity.id}/units`}
@@ -57,54 +56,16 @@ export const ViewUnit = () => {
 
       <Dashboard.Header
         heading={unit.title}
-        subtitle="View this unit's description and datasets."
-      >
-        <IconButton aria-label="unit actions" onClick={openMenu}>
-          <MoreVert sx={{ color: 'black' }} />
-        </IconButton>
-        <Menu
-          anchorEl={menuAnchorEl}
-          open={menuOpen}
-          onClose={closeMenu}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        >
-          <MenuItem
-            onClick={() => {
-              closeMenu();
-              navigate(`../${unit.id}/edit-unit`);
-            }}
-          >
-            <ListItemIcon>
-              <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
-                <EditNoteRounded fontSize="small" sx={{ color: 'black' }} />
-              </Avatar>
-            </ListItemIcon>
-            Edit Unit
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              closeMenu();
-              onUnitDelete();
-            }}
-          >
-            <ListItemIcon>
-              <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
-                <DeleteRounded fontSize="small" sx={{ color: 'black' }} />
-              </Avatar>
-            </ListItemIcon>
-            Delete Unit
-          </MenuItem>
-        </Menu>
-      </Dashboard.Header>
+        subtitle="View this task's description and datasets."
+      />
 
       <Stack padding={0.5}>
         <Paper variant="outlined">
           <Typography
             dangerouslySetInnerHTML={{ __html: unit.description }}
             sx={{
-              minHeight: '20rem',
-              maxHeight: '20rem',
+              minHeight: 'auto',
+              maxHeight: '30rem',
               overflowY: 'auto',
               paddingX: 4,
               paddingY: 2,
@@ -112,6 +73,23 @@ export const ViewUnit = () => {
           />
         </Paper>
       </Stack>
+
+      {/* Reference Images Section */}
+      {unit.reference && unit.reference.length > 0 && (
+        <Stack padding={0.5}>
+          <Paper variant="outlined" sx={{ padding: 3 }}>
+            <ImageGallery
+              record={unit}
+              imageNames={
+                Array.isArray(unit.reference)
+                  ? unit.reference
+                  : [unit.reference]
+              }
+              title="Reference Images"
+            />
+          </Paper>
+        </Stack>
+      )}
 
       <Stack padding={0.5}>
         <Paper variant="outlined">

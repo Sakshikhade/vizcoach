@@ -1,7 +1,10 @@
 import { ChangeEvent, useState } from 'react';
 import {
   Alert,
+  Button,
+  Chip,
   FormControlLabel,
+  IconButton,
   Paper,
   SpeedDialAction,
   Stack,
@@ -11,8 +14,10 @@ import {
   Typography,
 } from '@mui/material';
 import {
+  Add,
   BackHandRounded,
   CheckCircleOutlineRounded,
+  Close,
   DoNotTouch,
   ErrorOutlineRounded,
   Save,
@@ -43,6 +48,8 @@ export const Perform = () => {
     datasets,
     submission,
     unit,
+    charts,
+    activeChartId,
     json,
     saved,
     comments,
@@ -52,6 +59,10 @@ export const Perform = () => {
     submit,
     save,
     postComment,
+    resubmit,
+    addChart,
+    removeChart,
+    setActiveChartId,
   } = usePerform();
   const [error, setError] = useState<string | null>(null);
   const [showBuilder, setShowBuilder] = useState(true);
@@ -94,7 +105,19 @@ export const Perform = () => {
         heading={unit.title}
         subtitle="Create visualization for this unit."
       >
-        <SubmissionChip submission={submission} />
+        <Stack direction="row" gap={2} alignItems="center">
+          <SubmissionChip submission={submission} />
+          {submission && (
+            <Typography variant="body2" color="text.secondary">
+              Attempt: {submission.attempt}
+            </Typography>
+          )}
+          {submission?.score != null && (
+            <Typography variant="body2" color="text.secondary">
+              Score: {submission.score}
+            </Typography>
+          )}
+        </Stack>
       </Dashboard.Header>
 
       <Tabs
@@ -113,58 +136,93 @@ export const Perform = () => {
       </Tabs>
 
       {performTab === PERFORM_TABS[0] && (
-        <Stack direction="row" gap={2}>
-          <Stack flex={1}>
-            <Paper variant="outlined">
-              <Stack>
-                <Visualization datasets={datasets} json={json} />
-              </Stack>
-            </Paper>
-          </Stack>
-          <Stack flex={1}>
-            <Paper variant="outlined">
-              <Stack padding={2}>
-                <Stack
-                  marginBottom={2}
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <FormControlLabel
-                    label="Show Builder"
-                    labelPlacement="start"
-                    control={
-                      <Switch
-                        checked={showBuilder}
-                        onChange={onShowBuilderChange}
-                      />
+        <Stack gap={2}>
+          {/* Chart Tabs */}
+          <Paper variant="outlined">
+            <Stack direction="row" alignItems="center" padding={2} gap={2}>
+              <Typography variant="h6">Charts</Typography>
+              <Stack direction="row" gap={1} flex={1}>
+                {charts.map((chart) => (
+                  <Chip
+                    key={chart.id}
+                    label={chart.title}
+                    onClick={() => setActiveChartId(chart.id)}
+                    onDelete={
+                      charts.length > 1
+                        ? () => removeChart(chart.id)
+                        : undefined
                     }
+                    color={activeChartId === chart.id ? 'primary' : 'default'}
+                    variant={activeChartId === chart.id ? 'filled' : 'outlined'}
                   />
-                  {!saved && <UnsavedChip />}
-                </Stack>
-                {showBuilder ? (
-                  <VegaLiteBuilder
-                    json={json}
-                    datasets={datasets}
-                    readOnly={submission?.state === 'submitted'}
-                    onJsonChange={onJsonChange}
-                  />
-                ) : (
-                  <JsonEditor
-                    json={json}
-                    readOnly={submission?.state === 'submitted'}
-                    onJsonChange={onJsonChange}
-                  />
-                )}
-                {error && (
-                  <Stack marginTop={2}>
-                    <Alert icon={<ErrorOutlineRounded />} color="error">
-                      {error}
-                    </Alert>
-                  </Stack>
-                )}
+                ))}
               </Stack>
-            </Paper>
+              {submission?.state !== 'submitted' && (
+                <Button
+                  startIcon={<Add />}
+                  onClick={addChart}
+                  variant="outlined"
+                  size="small"
+                >
+                  Add Chart
+                </Button>
+              )}
+            </Stack>
+          </Paper>
+
+          <Stack direction="row" gap={2}>
+            <Stack flex={1}>
+              <Paper variant="outlined">
+                <Stack>
+                  <Visualization datasets={datasets} json={json} />
+                </Stack>
+              </Paper>
+            </Stack>
+            <Stack flex={1}>
+              <Paper variant="outlined">
+                <Stack padding={2}>
+                  <Stack
+                    marginBottom={2}
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <FormControlLabel
+                      label="Show Builder"
+                      labelPlacement="start"
+                      control={
+                        <Switch
+                          checked={showBuilder}
+                          onChange={onShowBuilderChange}
+                        />
+                      }
+                    />
+                    {!saved && <UnsavedChip />}
+                  </Stack>
+                  {showBuilder ? (
+                    <VegaLiteBuilder
+                      json={json}
+                      datasets={datasets}
+                      readOnly={submission?.state === 'submitted'}
+                      onJsonChange={onJsonChange}
+                    />
+                  ) : (
+                    <JsonEditor
+                      json={json}
+                      readOnly={submission?.state === 'submitted'}
+                      onJsonChange={onJsonChange}
+                    />
+                  )}
+                  {error && (
+                    <Stack marginTop={2}>
+                      <Alert icon={<ErrorOutlineRounded />} color="error">
+                        {error}
+                      </Alert>
+                    </Stack>
+                  )}
+                </Stack>
+              </Paper>
+            </Stack>
           </Stack>
         </Stack>
       )}
@@ -226,6 +284,16 @@ export const Perform = () => {
             icon={<CheckCircleOutlineRounded />}
             tooltipTitle="Submit Submission"
             onClick={submit}
+          />
+        </Dashboard.SpeedDial>
+      )}
+
+      {submission?.state === 'submitted' && (
+        <Dashboard.SpeedDial label="Resubmit" icon={<TaskAltRounded />}>
+          <SpeedDialAction
+            icon={<CheckCircleOutlineRounded />}
+            tooltipTitle={'Resubmit (new attempt)'}
+            onClick={resubmit}
           />
         </Dashboard.SpeedDial>
       )}

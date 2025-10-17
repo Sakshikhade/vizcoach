@@ -5,6 +5,7 @@ import { CloudUpload, Save } from '@mui/icons-material';
 import {
   Dashboard,
   FormField,
+  ImageUpload,
   RichEditor,
   VisuallyHiddenInput,
 } from 'components';
@@ -83,9 +84,9 @@ export const AddUnit = () => {
 
   return (
     <>
-      <Dashboard.Breadcrumbs title="Add Unit">
+      <Dashboard.Breadcrumbs title="Add Task">
         <Dashboard.Breadcrumbs.Link href="/dashboard/activities">
-          Activities
+          Assignments
         </Dashboard.Breadcrumbs.Link>
         <Dashboard.Breadcrumbs.Link href={`../${activity.id}/units`}>
           {activity.title}
@@ -93,8 +94,8 @@ export const AddUnit = () => {
       </Dashboard.Breadcrumbs>
 
       <Dashboard.Header
-        heading="Add Unit"
-        subtitle={`Create new unit for "${activity.title}" activity.`}
+        heading="Add Task"
+        subtitle={`Create new task for "${activity.title}" assignment.`}
       />
 
       <Alert variant="outlined" severity={errors.generic ? 'error' : 'info'}>
@@ -102,13 +103,13 @@ export const AddUnit = () => {
           errors.generic
         ) : (
           <>
-            Units hold description on how students should perform the task using
+            Tasks hold description on how students should perform the work using
             the datasets.
           </>
         )}
       </Alert>
 
-      <FormField label="What's the unit's title?" error={errors.title} required>
+      <FormField label="What's the task's title?" error={errors.title} required>
         <TextField
           variant="outlined"
           value={unit.title || ''}
@@ -118,7 +119,7 @@ export const AddUnit = () => {
       </FormField>
 
       <FormField
-        label="What's the unit's description?"
+        label="What's the task's description?"
         error={errors.description}
         required
       >
@@ -151,6 +152,15 @@ export const AddUnit = () => {
             multiple
           />
         </Button>
+      </FormField>
+
+      <FormField label="Reference Images (Optional)" error={errors.reference}>
+        <ImageUpload
+          files={unit.reference || []}
+          onChange={(files) => setField('reference', files)}
+          label="Upload reference images for 'recreate this image' type activities"
+          maxFiles={5}
+        />
       </FormField>
 
       <Dashboard.SpeedDial

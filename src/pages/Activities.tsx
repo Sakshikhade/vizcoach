@@ -32,14 +32,14 @@ export const Activities = () => {
 
   return (
     <>
-      <Dashboard.Breadcrumbs title="Activities" />
+      <Dashboard.Breadcrumbs title="Assignments" />
 
       <Dashboard.Header
-        heading="Activities"
+        heading="Assignments"
         subtitle={
           user?.role === 'Teacher'
-            ? 'Create, manage, and track activities.'
-            : 'Welcome, track your assigned activities.'
+            ? 'Create, manage, and track assignments.'
+            : 'Welcome, track your assigned work.'
         }
       >
         <FormControl>

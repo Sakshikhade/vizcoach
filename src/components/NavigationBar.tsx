@@ -11,11 +11,12 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
-import { AccountBox, BarChart, Chat, Group, Logout } from '@mui/icons-material';
+import { AccountBox, BarChart, Group, Logout } from '@mui/icons-material';
 import { VizCoachLogo } from 'components';
 import { useAuth, useDashboard } from 'hooks';
 
 export const NavigationBar = () => {
+  const { user } = useDashboard();
   return (
     <AppBar position="fixed">
       <Container maxWidth="xl">
@@ -26,7 +27,7 @@ export const NavigationBar = () => {
           <Stack direction="row">
             <VizCoachLogo />
             <Stack direction="row" columnGap={2} sx={{ ml: 4 }}>
-              <NavigationPages />
+              {user?.role === 'Teacher' && <NavigationPages />}
             </Stack>
           </Stack>
           <NavigationProfile />
@@ -38,37 +39,23 @@ export const NavigationBar = () => {
 
 const NavigationPages = () => {
   const navigate = useNavigate();
-  const { user } = useDashboard();
-
   return (
     <>
-      {user?.role === 'Teacher' && (
-        <>
-          <Button
-            variant="text"
-            startIcon={<BarChart />}
-            sx={{ color: 'white' }}
-            onClick={() => navigate('activities')}
-          >
-            Activities
-          </Button>
-          <Button
-            variant="text"
-            startIcon={<Group />}
-            sx={{ color: 'white' }}
-            onClick={() => navigate('groups')}
-          >
-            Student Groups
-          </Button>
-        </>
-      )}
       <Button
         variant="text"
-        startIcon={<Chat />}
+        startIcon={<BarChart />}
         sx={{ color: 'white' }}
-        onClick={() => navigate('chat')}
+        onClick={() => navigate('activities')}
       >
-        Chat
+        Assignments
+      </Button>
+      <Button
+        variant="text"
+        startIcon={<Group />}
+        sx={{ color: 'white' }}
+        onClick={() => navigate('groups')}
+      >
+        Classes
       </Button>
     </>
   );
