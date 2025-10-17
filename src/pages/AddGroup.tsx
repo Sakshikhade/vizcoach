@@ -7,9 +7,8 @@ import {
   MenuItem,
   Paper,
   Select,
-  SpeedDialAction,
 } from '@mui/material';
-import { CloudUpload, GroupAdd, Save } from '@mui/icons-material';
+import { CloudUpload, Save } from '@mui/icons-material';
 import { YearCalendar } from '@mui/x-date-pickers';
 import { Dashboard, FormField, VisuallyHiddenInput } from 'components';
 import client, {
@@ -197,12 +196,14 @@ export const AddGroup = () => {
       </FormField>
 
       {!saving && (
-        <Dashboard.SpeedDial label="Add Group SpeedDial" icon={<GroupAdd />}>
-          <SpeedDialAction
-            icon={<Save />}
-            tooltipTitle="Save Group"
-            onClick={onSave}
-          />
+        <Dashboard.SpeedDial
+          label="Add Group SpeedDial"
+          icon={<Save />}
+          onClick={onSave}
+          open={false}
+          staticIcon
+        >
+          {/* Keeping structure without actions to preserve shape/placement */}
         </Dashboard.SpeedDial>
       )}
     </>

@@ -100,17 +100,29 @@ const DashboardHeader = ({
 type DashboardSpeedDialProps = {
   label: string;
   icon: ReactNode;
+  onClick?: () => void;
+  open?: boolean;
+  staticIcon?: boolean;
 } & PropsWithChildren;
 
 const DashboardSpeedDial = ({
   label,
   icon,
   children,
+  onClick,
+  open,
+  staticIcon,
 }: DashboardSpeedDialProps) => (
   <SpeedDial
     ariaLabel={label}
     sx={{ position: 'fixed', bottom: '2rem', right: '2rem' }}
-    icon={<SpeedDialIcon openIcon={icon} />}
+    icon={staticIcon ? (
+      <SpeedDialIcon icon={icon} openIcon={icon} />
+    ) : (
+      <SpeedDialIcon openIcon={icon} />
+    )}
+    FabProps={{ onClick }}
+    open={open}
   >
     {children}
   </SpeedDial>

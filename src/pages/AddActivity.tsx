@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Addchart, Save } from '@mui/icons-material';
+import { Save } from '@mui/icons-material';
 import {
   Alert,
   MenuItem,
   Paper,
   Select,
-  SpeedDialAction,
   TextField,
 } from '@mui/material';
 import { DateCalendar } from '@mui/x-date-pickers';
@@ -170,12 +169,14 @@ export const AddActivity = () => {
         </Paper>
       </FormField>
 
-      <Dashboard.SpeedDial label="Add Activity SpeedDial" icon={<Addchart />}>
-        <SpeedDialAction
-          icon={<Save />}
-          tooltipTitle="Save Activity"
-          onClick={onSave}
-        />
+      <Dashboard.SpeedDial
+        label="Add Activity SpeedDial"
+        icon={<Save />}
+        onClick={onSave}
+        open={false}
+        staticIcon
+      >
+        {/* Keeping structure without actions to preserve shape/placement */}
       </Dashboard.SpeedDial>
     </>
   );

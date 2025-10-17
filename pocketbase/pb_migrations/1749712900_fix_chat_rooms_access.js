@@ -4,8 +4,8 @@ migrate((app) => {
   
   // Set proper access rules for chat rooms
   collection.createRule = "// Teachers can create any chat room\n@request.auth.role = 'Teacher' ||\n// Students can create private chats\n(@request.auth.role = 'Student' && @request.body.type = 'private')";
-  collection.listRule = "// Teachers can see all chat rooms\n@request.auth.role = 'Teacher' ||\n// Students can see rooms they're participants in\n(@request.auth.role = 'Student' && @request.auth.id in participants)";
-  collection.viewRule = "// Teachers can view all chat rooms\n@request.auth.role = 'Teacher' ||\n// Students can view rooms they're participants in\n(@request.auth.role = 'Student' && @request.auth.id in participants)";
+  collection.listRule = "// Teachers can see all chat rooms\n@request.auth.role = 'Teacher' ||\n// Students can see rooms they're participants in\n(@request.auth.role = 'Student' && @request.auth.id ?= participants)";
+  collection.viewRule = "// Teachers can view all chat rooms\n@request.auth.role = 'Teacher' ||\n// Students can view rooms they're participants in\n(@request.auth.role = 'Student' && @request.auth.id ?= participants)";
   collection.updateRule = "// Teachers can update any chat room\n@request.auth.role = 'Teacher' ||\n// Students can update rooms they created\n(@request.auth.role = 'Student' && @request.auth.id = createdBy)";
   collection.deleteRule = "// Teachers can delete any chat room\n@request.auth.role = 'Teacher' ||\n// Students can delete rooms they created\n(@request.auth.role = 'Student' && @request.auth.id = createdBy)";
   

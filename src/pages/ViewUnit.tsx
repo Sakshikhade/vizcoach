@@ -1,10 +1,7 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Paper, SpeedDialAction, Stack, Typography } from '@mui/material';
-import {
-  DeleteRounded,
-  EditNoteRounded,
-  TaskAltRounded,
-} from '@mui/icons-material';
+import { Avatar, IconButton, ListItemIcon, Menu, MenuItem, Paper, Stack, Typography } from '@mui/material';
+import { DeleteRounded, EditNoteRounded, MoreVert } from '@mui/icons-material';
 import { Dashboard, DatasetTabs } from 'components';
 import client, { GetUnitResponse } from 'db';
 import { useDashboard } from 'hooks';
@@ -13,6 +10,8 @@ export const ViewUnit = () => {
   const { useData } = useDashboard();
   const { activity, unit, datasets } = useData!<GetUnitResponse>();
   const navigate = useNavigate();
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(menuAnchorEl);
 
   const onUnitDelete = async () => {
     if (
@@ -28,6 +27,11 @@ export const ViewUnit = () => {
       }
     }
   };
+
+  const openMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
+  const closeMenu = () => setMenuAnchorEl(null);
 
   return (
     <>
@@ -45,7 +49,35 @@ export const ViewUnit = () => {
       <Dashboard.Header
         heading={unit.title}
         subtitle="View this unit's description and datasets."
-      />
+      >
+        <IconButton aria-label="unit actions" onClick={openMenu}>
+          <MoreVert sx={{ color: 'black' }} />
+        </IconButton>
+        <Menu
+          anchorEl={menuAnchorEl}
+          open={menuOpen}
+          onClose={closeMenu}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <MenuItem onClick={() => { closeMenu(); navigate(`../${unit.id}/edit-unit`); }}>
+            <ListItemIcon>
+              <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
+                <EditNoteRounded fontSize="small" sx={{ color: 'black' }} />
+              </Avatar>
+            </ListItemIcon>
+            Edit Unit
+          </MenuItem>
+          <MenuItem onClick={() => { closeMenu(); onUnitDelete(); }}>
+            <ListItemIcon>
+              <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
+                <DeleteRounded fontSize="small" sx={{ color: 'black' }} />
+              </Avatar>
+            </ListItemIcon>
+            Delete Unit
+          </MenuItem>
+        </Menu>
+      </Dashboard.Header>
 
       <Stack padding={0.5}>
         <Paper variant="outlined">
@@ -68,18 +100,7 @@ export const ViewUnit = () => {
         </Paper>
       </Stack>
 
-      <Dashboard.SpeedDial label="ViewUnit SpeedDial" icon={<TaskAltRounded />}>
-        <SpeedDialAction
-          icon={<EditNoteRounded />}
-          tooltipTitle="Edit Unit"
-          onClick={() => navigate(`../${unit.id}/edit-unit`)}
-        />
-        <SpeedDialAction
-          icon={<DeleteRounded />}
-          tooltipTitle="Delete Unit"
-          onClick={onUnitDelete}
-        />
-      </Dashboard.SpeedDial>
+      
     </>
   );
 };

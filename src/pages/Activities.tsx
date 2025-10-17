@@ -51,7 +51,17 @@ export const Activities = () => {
           />
         </FormControl>
       </Dashboard.Header>
-
+      {user?.role === 'Teacher' && (
+        <Dashboard.SpeedDial
+          label="Activities SpeedDial"
+          icon={<BarChart />}
+          onClick={() => navigate('add-activity')}
+          open={false}
+        >
+          {/* No actions to keep single-click behavior; we keep structure and icon */}
+          {/* Intentionally left empty */}
+        </Dashboard.SpeedDial>
+      )}
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {activities.map((activity) => {
           return (
@@ -62,15 +72,7 @@ export const Activities = () => {
         })}
       </Grid2>
 
-      {user?.role === 'Teacher' && (
-        <Dashboard.SpeedDial label="Activities SpeedDial" icon={<BarChart />}>
-          <SpeedDialAction
-            icon={<Addchart />}
-            tooltipTitle="Add Activity"
-            onClick={() => navigate('add-activity')}
-          />
-        </Dashboard.SpeedDial>
-      )}
+
     </>
   );
 };

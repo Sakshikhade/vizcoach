@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, SpeedDialAction, TextField } from '@mui/material';
-import { AddTask, CloudUpload, Save } from '@mui/icons-material';
+import { Alert, Button, TextField } from '@mui/material';
+import { CloudUpload, Save } from '@mui/icons-material';
 import {
   Dashboard,
   FormField,
@@ -153,12 +153,14 @@ export const AddUnit = () => {
         </Button>
       </FormField>
 
-      <Dashboard.SpeedDial label="Add Unit SpeedDial" icon={<AddTask />}>
-        <SpeedDialAction
-          icon={<Save />}
-          tooltipTitle="Save Unit"
-          onClick={onSave}
-        />
+      <Dashboard.SpeedDial
+        label="Add Unit SpeedDial"
+        icon={<Save />}
+        onClick={onSave}
+        open={false}
+        staticIcon
+      >
+        {/* Keeping structure without actions to preserve shape/placement */}
       </Dashboard.SpeedDial>
     </>
   );

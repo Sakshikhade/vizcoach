@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Group as GroupIcon, GroupAdd } from '@mui/icons-material';
+import { GroupAdd } from '@mui/icons-material';
 import {
   Box,
   Chip,
@@ -10,7 +10,6 @@ import {
   OutlinedInput,
   Select,
   SelectChangeEvent,
-  SpeedDialAction,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { Dashboard, GroupCard } from 'components';
@@ -110,12 +109,14 @@ export const Groups = () => {
         })}
       </Grid2>
 
-      <Dashboard.SpeedDial label="Groups SpeedDial" icon={<GroupIcon />}>
-        <SpeedDialAction
-          icon={<GroupAdd />}
-          tooltipTitle="Add Student Group"
-          onClick={() => navigate('add-group')}
-        />
+      <Dashboard.SpeedDial
+        label="Groups SpeedDial"
+        icon={<GroupAdd />}
+        onClick={() => navigate('add-group')}
+        open={false}
+        staticIcon
+      >
+        {/* Keeping structure without actions to preserve shape/placement */}
       </Dashboard.SpeedDial>
     </>
   );

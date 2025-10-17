@@ -1,11 +1,13 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Paper, SpeedDialAction, Stack, Typography } from '@mui/material';
+import { Avatar, IconButton, ListItemIcon, Menu, MenuItem, Paper, Stack, Typography } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   DeleteRounded,
   EditNoteRounded,
   PlaylistAddCheckRounded,
   PlaylistAddRounded,
+  MoreVert,
   TaskAltRounded,
 } from '@mui/icons-material';
 import { Dashboard, UnitCard } from 'components';
@@ -16,6 +18,8 @@ export const Units = () => {
   const { user, useData } = useDashboard();
   const { activity, units, submissions } = useData!<GetSubmissionsResponse>();
   const navigate = useNavigate();
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(menuAnchorEl);
 
   const submissionMap = submissions.reduce((map, submission) => {
     map.set(submission.unitId, submission);
@@ -37,6 +41,12 @@ export const Units = () => {
     }
   };
 
+  const openMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
+
+  const closeMenu = () => setMenuAnchorEl(null);
+
   return (
     <>
       <Dashboard.Breadcrumbs title={activity.title}>
@@ -52,7 +62,55 @@ export const Units = () => {
             ? "Create, manage, and track activity's units."
             : 'Track your progress for this activity.'
         }
-      />
+      >
+        {user?.role === 'Teacher' && (
+          <>
+            <IconButton aria-label="activity actions" onClick={openMenu}>
+              <MoreVert sx={{ color: 'black' }} />
+            </IconButton>
+            <Menu
+              anchorEl={menuAnchorEl}
+              open={menuOpen}
+              onClose={closeMenu}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <MenuItem onClick={() => { closeMenu(); navigate(`../${activity.id}/add-unit`); }}>
+                <ListItemIcon>
+                  <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
+                    <PlaylistAddRounded fontSize="small" sx={{ color: 'black' }} />
+                  </Avatar>
+                </ListItemIcon>
+                Add Unit
+              </MenuItem>
+              <MenuItem onClick={() => { closeMenu(); navigate(`../${activity.id}/submissions`); }}>
+                <ListItemIcon>
+                  <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
+                    <PlaylistAddCheckRounded fontSize="small" sx={{ color: 'black' }} />
+                  </Avatar>
+                </ListItemIcon>
+                View Submissions
+              </MenuItem>
+              <MenuItem onClick={() => { closeMenu(); navigate(`../${activity.id}/edit-activity`); }}>
+                <ListItemIcon>
+                  <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
+                    <EditNoteRounded fontSize="small" sx={{ color: 'black' }} />
+                  </Avatar>
+                </ListItemIcon>
+                Edit Activity
+              </MenuItem>
+              <MenuItem onClick={() => { closeMenu(); onDeleteActivity(); }}>
+                <ListItemIcon>
+                  <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
+                    <DeleteRounded fontSize="small" sx={{ color: 'black' }} />
+                  </Avatar>
+                </ListItemIcon>
+                Delete Activity
+              </MenuItem>
+            </Menu>
+          </>
+        )}
+      </Dashboard.Header>
 
       <Stack padding={0.5}>
         <Paper variant="outlined">
@@ -91,30 +149,7 @@ export const Units = () => {
         })}
       </Grid2>
 
-      {user?.role === 'Teacher' && (
-        <Dashboard.SpeedDial label="Units SpeedDial" icon={<TaskAltRounded />}>
-          <SpeedDialAction
-            icon={<PlaylistAddRounded />}
-            tooltipTitle="Add Unit"
-            onClick={() => navigate(`../${activity.id}/add-unit`)}
-          />
-          <SpeedDialAction
-            icon={<PlaylistAddCheckRounded />}
-            tooltipTitle="View Submissions"
-            onClick={() => navigate(`../${activity.id}/submissions`)}
-          />
-          <SpeedDialAction
-            icon={<EditNoteRounded />}
-            tooltipTitle="Edit Activity"
-            onClick={() => navigate(`../${activity.id}/edit-activity`)}
-          />
-          <SpeedDialAction
-            icon={<DeleteRounded />}
-            tooltipTitle="Delete Activity"
-            onClick={onDeleteActivity}
-          />
-        </Dashboard.SpeedDial>
-      )}
+
     </>
   );
 };
