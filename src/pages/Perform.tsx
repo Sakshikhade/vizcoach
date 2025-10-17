@@ -244,13 +244,10 @@ export const Perform = () => {
       )}
 
       {submission?.state === 'submitted' && (
-        <Dashboard.SpeedDial
-          label="Resubmit"
-          icon={<TaskAltRounded />}
-        >
+        <Dashboard.SpeedDial label="Resubmit" icon={<TaskAltRounded />}>
           <SpeedDialAction
             icon={<CheckCircleOutlineRounded />}
-            tooltipTitle={"Resubmit (new attempt)"}
+            tooltipTitle={'Resubmit (new attempt)'}
             onClick={resubmit}
           />
         </Dashboard.SpeedDial>

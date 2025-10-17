@@ -308,7 +308,6 @@ export class ChatRoom {
   }
 }
 
-
 export type ChatMessageType = 'text' | 'system';
 
 export class ChatMessage {

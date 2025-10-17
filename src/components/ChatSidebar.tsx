@@ -73,7 +73,6 @@ export const ChatSidebar = ({
     }
   };
 
-
   const loadUsers = async () => {
     try {
       const usersData = await client.getAllUsers();
@@ -209,8 +208,6 @@ export const ChatSidebar = ({
     }
   };
 
-
-
   const createPrivateChat = async (targetUser: User) => {
     try {
       console.log('Creating private chat with:', targetUser.name);
@@ -323,7 +320,6 @@ export const ChatSidebar = ({
     );
   }
 
-
   return (
     <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
@@ -366,7 +362,6 @@ export const ChatSidebar = ({
 
       {user?.role === 'Teacher' && (
         <>
-
           <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
             <Typography variant="subtitle2" gutterBottom>
               Start Private Chat
@@ -418,8 +413,6 @@ export const ChatSidebar = ({
 
       {user?.role === 'Student' && (
         <>
-
-
           <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
             <Typography variant="subtitle2" gutterBottom>
               Start Private Chat
@@ -495,7 +488,6 @@ export const ChatSidebar = ({
           </Box>
         </>
       )}
-
     </Paper>
   );
 };

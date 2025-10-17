@@ -267,8 +267,13 @@ class PocketbaseClient {
     );
     // Return latest attempt (highest attempt number or latest updated)
     const latest = submissions.sort((a, b) => {
-      if ((a as any).attempt !== undefined && (b as any).attempt !== undefined) {
-        return b.attempt - a.attempt || b.updated.getTime() - a.updated.getTime();
+      if (
+        (a as any).attempt !== undefined &&
+        (b as any).attempt !== undefined
+      ) {
+        return (
+          b.attempt - a.attempt || b.updated.getTime() - a.updated.getTime()
+        );
       }
       return b.updated.getTime() - a.updated.getTime();
     })[0];
@@ -309,9 +314,11 @@ class PocketbaseClient {
     const user = this.getUser();
     if (!user) return null;
     try {
-      const model = await this.pb.collection('submissions').getOne(submissionId, {
-        expand: user.role === 'Teacher' ? 'userId' : '',
-      });
+      const model = await this.pb
+        .collection('submissions')
+        .getOne(submissionId, {
+          expand: user.role === 'Teacher' ? 'userId' : '',
+        });
       const student = user.role === 'Teacher' ? model.expand?.userId : user;
       return new Submission(model, student as any);
     } catch {
@@ -399,7 +406,10 @@ class PocketbaseClient {
     }
 
     // Determine next attempt number for this user+unit
-    const previous = await this.getSubmissions(activityId, `unitId='${unitId}' && userId='${user.id}'`);
+    const previous = await this.getSubmissions(
+      activityId,
+      `unitId='${unitId}' && userId='${user.id}'`,
+    );
     const nextAttempt = previous.length
       ? Math.max(...previous.map((s: any) => s.attempt || 1)) + 1
       : 1;
@@ -452,12 +462,17 @@ class PocketbaseClient {
       attempt: (oldSubmission as any).attempt || 1,
       json: unsavedSubmission.json,
     };
-    if (unsavedSubmission.state === 'help' || unsavedSubmission.state === 'submitted') {
+    if (
+      unsavedSubmission.state === 'help' ||
+      unsavedSubmission.state === 'submitted'
+    ) {
       updateData.state = unsavedSubmission.state;
     } else {
       updateData.state = '';
     }
-    await this.pb.collection('submissions').update(oldSubmission.id, updateData);
+    await this.pb
+      .collection('submissions')
+      .update(oldSubmission.id, updateData);
 
     // Fetching updated submission
     const newSubmission = await this.getSubmission(activityId, unitId);
@@ -680,7 +695,6 @@ class PocketbaseClient {
       return null;
     }
   }
-
 
   async getChatMessages(roomId: string, limit = 50): Promise<ChatMessage[]> {
     const user = this.getUser();
