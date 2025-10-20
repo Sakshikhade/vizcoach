@@ -194,7 +194,7 @@ export interface GetUnitResponse {
 // Frontend aliases for better UX
 export type GetTaskResponse = GetUnitResponse;
 
-export type SubmissionState = 'help' | 'submitted' | null;
+export type SubmissionState = 'help' | 'submitted' | 'draft' | null;
 
 export class Submission {
   constructor(
