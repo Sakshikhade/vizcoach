@@ -79,10 +79,7 @@ export const Units = () => {
               </IconButton>
             </Tooltip>
             <Tooltip title="Delete Assignment">
-              <IconButton
-                onClick={onDeleteActivity}
-                color="error"
-              >
+              <IconButton onClick={onDeleteActivity} color="error">
                 <DeleteRounded />
               </IconButton>
             </Tooltip>

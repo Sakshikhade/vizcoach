@@ -38,34 +38,46 @@ import client from 'db';
 const getSubmissionStatus = (submission: any) => {
   if (!submission) return 'Not Started';
   switch (submission.state) {
-    case 'draft': return 'In Progress';
-    case 'submitted': return 'Completed';
-    case 'help': return 'Help Needed';
-    default: return 'In Progress';
+    case 'draft':
+      return 'In Progress';
+    case 'submitted':
+      return 'Completed';
+    case 'help':
+      return 'Help Needed';
+    default:
+      return 'In Progress';
   }
 };
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'In Progress': return 'success';
-    case 'Not Started': return 'default';
-    case 'Completed': return 'info';
-    case 'Help Needed': return 'error';
-    case 'Stuck': return 'warning';
-    default: return 'default';
+    case 'In Progress':
+      return 'success';
+    case 'Not Started':
+      return 'default';
+    case 'Completed':
+      return 'info';
+    case 'Help Needed':
+      return 'error';
+    case 'Stuck':
+      return 'warning';
+    default:
+      return 'default';
   }
 };
 
 export const OrchestrationView = () => {
   const { useData } = useDashboard();
   const navigate = useNavigate();
-  
+
   // Get activities and groups data from the loader
   const data = useData!<{ activities: Activity[]; groups: GroupType[] }>();
   const activities = data?.activities || [];
   const groups = data?.groups || [];
-  
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
+    null,
+  );
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [activityTime, setActivityTime] = useState('00:00');
@@ -101,9 +113,9 @@ export const OrchestrationView = () => {
   // Mock timer functionality
   useEffect(() => {
     if (!isRunning) return;
-    
+
     const interval = setInterval(() => {
-      setActivityTime(prev => {
+      setActivityTime((prev) => {
         const [hours, minutes] = prev.split(':').map(Number);
         const totalMinutes = hours * 60 + minutes + 1;
         const newHours = Math.floor(totalMinutes / 60);
@@ -115,9 +127,10 @@ export const OrchestrationView = () => {
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredStudents = students.filter(
+    (student) =>
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const startActivity = () => {
@@ -133,19 +146,27 @@ export const OrchestrationView = () => {
 
   const getStudentSubmission = (studentId: string) => {
     // In a real app, this would fetch the student's submission for the selected activity
-    return submissions.find(sub => sub.studentId === studentId);
+    return submissions.find((sub) => sub.studentId === studentId);
   };
 
   const getStatusCounts = () => {
     const counts = { active: 0, inProgress: 0, completed: 0, help: 0 };
-    students.forEach(student => {
+    students.forEach((student) => {
       const submission = getStudentSubmission(student.id);
       const status = getSubmissionStatus(submission);
       switch (status) {
-        case 'In Progress': counts.active++; break;
-        case 'Not Started': counts.inProgress++; break; // Treat "Not Started" as "In Progress" for display
-        case 'Completed': counts.completed++; break;
-        case 'Help Needed': counts.help++; break;
+        case 'In Progress':
+          counts.active++;
+          break;
+        case 'Not Started':
+          counts.inProgress++;
+          break; // Treat "Not Started" as "In Progress" for display
+        case 'Completed':
+          counts.completed++;
+          break;
+        case 'Help Needed':
+          counts.help++;
+          break;
       }
     });
     return counts;
@@ -158,11 +179,15 @@ export const OrchestrationView = () => {
     return (
       <>
         <Dashboard.Breadcrumbs title="Orchestration View" />
-        <Dashboard.Header
-          heading="Orchestration View"
-          subtitle="Loading..."
-        />
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <Dashboard.Header heading="Orchestration View" subtitle="Loading..." />
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '50vh',
+          }}
+        >
           <Typography>Loading orchestration data...</Typography>
         </Box>
       </>
@@ -174,30 +199,33 @@ export const OrchestrationView = () => {
       <Dashboard.Breadcrumbs title="Orchestration View" />
 
       <Dashboard.Header
-        heading={selectedActivity ? selectedActivity.title : "Orchestration View"}
-        subtitle={selectedActivity ? `Monitoring: ${selectedActivity.title}` : "Select an activity and class to begin orchestration"}
+        heading={
+          selectedActivity ? selectedActivity.title : 'Orchestration View'
+        }
+        subtitle={
+          selectedActivity
+            ? `Monitoring: ${selectedActivity.title}`
+            : 'Select an activity and class to begin orchestration'
+        }
       >
         <Stack direction="row" spacing={2} alignItems="center">
           {selectedActivity && (
-            <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
+            <Typography
+              variant="h6"
+              sx={{ color: 'primary.main', fontWeight: 'bold' }}
+            >
               Activity run-time: {activityTime}
             </Typography>
           )}
           {isRunning ? (
             <>
               <Tooltip title="Pause Activity">
-                <IconButton
-                  onClick={() => setIsRunning(false)}
-                  color="primary"
-                >
+                <IconButton onClick={() => setIsRunning(false)} color="primary">
                   <Pause />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Stop Activity">
-                <IconButton
-                  onClick={stopActivity}
-                  color="error"
-                >
+                <IconButton onClick={stopActivity} color="error">
                   <Stop />
                 </IconButton>
               </Tooltip>
@@ -232,7 +260,9 @@ export const OrchestrationView = () => {
             <Select
               value={selectedActivity?.id || ''}
               onChange={(e) => {
-                const activity = activities.find(a => a.id === e.target.value);
+                const activity = activities.find(
+                  (a) => a.id === e.target.value,
+                );
                 setSelectedActivity(activity || null);
               }}
               label="Activity"
@@ -247,13 +277,13 @@ export const OrchestrationView = () => {
               ))}
             </Select>
           </FormControl>
-          
+
           <FormControl sx={{ minWidth: 200 }}>
             <InputLabel>Class</InputLabel>
             <Select
               value={selectedGroup?.id || ''}
               onChange={(e) => {
-                const group = groups.find(g => g.id === e.target.value);
+                const group = groups.find((g) => g.id === e.target.value);
                 setSelectedGroup(group || null);
               }}
               label="Class"
@@ -268,7 +298,7 @@ export const OrchestrationView = () => {
               ))}
             </Select>
           </FormControl>
-          
+
           {selectedActivity && selectedGroup && (
             <Button
               variant="contained"
@@ -288,131 +318,164 @@ export const OrchestrationView = () => {
           <Grid2 xs={12} md={8}>
             <Stack spacing={2} sx={{ height: '100%' }}>
               {/* Class Summary Pane */}
-              <Paper variant="outlined" sx={{ p: 2, backgroundColor: '#f5f5f5' }}>
+              <Paper
+                variant="outlined"
+                sx={{ p: 2, backgroundColor: '#f5f5f5' }}
+              >
                 <Typography variant="h6" color="error" gutterBottom>
                   Class Summary Pane
                 </Typography>
                 <Grid2 container spacing={2}>
                   <Grid2 xs={3}>
                     <Box textAlign="center">
-                      <Typography variant="h4" color="success.main">{statusCounts.active}</Typography>
+                      <Typography variant="h4" color="success.main">
+                        {statusCounts.active}
+                      </Typography>
                       <Typography variant="body2">Active</Typography>
                     </Box>
                   </Grid2>
                   <Grid2 xs={3}>
                     <Box textAlign="center">
-                      <Typography variant="h4" color="warning.main">{statusCounts.inProgress}</Typography>
+                      <Typography variant="h4" color="warning.main">
+                        {statusCounts.inProgress}
+                      </Typography>
                       <Typography variant="body2">In Progress</Typography>
                     </Box>
                   </Grid2>
                   <Grid2 xs={3}>
                     <Box textAlign="center">
-                      <Typography variant="h4" color="info.main">{statusCounts.completed}</Typography>
+                      <Typography variant="h4" color="info.main">
+                        {statusCounts.completed}
+                      </Typography>
                       <Typography variant="body2">Completed</Typography>
                     </Box>
                   </Grid2>
                   <Grid2 xs={3}>
                     <Box textAlign="center">
-                      <Typography variant="h4" color="error.main">{statusCounts.help}</Typography>
+                      <Typography variant="h4" color="error.main">
+                        {statusCounts.help}
+                      </Typography>
                       <Typography variant="body2">Help</Typography>
                     </Box>
                   </Grid2>
                 </Grid2>
               </Paper>
 
-            {/* Overview Grid View */}
-            <Paper variant="outlined" sx={{ flex: 1, p: 2 }}>
-              <Typography variant="h6" color="error" gutterBottom>
-                Overview Grid View
-              </Typography>
-              
-              {/* Filter Section */}
-              <Box sx={{ mb: 2 }}>
-                <TextField
-                  placeholder="Filter students..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  InputProps={{
-                    startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
-                  }}
-                  size="small"
-                  sx={{ width: 300 }}
-                />
-              </Box>
+              {/* Overview Grid View */}
+              <Paper variant="outlined" sx={{ flex: 1, p: 2 }}>
+                <Typography variant="h6" color="error" gutterBottom>
+                  Overview Grid View
+                </Typography>
 
-              {/* Student Grid */}
-              {loadingStudents ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-                  <Typography>Loading students...</Typography>
+                {/* Filter Section */}
+                <Box sx={{ mb: 2 }}>
+                  <TextField
+                    placeholder="Filter students..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <Search sx={{ mr: 1, color: 'text.secondary' }} />
+                      ),
+                    }}
+                    size="small"
+                    sx={{ width: 300 }}
+                  />
                 </Box>
-              ) : (
-                <Grid2 container spacing={1}>
-                  {filteredStudents.map((student) => {
-                  const submission = getStudentSubmission(student.id);
-                  const status = getSubmissionStatus(submission);
-                  return (
-                    <Grid2 key={student.id} xs={6} sm={4} md={3}>
-                      <Card
-                        sx={{
-                          cursor: 'pointer',
-                          border: selectedStudent?.id === student.id ? 2 : 1,
-                          borderColor: selectedStudent?.id === student.id ? 'primary.main' : 'divider',
-                          '&:hover': {
-                            boxShadow: 2,
-                          },
-                        }}
-                        onClick={() => setSelectedStudent(student)}
-                      >
-                        <CardContent sx={{ p: 2, textAlign: 'center' }}>
-                          <Avatar
+
+                {/* Student Grid */}
+                {loadingStudents ? (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      height: 200,
+                    }}
+                  >
+                    <Typography>Loading students...</Typography>
+                  </Box>
+                ) : (
+                  <Grid2 container spacing={1}>
+                    {filteredStudents.map((student) => {
+                      const submission = getStudentSubmission(student.id);
+                      const status = getSubmissionStatus(submission);
+                      return (
+                        <Grid2 key={student.id} xs={6} sm={4} md={3}>
+                          <Card
                             sx={{
-                              width: 60,
-                              height: 60,
-                              mx: 'auto',
-                              mb: 1,
-                              bgcolor: 'primary.main',
+                              cursor: 'pointer',
+                              border:
+                                selectedStudent?.id === student.id ? 2 : 1,
+                              borderColor:
+                                selectedStudent?.id === student.id
+                                  ? 'primary.main'
+                                  : 'divider',
+                              '&:hover': {
+                                boxShadow: 2,
+                              },
                             }}
+                            onClick={() => setSelectedStudent(student)}
                           >
-                            {student.name.charAt(0)}
-                          </Avatar>
-                          <Typography variant="body2" fontWeight="bold" noWrap>
-                            {student.name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {student.email}
-                          </Typography>
-                          <Box sx={{ mt: 1 }}>
-                            <Chip
-                              label={status}
-                              size="small"
-                              color={getStatusColor(status) as any}
-                            />
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    </Grid2>
-                  );
-                })}
-                </Grid2>
-              )}
-            </Paper>
-          </Stack>
-        </Grid2>
+                            <CardContent sx={{ p: 2, textAlign: 'center' }}>
+                              <Avatar
+                                sx={{
+                                  width: 60,
+                                  height: 60,
+                                  mx: 'auto',
+                                  mb: 1,
+                                  bgcolor: 'primary.main',
+                                }}
+                              >
+                                {student.name.charAt(0)}
+                              </Avatar>
+                              <Typography
+                                variant="body2"
+                                fontWeight="bold"
+                                noWrap
+                              >
+                                {student.name}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {student.email}
+                              </Typography>
+                              <Box sx={{ mt: 1 }}>
+                                <Chip
+                                  label={status}
+                                  size="small"
+                                  color={getStatusColor(status) as any}
+                                />
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        </Grid2>
+                      );
+                    })}
+                  </Grid2>
+                )}
+              </Paper>
+            </Stack>
+          </Grid2>
 
           {/* Right Section - Student Details Pane */}
           <Grid2 xs={12} md={4}>
-            <Paper 
-              variant="outlined" 
-              sx={{ 
-                height: '100%', 
+            <Paper
+              variant="outlined"
+              sx={{
+                height: '100%',
                 p: 2,
-                backgroundColor: selectedStudent ? 'background.paper' : '#f5f5f5',
+                backgroundColor: selectedStudent
+                  ? 'background.paper'
+                  : '#f5f5f5',
               }}
             >
               <Typography variant="h6" color="error" gutterBottom>
                 Student Details Pane
               </Typography>
-              
+
               {selectedStudent ? (
                 <Stack spacing={2}>
                   <Box textAlign="center">
@@ -430,12 +493,24 @@ export const OrchestrationView = () => {
                     <Typography variant="h6" gutterBottom>
                       {selectedStudent.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      gutterBottom
+                    >
                       {selectedStudent.email}
                     </Typography>
                     <Chip
-                      label={getSubmissionStatus(getStudentSubmission(selectedStudent.id))}
-                      color={getStatusColor(getSubmissionStatus(getStudentSubmission(selectedStudent.id))) as any}
+                      label={getSubmissionStatus(
+                        getStudentSubmission(selectedStudent.id),
+                      )}
+                      color={
+                        getStatusColor(
+                          getSubmissionStatus(
+                            getStudentSubmission(selectedStudent.id),
+                          ),
+                        ) as any
+                      }
                       sx={{ mb: 2 }}
                     />
                   </Box>
@@ -451,7 +526,10 @@ export const OrchestrationView = () => {
                       Class: {selectedGroup?.title}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Status: {getSubmissionStatus(getStudentSubmission(selectedStudent.id))}
+                      Status:{' '}
+                      {getSubmissionStatus(
+                        getStudentSubmission(selectedStudent.id),
+                      )}
                     </Typography>
                   </Box>
 
@@ -468,7 +546,9 @@ export const OrchestrationView = () => {
                           onClick={() => {
                             // Navigate to student's submission view
                             // For now, navigate to the activity units page
-                            navigate(`/dashboard/activities/${selectedActivity?.id}/units`);
+                            navigate(
+                              `/dashboard/activities/${selectedActivity?.id}/units`,
+                            );
                           }}
                         >
                           View Work
@@ -495,13 +575,13 @@ export const OrchestrationView = () => {
                   </Box>
                 </Stack>
               ) : (
-                <Box 
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     height: '100%',
-                    color: 'text.secondary'
+                    color: 'text.secondary',
                   }}
                 >
                   <Typography variant="body1">
@@ -518,7 +598,8 @@ export const OrchestrationView = () => {
             Select an Activity and Class to Begin Orchestration
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Choose an activity from the dropdown above and select the class that will be participating.
+            Choose an activity from the dropdown above and select the class that
+            will be participating.
           </Typography>
         </Paper>
       )}

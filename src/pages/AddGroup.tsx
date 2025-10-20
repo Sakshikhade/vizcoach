@@ -100,10 +100,7 @@ export const AddGroup = () => {
         </Dashboard.Breadcrumbs.Link>
       </Dashboard.Breadcrumbs>
 
-      <Dashboard.Header
-        heading="Add Class"
-        subtitle="Create new class."
-      >
+      <Dashboard.Header heading="Add Class" subtitle="Create new class.">
         <Tooltip title="Save Group">
           <IconButton
             onClick={onSave}
@@ -207,7 +204,6 @@ export const AddGroup = () => {
           />
         </Paper>
       </FormField>
-
     </>
   );
 };

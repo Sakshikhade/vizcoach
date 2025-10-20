@@ -94,11 +94,7 @@ export const AddActivity = () => {
         subtitle="Create new assignment for a class."
       >
         <Tooltip title="Save Activity">
-          <IconButton
-            onClick={onSave}
-            color="primary"
-            size="large"
-          >
+          <IconButton onClick={onSave} color="primary" size="large">
             <Save />
           </IconButton>
         </Tooltip>

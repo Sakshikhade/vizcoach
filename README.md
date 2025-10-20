@@ -44,6 +44,7 @@ npm install
 Navigate to the PocketBase directory and set up the backend:
 
 **For Windows:**
+
 ```cmd
 cd pocketbase
 chmod +x *.sh
@@ -51,6 +52,7 @@ chmod +x *.sh
 ```
 
 **For Mac/Linux:**
+
 ```bash
 cd pocketbase
 chmod +x *.sh
@@ -60,12 +62,14 @@ chmod +x *.sh
 #### 4. Start the Development Servers
 
 **Terminal 1 - Start PocketBase Backend:**
+
 ```bash
 cd pocketbase
 ./dev.sh
 ```
 
 **Terminal 2 - Start React Frontend:**
+
 ```bash
 npm start
 ```
@@ -73,7 +77,7 @@ npm start
 #### 5. Access the Application
 
 - **Frontend**: Open [http://localhost:3000](http://localhost:3000) in your browser
-- **PocketBase Admin**: Open [http://localhost:8090/_/](http://localhost:8090/_/) in your browser
+- **PocketBase Admin**: Open [http://localhost:8090/\_/](http://localhost:8090/_/) in your browser
 
 #### 6. Configure PocketBase
 
@@ -102,6 +106,7 @@ cd pocketbase
 VizCoach provides a comprehensive set of features for visualization education:
 
 ### For Educators (Teachers)
+
 - **Activity Management**: Create, schedule, and manage visualization activities
 - **Group Management**: Organize students into groups by semester, year, and course
 - **Unit Creation**: Design structured learning units with datasets and descriptions
@@ -111,6 +116,7 @@ VizCoach provides a comprehensive set of features for visualization education:
 - **Reference Materials**: Upload and share reference images and materials
 
 ### For Students
+
 - **Interactive Visualization Builder**: Create visualizations using Vega-Lite with an intuitive interface
 - **JSON Editor**: Direct JSON editing for advanced users with syntax validation
 - **Dataset Exploration**: Browse and analyze provided datasets through interactive tables
@@ -120,6 +126,7 @@ VizCoach provides a comprehensive set of features for visualization education:
 - **Comment System**: Engage in discussions with teachers and peers
 
 ### Core Functionality
+
 - **Vega-Lite Integration**: Built-in support for creating and editing Vega-Lite visualizations
 - **Multi-dataset Support**: Work with multiple CSV datasets simultaneously
 - **Responsive Design**: Modern, mobile-friendly interface
@@ -130,6 +137,7 @@ VizCoach provides a comprehensive set of features for visualization education:
 ## Technology Stack
 
 ### Frontend
+
 - **React 18.3.1** - Modern React with hooks and functional components
 - **TypeScript 4.9.4** - Type-safe JavaScript development
 - **Material-UI (MUI) 5.16.0** - Modern React component library
@@ -140,12 +148,14 @@ VizCoach provides a comprehensive set of features for visualization education:
 - **TipTap** - Rich text editor for content creation
 
 ### Backend
+
 - **PocketBase 0.26.1** - Backend-as-a-Service with Go
 - **Go 1.19+** - Backend runtime
 - **SQLite** - Embedded database
 - **RESTful API** - REST API for data operations
 
 ### Development Tools
+
 - **Create React App** - React application boilerplate
 - **Prettier** - Code formatting
 - **Husky** - Git hooks
@@ -156,6 +166,7 @@ VizCoach provides a comprehensive set of features for visualization education:
 ## References
 
 ### Tools, Frameworks, and Libraries
+
 - [React](https://reactjs.org/) - JavaScript library for building user interfaces
 - [Material-UI](https://mui.com/) - React component library implementing Material Design
 - [Vega-Lite](https://vega.github.io/vega-lite/) - Grammar of graphics for data visualization
@@ -165,13 +176,11 @@ VizCoach provides a comprehensive set of features for visualization education:
 - [Monaco Editor](https://microsoft.github.io/monaco-editor/) - Code editor for the web
 - [TipTap](https://tiptap.dev/) - Headless rich text editor
 
-
 ## Contributing
 
 This project follows a participatory design approach, utilizing community feedback to create a flexible tool for education. Contributions are welcome and should align with the project's educational goals.
 
 **Repository**: [https://github.com/svl-at-asu/viz-coach.git](https://github.com/svl-at-asu/viz-coach.git)
-
 
 ## Support
 

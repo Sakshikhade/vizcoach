@@ -98,11 +98,7 @@ export const AddUnit = () => {
         subtitle={`Create new task for "${activity.title}" assignment.`}
       >
         <Tooltip title="Save Task">
-          <IconButton
-            onClick={onSave}
-            color="primary"
-            size="large"
-          >
+          <IconButton onClick={onSave} color="primary" size="large">
             <Save />
           </IconButton>
         </Tooltip>
@@ -164,10 +160,7 @@ export const AddUnit = () => {
         </Button>
       </FormField>
 
-      <FormField
-        label="Reference Images (Optional)"
-        error={errors.reference}
-      >
+      <FormField label="Reference Images (Optional)" error={errors.reference}>
         <ImageUpload
           files={unit.reference || []}
           onChange={(files) => setField('reference', files)}

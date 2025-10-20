@@ -120,11 +120,7 @@ export const EditActivity = () => {
         subtitle="Update assignment details for a class."
       >
         <Tooltip title="Save Changes">
-          <IconButton
-            onClick={onSave}
-            color="primary"
-            size="large"
-          >
+          <IconButton onClick={onSave} color="primary" size="large">
             <Save />
           </IconButton>
         </Tooltip>

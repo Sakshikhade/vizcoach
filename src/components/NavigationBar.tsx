@@ -11,7 +11,13 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
-import { AccountBox, BarChart, Group, Logout, Dashboard as DashboardIcon } from '@mui/icons-material';
+import {
+  AccountBox,
+  BarChart,
+  Group,
+  Logout,
+  Dashboard as DashboardIcon,
+} from '@mui/icons-material';
 import { VizCoachLogo } from 'components';
 import { useAuth, useDashboard } from 'hooks';
 

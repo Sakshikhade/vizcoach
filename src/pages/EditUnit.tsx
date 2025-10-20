@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Box, Button, TextField, Typography, IconButton, Tooltip } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
+  Tooltip,
+} from '@mui/material';
 import { CloudUpload, Save } from '@mui/icons-material';
 import {
   Dashboard,
@@ -29,10 +37,18 @@ export const EditUnit = () => {
     description: unit.description,
   });
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [uploadedReferenceFiles, setUploadedReferenceFiles] = useState<File[]>([]);
+  const [uploadedReferenceFiles, setUploadedReferenceFiles] = useState<File[]>(
+    [],
+  );
   const [existingDatasets] = useState<string[]>(unit.datasets || []);
-  const [existingReferenceImages, setExistingReferenceImages] = useState<string[]>(
-    Array.isArray(unit.reference) ? unit.reference : unit.reference ? [unit.reference] : []
+  const [existingReferenceImages, setExistingReferenceImages] = useState<
+    string[]
+  >(
+    Array.isArray(unit.reference)
+      ? unit.reference
+      : unit.reference
+        ? [unit.reference]
+        : [],
   );
   const [errors, setErrors] = useState<FormErrorState>({});
   const navigate = useNavigate();
@@ -70,7 +86,9 @@ export const EditUnit = () => {
     setErrors((prev) => ({ ...prev, [name]: value }));
 
   const removeExistingReferenceImage = (imageName: string) => {
-    setExistingReferenceImages(prev => prev.filter(img => img !== imageName));
+    setExistingReferenceImages((prev) =>
+      prev.filter((img) => img !== imageName),
+    );
   };
 
   const onSave = async () => {
@@ -99,17 +117,20 @@ export const EditUnit = () => {
 
       // Prepare FormData for file uploads
       const formData = new FormData();
-      
+
       // Add basic fields
       formData.append('title', editedUnit.title || unit.title);
-      formData.append('description', editedUnit.description || unit.description);
+      formData.append(
+        'description',
+        editedUnit.description || unit.description,
+      );
 
       // Handle datasets - combine existing with new uploads
       // First, add existing datasets (as strings to preserve them)
       existingDatasets.forEach((datasetName) => {
         formData.append('datasets', datasetName);
       });
-      
+
       // Then, add new dataset files
       uploadedFiles.forEach((file) => {
         formData.append('datasets', file);
@@ -120,20 +141,23 @@ export const EditUnit = () => {
       existingReferenceImages.forEach((imageName) => {
         formData.append('reference', imageName);
       });
-      
+
       // Then, add new reference image files
       uploadedReferenceFiles.forEach((file) => {
         formData.append('reference', file);
       });
 
       console.log('Saving unit with FormData containing files:', {
-        datasets: [...existingDatasets, ...uploadedFiles.map(f => f.name)],
-        reference: [...existingReferenceImages, ...uploadedReferenceFiles.map(f => f.name)]
+        datasets: [...existingDatasets, ...uploadedFiles.map((f) => f.name)],
+        reference: [
+          ...existingReferenceImages,
+          ...uploadedReferenceFiles.map((f) => f.name),
+        ],
       });
 
       // Update unit with FormData for proper file handling
       await client.pb.collection('units').update(unit.id, formData);
-      
+
       // Fetch the updated unit
       const savedUnit = await client.getUnit(unit.activityId, unit.id);
       if (!savedUnit) {
@@ -145,7 +169,10 @@ export const EditUnit = () => {
       navigate(`/dashboard/activities/${activity.id}/units/${unit.id}/view`);
     } catch (error) {
       console.error('Error saving unit:', error);
-      setError('generic', 'An error occurred while saving the unit. Please try again.');
+      setError(
+        'generic',
+        'An error occurred while saving the unit. Please try again.',
+      );
     }
   };
 
@@ -172,11 +199,7 @@ export const EditUnit = () => {
         subtitle={`Update task details for "${activity.title}" assignment.`}
       >
         <Tooltip title="Save Changes">
-          <IconButton
-            onClick={onSave}
-            color="primary"
-            size="large"
-          >
+          <IconButton onClick={onSave} color="primary" size="large">
             <Save />
           </IconButton>
         </Tooltip>
@@ -226,8 +249,7 @@ export const EditUnit = () => {
           startIcon={<CloudUpload />}
           sx={{ width: 'fit-content', marginTop: 1 }}
         >
-          Upload Datasets (
-          {uploadedFiles.length + existingDatasets.length})
+          Upload Datasets ({uploadedFiles.length + existingDatasets.length})
           <VisuallyHiddenInput
             type="file"
             accept=".csv"
@@ -263,10 +285,7 @@ export const EditUnit = () => {
         )}
       </FormField>
 
-      <FormField
-        label="Reference Images (Optional)"
-        error={errors.reference}
-      >
+      <FormField label="Reference Images (Optional)" error={errors.reference}>
         <ImageUpload
           files={uploadedReferenceFiles}
           onChange={(files) => setField('reference', files)}
@@ -302,8 +321,8 @@ export const EditUnit = () => {
                     size="small"
                     color="error"
                     onClick={() => removeExistingReferenceImage(imageName)}
-                    sx={{ 
-                      minWidth: 'auto', 
+                    sx={{
+                      minWidth: 'auto',
                       p: 0.5,
                       '&:hover': {
                         backgroundColor: 'error.light',
