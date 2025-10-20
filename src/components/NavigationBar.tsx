@@ -58,16 +58,16 @@ const NavigationPages = () => {
       >
         Chat
       </Button>
+      <Button
+        variant="text"
+        startIcon={<BarChart />}
+        sx={{ color: 'white' }}
+        onClick={() => navigate('activities')}
+      >
+        Assignments
+      </Button>
       {user?.role === 'Teacher' && (
         <>
-          <Button
-            variant="text"
-            startIcon={<BarChart />}
-            sx={{ color: 'white' }}
-            onClick={() => navigate('activities')}
-          >
-            Assignments
-          </Button>
           <Button
             variant="text"
             startIcon={<Group />}
