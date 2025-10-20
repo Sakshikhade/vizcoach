@@ -3,13 +3,32 @@ import { GridColDef } from '@mui/x-data-grid';
 
 export type UserRole = 'Teacher' | 'Student';
 
-export interface User {
-  id: string;
-  avatar: string;
-  name: string;
-  email: string;
-  username: string;
-  role: UserRole;
+export class User {
+  constructor(readonly model: RecordModel) {}
+
+  get id(): string {
+    return this.model.id;
+  }
+
+  get avatar(): string {
+    return this.model.avatar || '';
+  }
+
+  get name(): string {
+    return this.model.name || this.model.username || 'Unknown';
+  }
+
+  get email(): string {
+    return this.model.email || '';
+  }
+
+  get username(): string {
+    return this.model.username || '';
+  }
+
+  get role(): UserRole {
+    return this.model.role || 'Student';
+  }
 }
 
 export class Group {
