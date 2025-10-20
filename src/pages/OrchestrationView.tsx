@@ -71,9 +71,12 @@ export const OrchestrationView = () => {
   const navigate = useNavigate();
 
   // Get activities and groups data from the loader
-  const data = useData!<{ activities: Activity[]; groups: GroupType[] }>();
-  const activities = data?.activities || [];
-  const groups = data?.groups || [];
+  const loaderData = useData!<{
+    activities: Activity[];
+    groups: GroupType[];
+  }>();
+  const activities = loaderData?.activities || [];
+  const groups = loaderData?.groups || [];
 
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
     null,
@@ -175,7 +178,7 @@ export const OrchestrationView = () => {
   const statusCounts = getStatusCounts();
 
   // Show loading state if data is not available
-  if (!data) {
+  if (!loaderData || !activities || !groups) {
     return (
       <>
         <Dashboard.Breadcrumbs title="Orchestration View" />
