@@ -3,6 +3,8 @@ import { GridColDef } from '@mui/x-data-grid';
 import { autoType, csv } from 'd3';
 import {
   Activity,
+  ChatMessage,
+  ChatRoom,
   Comment,
   Dataset,
   DatasetRow,
@@ -10,6 +12,8 @@ import {
   Submission,
   Unit,
   UnsavedActivity,
+  UnsavedChatMessage,
+  UnsavedChatRoom,
   UnsavedGroup,
   UnsavedSubmission,
   UnsavedUnit,
@@ -521,6 +525,279 @@ class PocketbaseClient {
 
   unregisterSubmissionUpdateCallback() {
     this.pb.collection('submissions').unsubscribe('*');
+  }
+
+  // Chat System Methods
+  async getChatRooms(): Promise<ChatRoom[]> {
+    const user = this.getUser();
+    if (!user) {
+      throw new Error('Authentication required to access chat rooms');
+    }
+
+    const models = await this.pb.collection('chat_rooms').getFullList({
+      filter: `isActive = true`,
+      sort: '-updated',
+      expand: 'groupId,createdBy',
+    });
+
+    return models.map((model) => new ChatRoom(model));
+  }
+
+  async getChatRoom(roomId: string): Promise<ChatRoom | null> {
+    try {
+      const model = await this.pb.collection('chat_rooms').getOne(roomId, {
+        expand: 'groupId,createdBy',
+      });
+      return new ChatRoom(model);
+    } catch {
+      return null;
+    }
+  }
+
+  async createChatRoom(room: UnsavedChatRoom): Promise<ChatRoom | null> {
+    const user = this.getUser();
+    if (!user) {
+      throw new Error('Authentication required to create chat rooms');
+    }
+
+    try {
+      console.log('Creating chat room with participants:', {
+        roomName: room.name,
+        roomType: room.type,
+        participants: room.participants,
+        createdBy: user.id,
+        userRole: user.role,
+      });
+      // Ensure participants is properly formatted as JSON string for PocketBase
+      const roomData = {
+        name: room.name,
+        type: room.type,
+        description: room.description || '',
+        participants: JSON.stringify(room.participants), // Convert array to JSON string
+        createdBy: user.id,
+        isActive: true,
+      };
+
+      console.log('Room data being sent:', roomData);
+
+      const model = await this.pb.collection('chat_rooms').create(roomData, {
+        expand: 'createdBy',
+      });
+
+      console.log('Created chat room:', {
+        roomId: model.id,
+        participants: model.participants,
+        roomName: model.name,
+      });
+
+      return new ChatRoom(model);
+    } catch (error: any) {
+      console.error('Failed to create chat room:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        status: error?.status,
+        data: error?.data,
+        response: error?.response,
+        url: error?.url,
+        isAbort: error?.isAbort,
+        isClientError: error?.isClientError,
+        isServerError: error?.isServerError,
+      });
+
+      // Log the full error object to see all properties
+      console.error('Full error object:', error);
+
+      // Log the detailed error data
+      if (error?.data?.data) {
+        console.error('Validation errors:', error.data.data);
+      }
+
+      return null;
+    }
+  }
+
+  async getChatMessages(roomId: string, limit = 50): Promise<ChatMessage[]> {
+    const user = this.getUser();
+    if (!user) {
+      throw new Error('Authentication required to get chat messages');
+    }
+
+    // First get the chat room to check if user is a participant
+    const room = await this.getChatRoom(roomId);
+    if (!room) {
+      throw new Error('Chat room not found');
+    }
+
+    // Check if user is a participant in the room
+    if (!room.participants.includes(user.id)) {
+      console.log('User not participant in room (getChatMessages):', {
+        userId: user.id,
+        userRole: user.role,
+        roomId: roomId,
+        roomType: room.type,
+        roomParticipants: room.participants,
+        roomName: room.name,
+      });
+      throw new Error('User is not a participant in this chat room');
+    }
+
+    const models = await this.pb.collection('chat_messages').getList(1, limit, {
+      filter: `roomId = "${roomId}"`,
+      sort: '-created',
+      expand: 'userId,replyTo',
+    });
+
+    return models.items.map((model) => new ChatMessage(model));
+  }
+
+  async postChatMessage(
+    message: UnsavedChatMessage,
+  ): Promise<ChatMessage | null> {
+    const user = this.getUser();
+    if (!user) {
+      throw new Error('Authentication required to post messages');
+    }
+
+    // First get the chat room to check if user is a participant
+    const room = await this.getChatRoom(message.roomId);
+    if (!room) {
+      throw new Error('Chat room not found');
+    }
+
+    // Check if user is a participant in the room
+    if (!room.participants.includes(user.id)) {
+      console.log('User not participant in room (postChatMessage):', {
+        userId: user.id,
+        userRole: user.role,
+        roomId: message.roomId,
+        roomType: room.type,
+        roomParticipants: room.participants,
+        roomName: room.name,
+      });
+      throw new Error('User is not a participant in this chat room');
+    }
+
+    try {
+      const model = await this.pb.collection('chat_messages').create(
+        {
+          ...message,
+          userId: user.id,
+          type: message.type || 'text',
+        },
+        {
+          expand: 'userId,replyTo',
+        },
+      );
+      return new ChatMessage(model);
+    } catch {
+      return null;
+    }
+  }
+
+  registerChatMessageCallback(
+    roomId: string,
+    callback: (message: ChatMessage) => void,
+  ) {
+    const user = this.getUser();
+    if (!user) {
+      throw new Error('Authentication required to subscribe to chat messages');
+    }
+
+    // First get the chat room to check if user is a participant
+    this.getChatRoom(roomId)
+      .then((room) => {
+        if (!room) {
+          throw new Error('Chat room not found');
+        }
+
+        // Check if user is a participant in the room
+        if (!room.participants.includes(user.id)) {
+          console.log(
+            'User not participant in room (registerChatMessageCallback):',
+            {
+              userId: user.id,
+              roomId: roomId,
+              roomParticipants: room.participants,
+              roomName: room.name,
+            },
+          );
+          throw new Error('User is not a participant in this chat room');
+        }
+
+        this.pb
+          .collection('chat_messages')
+          .subscribe('*', async ({ action, record }) => {
+            if (action !== 'create') {
+              return;
+            }
+
+            // Strict filtering - only process messages for the specific room
+            if (record.roomId !== roomId) {
+              return;
+            }
+
+            const message = await this.getChatMessage(record.id);
+            if (message && message.roomId === roomId) {
+              callback(message);
+            }
+          });
+      })
+      .catch((error) => {
+        console.error('Failed to setup chat message subscription:', error);
+      });
+  }
+
+  async getChatMessage(messageId: string): Promise<ChatMessage | null> {
+    try {
+      const model = await this.pb
+        .collection('chat_messages')
+        .getOne(messageId, {
+          expand: 'userId,replyTo',
+        });
+      return new ChatMessage(model);
+    } catch {
+      return null;
+    }
+  }
+
+  unregisterChatMessageCallback() {
+    this.pb.collection('chat_messages').unsubscribe('*');
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    try {
+      console.log('=== GET ALL USERS DEBUG ===');
+      console.log('Current user:', this.getUser());
+
+      const models = await this.pb.collection('_pb_users_auth_').getFullList({
+        sort: 'name',
+      });
+      console.log(
+        'Raw user models from PocketBase:',
+        models.map((m) => ({
+          id: m.id,
+          name: m.name,
+          role: m.role,
+          email: m.email,
+        })),
+      );
+
+      const users = models.map((model) => new User(model));
+      console.log(
+        'Processed users:',
+        users.map((u) => ({
+          id: u.id,
+          name: u.name,
+          role: u.role,
+          email: u.email,
+        })),
+      );
+      console.log('=== END GET ALL USERS DEBUG ===');
+      return users;
+    } catch (error) {
+      console.error('Error getting all users:', error);
+      return [];
+    }
   }
 }
 
