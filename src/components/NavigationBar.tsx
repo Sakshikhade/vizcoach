@@ -14,6 +14,7 @@ import {
 import {
   AccountBox,
   BarChart,
+  Chat,
   Group,
   Logout,
   Dashboard as DashboardIcon,
@@ -33,7 +34,7 @@ export const NavigationBar = () => {
           <Stack direction="row">
             <VizCoachLogo />
             <Stack direction="row" columnGap={2} sx={{ ml: 4 }}>
-              {user?.role === 'Teacher' && <NavigationPages />}
+              <NavigationPages />
             </Stack>
           </Stack>
           <NavigationProfile />
@@ -45,32 +46,46 @@ export const NavigationBar = () => {
 
 const NavigationPages = () => {
   const navigate = useNavigate();
+  const { user } = useDashboard();
+
   return (
     <>
       <Button
         variant="text"
-        startIcon={<BarChart />}
+        startIcon={<Chat />}
         sx={{ color: 'white' }}
-        onClick={() => navigate('activities')}
+        onClick={() => navigate('chat')}
       >
-        Assignments
+        Chat
       </Button>
-      <Button
-        variant="text"
-        startIcon={<Group />}
-        sx={{ color: 'white' }}
-        onClick={() => navigate('groups')}
-      >
-        Classes
-      </Button>
-      <Button
-        variant="text"
-        startIcon={<DashboardIcon />}
-        sx={{ color: 'white' }}
-        onClick={() => navigate('orchestration')}
-      >
-        Orchestration View
-      </Button>
+      {user?.role === 'Teacher' && (
+        <>
+          <Button
+            variant="text"
+            startIcon={<BarChart />}
+            sx={{ color: 'white' }}
+            onClick={() => navigate('activities')}
+          >
+            Assignments
+          </Button>
+          <Button
+            variant="text"
+            startIcon={<Group />}
+            sx={{ color: 'white' }}
+            onClick={() => navigate('groups')}
+          >
+            Classes
+          </Button>
+          <Button
+            variant="text"
+            startIcon={<DashboardIcon />}
+            sx={{ color: 'white' }}
+            onClick={() => navigate('orchestration')}
+          >
+            Orchestration View
+          </Button>
+        </>
+      )}
     </>
   );
 };
