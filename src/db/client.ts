@@ -371,7 +371,7 @@ class PocketbaseClient {
       userId: user.id,
     };
     // PocketBase select field: clear by sending empty string
-    if (state === 'help' || state === 'submitted') {
+    if (state === 'help' || state === 'submitted' || state === 'draft') {
       payload.state = state;
     } else {
       payload.state = '';
@@ -412,7 +412,8 @@ class PocketbaseClient {
     // PocketBase select field: clear by sending empty string
     if (
       unsavedSubmission.state === 'help' ||
-      unsavedSubmission.state === 'submitted'
+      unsavedSubmission.state === 'submitted' ||
+      unsavedSubmission.state === 'draft'
     ) {
       updatePayload.state = unsavedSubmission.state;
     } else {
