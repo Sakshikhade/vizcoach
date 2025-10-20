@@ -87,8 +87,9 @@ export const OrchestrationView = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [students, setStudents] = useState<User[]>([]);
-  const [submissions] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
 
   // Load students when group is selected
   useEffect(() => {
@@ -112,6 +113,30 @@ export const OrchestrationView = () => {
 
     fetchStudents();
   }, [selectedGroup]);
+
+  // Load submissions when both activity and group are selected
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      if (selectedActivity && selectedGroup) {
+        setLoadingSubmissions(true);
+        try {
+          const submissions = await client.getSubmissions(selectedActivity.id);
+          console.log('Fetched submissions:', submissions);
+          setSubmissions(submissions);
+        } catch (error) {
+          console.error('Error fetching submissions:', error);
+          setSubmissions([]);
+        } finally {
+          setLoadingSubmissions(false);
+        }
+      } else {
+        setSubmissions([]);
+        setLoadingSubmissions(false);
+      }
+    };
+
+    fetchSubmissions();
+  }, [selectedActivity, selectedGroup]);
 
   // Mock timer functionality
   useEffect(() => {
@@ -148,8 +173,8 @@ export const OrchestrationView = () => {
   };
 
   const getStudentSubmission = (studentId: string) => {
-    // In a real app, this would fetch the student's submission for the selected activity
-    return submissions.find((sub) => sub.studentId === studentId);
+    // Find the student's submission for the selected activity
+    return submissions.find((sub) => sub.student.id === studentId);
   };
 
   const getStatusCounts = () => {
@@ -235,13 +260,15 @@ export const OrchestrationView = () => {
             </>
           ) : (
             <Tooltip title="Start Activity">
-              <IconButton
-                onClick={startActivity}
-                color="primary"
-                disabled={!selectedActivity || !selectedGroup}
-              >
-                <PlayArrow />
-              </IconButton>
+              <span>
+                <IconButton
+                  onClick={startActivity}
+                  color="primary"
+                  disabled={!selectedActivity || !selectedGroup}
+                >
+                  <PlayArrow />
+                </IconButton>
+              </span>
             </Tooltip>
           )}
           <Tooltip title="Refresh">

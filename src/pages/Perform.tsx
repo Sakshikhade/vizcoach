@@ -49,6 +49,16 @@ export const Perform = () => {
   const [error, setError] = useState<string | null>(null);
   const [showBuilder, setShowBuilder] = useState(true);
 
+  // Debug logging
+  console.log('Perform component rendered with:', {
+    submission: submission
+      ? { id: submission.id, state: submission.state }
+      : null,
+    activity: activity ? { id: activity.id, title: activity.title } : null,
+    unit: unit ? { id: unit.id, title: unit.title } : null,
+    saved,
+  });
+
   const onShowBuilderChange = (_: ChangeEvent<HTMLInputElement>) => {
     setShowBuilder((prev) => !prev);
   };
@@ -86,7 +96,7 @@ export const Perform = () => {
       >
         <Stack direction="row" spacing={1} alignItems="center">
           <SubmissionChip submission={submission} />
-          {submission?.state !== 'submitted' && (
+          {(!submission || submission?.state !== 'submitted') && (
             <>
               <Tooltip title="Save Submission">
                 <IconButton onClick={save} color="primary">

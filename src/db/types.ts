@@ -194,7 +194,7 @@ export interface GetUnitResponse {
 // Frontend aliases for better UX
 export type GetTaskResponse = GetUnitResponse;
 
-export type SubmissionState = 'help' | 'submitted' | 'draft' | null;
+export type SubmissionState = 'help' | 'submitted' | null;
 
 export class Submission {
   constructor(
@@ -220,6 +220,10 @@ export class Submission {
 
   get unitId(): string {
     return this.model.unitId;
+  }
+
+  get attempt(): number {
+    return this.model.attempt || 1;
   }
 }
 

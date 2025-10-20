@@ -55,10 +55,23 @@ export const usePerform = () => {
   }, [submission, json]);
 
   const createOrUpdate = (state: SubmissionState) => {
-    if (syncing) return;
-    // Allow resubmit when changing from 'submitted' to 'draft'
-    if (submission?.state === 'submitted' && state !== 'draft') return;
+    console.log(
+      'createOrUpdate called with state:',
+      state,
+      'syncing:',
+      syncing,
+    );
+    if (syncing) {
+      console.log('Already syncing, returning early');
+      return;
+    }
+    // Allow resubmit when changing from 'submitted' to null (draft state)
+    if (submission?.state === 'submitted' && state !== null) {
+      console.log('Submission is submitted and not resubmit, returning early');
+      return;
+    }
     setSyncing(true);
+    console.log('Starting sync...');
 
     // Build payload safely; if JSON is invalid, bail and reset syncing
     let payload: { json: object; state: SubmissionState };
@@ -67,6 +80,7 @@ export const usePerform = () => {
         json: JSON.parse(json),
         state,
       };
+      console.log('JSON parsed successfully, payload:', payload);
     } catch (e) {
       console.error('Invalid JSON, cannot save/update submission.', e);
       setSyncing(false);
@@ -77,27 +91,47 @@ export const usePerform = () => {
       ? client.createSubmission(activity.id, unit.id, payload)
       : client.updateSubmission(activity.id, unit.id, payload);
 
+    console.log('Calling client method, submission exists:', !!submission);
     promise
-      .then(setSubmission)
-      .catch(console.error)
-      .finally(() => setSyncing(false));
+      .then((result) => {
+        console.log('Submission updated successfully:', result);
+        setSubmission(result);
+      })
+      .catch((error) => {
+        console.error('Error updating submission:', error);
+      })
+      .finally(() => {
+        console.log('Sync completed, setting syncing to false');
+        setSyncing(false);
+      });
   };
 
   const raiseHand = () => {
+    console.log('raiseHand clicked, submission state:', submission?.state);
     if (submission?.state === 'help') return;
     createOrUpdate('help');
   };
 
   const unraiseHand = () => {
+    console.log('unraiseHand clicked, submission state:', submission?.state);
     if (submission?.state !== 'help') return;
     createOrUpdate(null);
   };
 
-  const submit = () => createOrUpdate('submitted');
+  const submit = () => {
+    console.log('submit clicked');
+    createOrUpdate('submitted');
+  };
 
-  const resubmit = () => createOrUpdate('draft');
+  const resubmit = () => {
+    console.log('resubmit clicked');
+    createOrUpdate(null);
+  };
 
-  const save = () => createOrUpdate(null);
+  const save = () => {
+    console.log('save clicked');
+    createOrUpdate(null);
+  };
 
   const postComment = async (content: string) => {
     if (!submission) return;

@@ -350,6 +350,11 @@ class PocketbaseClient {
     unitId: string,
     unsavedSubmission: UnsavedSubmission,
   ): Promise<Submission> {
+    console.log('createSubmission called with:', {
+      activityId,
+      unitId,
+      unsavedSubmission,
+    });
     const user = this.getUser();
     if (!user || user?.role !== 'Student') {
       throw new Error('Only logged-in student can create a submission!');
@@ -369,14 +374,33 @@ class PocketbaseClient {
       json,
       unitId,
       userId: user.id,
+      attempt: 1, // Default to attempt 1 for new submissions
     };
     // PocketBase select field: clear by sending empty string
-    if (state === 'help' || state === 'submitted' || state === 'draft') {
+    if (state === 'help' || state === 'submitted') {
       payload.state = state;
     } else {
       payload.state = '';
     }
-    await this.pb.collection('submissions').create(payload);
+    console.log(
+      'About to create submission with payload:',
+      JSON.stringify(payload, null, 2),
+    );
+    try {
+      await this.pb.collection('submissions').create(payload);
+      console.log('Submission created successfully');
+    } catch (error) {
+      console.error('Detailed error creating submission:', error);
+      if (error && typeof error === 'object' && 'status' in error) {
+        console.error('Error details:', {
+          status: (error as any).status,
+          data: (error as any).data,
+          message: (error as any).message,
+          url: (error as any).url,
+        });
+      }
+      throw error;
+    }
 
     // Fetching newly created submission
     const submission = await this.getSubmission(activityId, unitId);
@@ -391,6 +415,11 @@ class PocketbaseClient {
     unitId: string,
     unsavedSubmission: UnsavedSubmission,
   ) {
+    console.log('updateSubmission called with:', {
+      activityId,
+      unitId,
+      unsavedSubmission,
+    });
     const user = this.getUser();
     if (!user || user?.role !== 'Student') {
       throw new Error('Only logged-in student can update submissions!');
@@ -408,12 +437,12 @@ class PocketbaseClient {
       json: unsavedSubmission.json,
       unitId,
       userId: user.id,
+      attempt: oldSubmission.attempt || 1, // Keep existing attempt or default to 1
     };
     // PocketBase select field: clear by sending empty string
     if (
       unsavedSubmission.state === 'help' ||
-      unsavedSubmission.state === 'submitted' ||
-      unsavedSubmission.state === 'draft'
+      unsavedSubmission.state === 'submitted'
     ) {
       updatePayload.state = unsavedSubmission.state;
     } else {
