@@ -55,7 +55,9 @@ export const usePerform = () => {
   }, [submission, json]);
 
   const createOrUpdate = (state: SubmissionState) => {
-    if (syncing || submission?.state === 'submitted') return;
+    if (syncing) return;
+    // Allow resubmit when changing from 'submitted' to 'draft'
+    if (submission?.state === 'submitted' && state !== 'draft') return;
     setSyncing(true);
 
     // Build payload safely; if JSON is invalid, bail and reset syncing
