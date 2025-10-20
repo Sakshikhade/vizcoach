@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { Paper, SpeedDialAction, Stack, Typography } from '@mui/material';
+import { Paper, Stack, Typography, IconButton, Tooltip } from '@mui/material';
 import {
   DeleteRounded,
   EditNoteRounded,
-  TaskAltRounded,
 } from '@mui/icons-material';
 import { Dashboard, DatasetTabs, ImageGallery } from 'components';
 import client, { GetUnitResponse } from 'db';
@@ -45,7 +44,26 @@ export const ViewUnit = () => {
       <Dashboard.Header
         heading={unit.title}
         subtitle="View this task's description and datasets."
-      />
+      >
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Edit Task">
+            <IconButton
+              onClick={() => navigate(`/dashboard/activities/${activity.id}/units/${unit.id}/edit-unit`)}
+              color="primary"
+            >
+              <EditNoteRounded />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete Task">
+            <IconButton
+              onClick={onUnitDelete}
+              color="error"
+            >
+              <DeleteRounded />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Dashboard.Header>
 
       <Stack padding={0.5}>
         <Paper variant="outlined">
@@ -68,11 +86,7 @@ export const ViewUnit = () => {
           <Paper variant="outlined" sx={{ padding: 3 }}>
             <ImageGallery
               record={unit}
-              imageNames={
-                Array.isArray(unit.reference)
-                  ? unit.reference
-                  : [unit.reference]
-              }
+              imageNames={Array.isArray(unit.reference) ? unit.reference : [unit.reference]}
               title="Reference Images"
             />
           </Paper>
@@ -84,23 +98,6 @@ export const ViewUnit = () => {
           <DatasetTabs datasets={datasets} />
         </Paper>
       </Stack>
-
-      <Dashboard.SpeedDial label="ViewTask SpeedDial" icon={<TaskAltRounded />}>
-        <SpeedDialAction
-          icon={<EditNoteRounded />}
-          tooltipTitle="Edit Task"
-          onClick={() =>
-            navigate(
-              `/dashboard/activities/${activity.id}/units/${unit.id}/edit-unit`,
-            )
-          }
-        />
-        <SpeedDialAction
-          icon={<DeleteRounded />}
-          tooltipTitle="Delete Task"
-          onClick={onUnitDelete}
-        />
-      </Dashboard.SpeedDial>
     </>
   );
 };

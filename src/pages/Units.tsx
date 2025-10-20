@@ -1,12 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { Paper, SpeedDialAction, Stack, Typography } from '@mui/material';
+import { Paper, Stack, Typography, IconButton, Tooltip } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   DeleteRounded,
   EditNoteRounded,
   PlaylistAddCheckRounded,
   PlaylistAddRounded,
-  TaskAltRounded,
 } from '@mui/icons-material';
 import { Dashboard, UnitCard } from 'components';
 import client, { GetSubmissionsResponse, Submission } from 'db';
@@ -52,7 +51,44 @@ export const Units = () => {
             ? "Create, manage, and track assignment's tasks."
             : 'Track your progress for this assignment.'
         }
-      />
+      >
+        {user?.role === 'Teacher' && (
+          <Stack direction="row" spacing={1}>
+            <Tooltip title="Add Task">
+              <IconButton
+                onClick={() => navigate(`../${activity.id}/add-unit`)}
+                color="primary"
+              >
+                <PlaylistAddRounded />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="View Submissions">
+              <IconButton
+                onClick={() => navigate(`../${activity.id}/submissions`)}
+                color="info"
+              >
+                <PlaylistAddCheckRounded />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Edit Assignment">
+              <IconButton
+                onClick={() => navigate(`../${activity.id}/edit-activity`)}
+                color="warning"
+              >
+                <EditNoteRounded />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete Assignment">
+              <IconButton
+                onClick={onDeleteActivity}
+                color="error"
+              >
+                <DeleteRounded />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        )}
+      </Dashboard.Header>
 
       <Stack padding={0.5}>
         <Paper variant="outlined">
@@ -91,31 +127,6 @@ export const Units = () => {
           );
         })}
       </Grid2>
-
-      {user?.role === 'Teacher' && (
-        <Dashboard.SpeedDial label="Tasks SpeedDial" icon={<TaskAltRounded />}>
-          <SpeedDialAction
-            icon={<PlaylistAddRounded />}
-            tooltipTitle="Add Task"
-            onClick={() => navigate(`../${activity.id}/add-unit`)}
-          />
-          <SpeedDialAction
-            icon={<PlaylistAddCheckRounded />}
-            tooltipTitle="View Submissions"
-            onClick={() => navigate(`../${activity.id}/submissions`)}
-          />
-          <SpeedDialAction
-            icon={<EditNoteRounded />}
-            tooltipTitle="Edit Assignment"
-            onClick={() => navigate(`../${activity.id}/edit-activity`)}
-          />
-          <SpeedDialAction
-            icon={<DeleteRounded />}
-            tooltipTitle="Delete Assignment"
-            onClick={onDeleteActivity}
-          />
-        </Dashboard.SpeedDial>
-      )}
     </>
   );
 };

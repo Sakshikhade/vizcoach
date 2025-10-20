@@ -3,10 +3,11 @@ import {
   Alert,
   FormControlLabel,
   Paper,
-  SpeedDialAction,
   Stack,
   Switch,
   Typography,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   BackHandRounded,
@@ -14,7 +15,6 @@ import {
   DoNotTouch,
   ErrorOutlineRounded,
   Save,
-  TaskAltRounded,
 } from '@mui/icons-material';
 import {
   Comments,
@@ -83,7 +83,48 @@ export const Perform = () => {
         heading={unit.title}
         subtitle="Create visualization for this unit."
       >
-        <SubmissionChip submission={submission} />
+        <Stack direction="row" spacing={1} alignItems="center">
+          <SubmissionChip submission={submission} />
+          {submission?.state !== 'submitted' && (
+            <>
+              <Tooltip title="Save Submission">
+                <IconButton
+                  onClick={save}
+                  color="primary"
+                >
+                  <Save />
+                </IconButton>
+              </Tooltip>
+              {submission?.state === 'help' ? (
+                <Tooltip title="Unraise Hand">
+                  <IconButton
+                    onClick={unraiseHand}
+                    color="warning"
+                  >
+                    <DoNotTouch />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <Tooltip title="Raise Hand">
+                  <IconButton
+                    onClick={raiseHand}
+                    color="info"
+                  >
+                    <BackHandRounded />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title="Submit Submission">
+                <IconButton
+                  onClick={submit}
+                  color="success"
+                >
+                  <CheckCircleOutlineRounded />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+        </Stack>
       </Dashboard.Header>
 
       <Stack gap={3}>
@@ -188,20 +229,13 @@ export const Perform = () => {
               {/* Reference Images Section */}
               {unit.reference && (
                 <Stack>
-                  <Typography
-                    variant="h6"
-                    sx={{ marginBottom: 2, fontWeight: 600 }}
-                  >
+                  <Typography variant="h6" sx={{ marginBottom: 2, fontWeight: 600 }}>
                     Reference Images
                   </Typography>
                   <Paper variant="outlined" sx={{ padding: 3 }}>
                     <ImageGallery
                       record={unit}
-                      imageNames={
-                        Array.isArray(unit.reference)
-                          ? unit.reference
-                          : [unit.reference]
-                      }
+                      imageNames={Array.isArray(unit.reference) ? unit.reference : [unit.reference]}
                       title=""
                     />
                   </Paper>
@@ -235,37 +269,6 @@ export const Perform = () => {
           </Stack>
         </Paper>
       </Stack>
-
-      {submission?.state !== 'submitted' && (
-        <Dashboard.SpeedDial
-          label="Perform SpeedDial"
-          icon={<TaskAltRounded />}
-        >
-          <SpeedDialAction
-            icon={<Save />}
-            tooltipTitle="Save Submission"
-            onClick={save}
-          />
-          {submission?.state === 'help' ? (
-            <SpeedDialAction
-              icon={<DoNotTouch />}
-              tooltipTitle="Unraise Hand"
-              onClick={unraiseHand}
-            />
-          ) : (
-            <SpeedDialAction
-              icon={<BackHandRounded />}
-              tooltipTitle="Raise Hand"
-              onClick={raiseHand}
-            />
-          )}
-          <SpeedDialAction
-            icon={<CheckCircleOutlineRounded />}
-            tooltipTitle="Submit Submission"
-            onClick={submit}
-          />
-        </Dashboard.SpeedDial>
-      )}
     </>
   );
 };

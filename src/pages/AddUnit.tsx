@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, SpeedDialAction, TextField } from '@mui/material';
-import { AddTask, CloudUpload, Save } from '@mui/icons-material';
+import { Alert, Button, TextField, IconButton, Tooltip } from '@mui/material';
+import { CloudUpload, Save } from '@mui/icons-material';
 import {
   Dashboard,
   FormField,
@@ -96,7 +96,17 @@ export const AddUnit = () => {
       <Dashboard.Header
         heading="Add Task"
         subtitle={`Create new task for "${activity.title}" assignment.`}
-      />
+      >
+        <Tooltip title="Save Task">
+          <IconButton
+            onClick={onSave}
+            color="primary"
+            size="large"
+          >
+            <Save />
+          </IconButton>
+        </Tooltip>
+      </Dashboard.Header>
 
       <Alert variant="outlined" severity={errors.generic ? 'error' : 'info'}>
         {errors.generic ? (
@@ -154,7 +164,10 @@ export const AddUnit = () => {
         </Button>
       </FormField>
 
-      <FormField label="Reference Images (Optional)" error={errors.reference}>
+      <FormField
+        label="Reference Images (Optional)"
+        error={errors.reference}
+      >
         <ImageUpload
           files={unit.reference || []}
           onChange={(files) => setField('reference', files)}
@@ -162,14 +175,6 @@ export const AddUnit = () => {
           maxFiles={5}
         />
       </FormField>
-
-      <Dashboard.SpeedDial label="Add Task SpeedDial" icon={<AddTask />}>
-        <SpeedDialAction
-          icon={<Save />}
-          tooltipTitle="Save Task"
-          onClick={onSave}
-        />
-      </Dashboard.SpeedDial>
     </>
   );
 };
