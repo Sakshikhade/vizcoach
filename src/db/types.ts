@@ -3,27 +3,13 @@ import { GridColDef } from '@mui/x-data-grid';
 
 export type UserRole = 'Teacher' | 'Student';
 
-export class User {
-  constructor(readonly model: RecordModel) {}
-
-  get id(): string {
-    return this.model.id;
-  }
-  get avatar(): string {
-    return this.model.avatar || '';
-  }
-  get name(): string {
-    return this.model.name || this.model.username || 'Unknown';
-  }
-  get email(): string {
-    return this.model.email || '';
-  }
-  get username(): string {
-    return this.model.username || '';
-  }
-  get role(): UserRole {
-    return this.model.role || 'Student';
-  }
+export interface User {
+  id: string;
+  avatar: string;
+  name: string;
+  email: string;
+  username: string;
+  role: UserRole;
 }
 
 export class Group {
@@ -57,6 +43,9 @@ export class Group {
     return `${course}-${semester}-${year}`;
   }
 }
+
+// Frontend alias for better UX
+export type Class = Group;
 
 export const UNSAVED_GROUP_FIELDS = [
   'course',
@@ -110,6 +99,9 @@ export class Activity {
   }
 }
 
+// Frontend alias for better UX
+export type Assignment = Activity;
+
 export const UNSAVED_ACTIVITY_REQUIRED_FIELDS = [
   'title',
   'description',
@@ -135,6 +127,9 @@ export interface GetActivityResponse {
   units: Unit[];
 }
 
+// Frontend aliases for better UX
+export type GetAssignmentResponse = GetActivityResponse;
+
 export type DatasetRow = { [key: string]: any };
 
 export interface Dataset {
@@ -147,17 +142,20 @@ export interface Unit extends RecordModel {
   title: string;
   description: string;
   datasets: string[];
+  reference?: string | string[];
   order: number;
-  reference?: string[];
 }
+
+// Frontend alias for better UX
+export type Task = Unit;
 
 export type UnsavedUnit = Partial<{
   title: string;
   description: string;
   datasets: File[];
+  reference: File[];
   activityId: string;
   order: number;
-  reference: File[];
 }>;
 
 export type UnsavedUnitField = keyof UnsavedUnit;
@@ -173,6 +171,9 @@ export interface GetUnitResponse {
   unit: Unit;
   datasets: Dataset[];
 }
+
+// Frontend aliases for better UX
+export type GetTaskResponse = GetUnitResponse;
 
 export type SubmissionState = 'help' | 'submitted' | null;
 
@@ -191,17 +192,7 @@ export class Submission {
   }
 
   get state(): SubmissionState {
-    const value = (this.model as any).state;
-    return value === '' ? null : value;
-  }
-
-  get attempt(): number {
-    return this.model.attempt || 1;
-  }
-
-  get score(): number | null {
-    const value = (this.model as any).score;
-    return typeof value === 'number' ? value : null;
+    return this.model.state;
   }
 
   get updated(): Date {
@@ -254,135 +245,3 @@ export const toTextContent = (innerHTML: string): string => {
   element.innerHTML = innerHTML;
   return element.textContent || innerHTML;
 };
-
-// Chat System Types
-export type ChatRoomType = 'private';
-
-export class ChatRoom {
-  constructor(readonly model: RecordModel) {}
-
-  get id(): string {
-    return this.model.id;
-  }
-
-  get name(): string {
-    return this.model.name;
-  }
-
-  get type(): ChatRoomType {
-    return this.model.type;
-  }
-
-  get description(): string {
-    return this.model.description;
-  }
-
-  get participants(): string[] {
-    // Parse JSON string if it's a string, otherwise return as array
-    if (typeof this.model.participants === 'string') {
-      try {
-        return JSON.parse(this.model.participants);
-      } catch {
-        return [];
-      }
-    }
-    return this.model.participants || [];
-  }
-
-  get createdBy(): string {
-    return this.model.createdBy;
-  }
-
-  get isActive(): boolean {
-    return this.model.isActive;
-  }
-
-  get created(): Date {
-    return new Date(this.model.created);
-  }
-
-  get updated(): Date {
-    return new Date(this.model.updated);
-  }
-
-  get creator(): User | undefined {
-    return this.model.expand?.createdBy;
-  }
-}
-
-export type ChatMessageType = 'text' | 'system';
-
-export class ChatMessage {
-  constructor(readonly model: RecordModel) {}
-
-  get id(): string {
-    return this.model.id;
-  }
-
-  get roomId(): string {
-    return this.model.roomId;
-  }
-
-  get userId(): string {
-    return this.model.userId;
-  }
-
-  get content(): string {
-    return this.model.content;
-  }
-
-  get type(): ChatMessageType {
-    return this.model.type || 'text';
-  }
-
-  get replyTo(): string | undefined {
-    return this.model.replyTo;
-  }
-
-  get created(): Date {
-    return new Date(this.model.created);
-  }
-
-  get updated(): Date {
-    return new Date(this.model.updated);
-  }
-
-  get user(): User | undefined {
-    return this.model.expand?.userId;
-  }
-
-  get room(): ChatRoom | undefined {
-    return this.model.expand?.roomId;
-  }
-
-  get replyToMessage(): ChatMessage | undefined {
-    return this.model.expand?.replyTo;
-  }
-}
-
-export type UnsavedChatRoom = {
-  name: string;
-  type: ChatRoomType;
-  description?: string;
-  participants: string[];
-};
-
-export type UnsavedChatMessage = {
-  roomId: string;
-  content: string;
-  type?: ChatMessageType;
-  replyTo?: string;
-};
-
-export interface GetChatRoomsResponse {
-  rooms: ChatRoom[];
-}
-
-export interface GetChatRoomResponse {
-  room: ChatRoom;
-  messages: ChatMessage[];
-}
-
-export interface GetChatMessagesResponse {
-  messages: ChatMessage[];
-}

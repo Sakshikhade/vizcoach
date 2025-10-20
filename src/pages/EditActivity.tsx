@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Save } from '@mui/icons-material';
-import { Alert, MenuItem, Paper, Select, TextField } from '@mui/material';
+import {
+  Alert,
+  MenuItem,
+  Paper,
+  Select,
+  TextField,
+  IconButton,
+  Tooltip,
+} from '@mui/material';
 import { DateCalendar } from '@mui/x-date-pickers';
 import { Dashboard, FormField, RichEditor } from 'components';
 import client, {
@@ -110,7 +118,13 @@ export const EditActivity = () => {
       <Dashboard.Header
         heading="Edit Assignment"
         subtitle="Update assignment details for a class."
-      />
+      >
+        <Tooltip title="Save Changes">
+          <IconButton onClick={onSave} color="primary" size="large">
+            <Save />
+          </IconButton>
+        </Tooltip>
+      </Dashboard.Header>
 
       <Alert variant="outlined" severity={errors.generic ? 'error' : 'info'}>
         {errors.generic ? (
@@ -190,16 +204,6 @@ export const EditActivity = () => {
           />
         </Paper>
       </FormField>
-
-      <Dashboard.SpeedDial
-        label="Edit Activity SpeedDial"
-        icon={<Save />}
-        onClick={onSave}
-        open={false}
-        staticIcon
-      >
-        {/* Keeping structure without actions to preserve shape/placement */}
-      </Dashboard.SpeedDial>
     </>
   );
 };

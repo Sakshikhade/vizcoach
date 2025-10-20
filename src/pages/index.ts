@@ -7,6 +7,7 @@ export * from './EditUnit';
 export * from './Groups';
 export * from './Login';
 export * from './NotFound';
+export * from './OrchestrationView';
 export * from './Perform';
 export * from './Students';
 export * from './StudentSubmissions';

@@ -93,6 +93,18 @@ export const useStudentSubmissions = () => {
     };
   }, [submission]);
 
+  // Subscribe to realtime submission updates while attempting
+  useEffect(() => {
+    if (!submission) return;
+    client.registerSubmissionUpdateCallback(submission.id, (updated) => {
+      // Only update if same unit and not submitted yet
+      if (updated.unitId === submission.unitId) {
+        setSubmission(updated);
+      }
+    });
+    return () => client.unregisterSubmissionUpdateCallback();
+  }, [submission]);
+
   return {
     ...data,
     submission,

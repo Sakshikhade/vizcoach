@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   Alert,
-  Chip,
   FormControl,
   InputLabel,
   MenuItem,
@@ -9,8 +8,6 @@ import {
   Paper,
   Select,
   Stack,
-  Tab,
-  Tabs,
   Typography,
 } from '@mui/material';
 import {
@@ -22,13 +19,6 @@ import {
   Visualization,
 } from 'components';
 import { useStudentSubmissions } from 'hooks';
-
-const SUBMISSION_TABS = [
-  'Visualization',
-  'Descriptions',
-  'Datasets',
-  'Comments',
-] as const;
 
 export const StudentSubmissions = () => {
   const {
@@ -44,46 +34,10 @@ export const StudentSubmissions = () => {
     postComment,
   } = useStudentSubmissions();
 
-  const [submissionTab, setSubmissionTab] = useState<
-    (typeof SUBMISSION_TABS)[number]
-  >(SUBMISSION_TABS[0]);
-  const [activeChartId, setActiveChartId] = useState<string | null>(null);
-
-  const charts = useMemo(() => {
-    if (!submission?.json) return [];
-    // Handle both old format (single object) and new format (array of charts)
-    if (Array.isArray(submission.json)) {
-      return submission.json.map((chart: any) => ({
-        ...chart,
-        json:
-          typeof chart.json === 'string'
-            ? chart.json
-            : JSON.stringify(chart.json, null, 4),
-      }));
-    }
-    return [
-      {
-        id: 'chart-1',
-        title: 'Chart 1',
-        json:
-          typeof submission.json === 'string'
-            ? submission.json
-            : JSON.stringify(submission.json, null, 4),
-      },
-    ];
-  }, [submission]);
-
-  const activeChart = useMemo(() => {
-    if (!activeChartId) return charts[0];
-    return charts.find((chart) => chart.id === activeChartId) || charts[0];
-  }, [charts, activeChartId]);
-
-  const json = useMemo(() => {
-    if (!activeChart?.json) return '{}';
-    return typeof activeChart.json === 'string'
-      ? activeChart.json
-      : JSON.stringify(activeChart.json, null, 4);
-  }, [activeChart]);
+  const json = useMemo(
+    () => JSON.stringify(submission?.json || {}, null, 4),
+    [submission],
+  );
 
   const unit = useMemo(
     () => (submission ? getSubmissionUnit(submission) : null),
@@ -149,7 +103,6 @@ export const StudentSubmissions = () => {
             </Select>
           </FormControl>
         )}
-        {submission && null}
       </Dashboard.Header>
 
       {!submission ? (
@@ -157,49 +110,14 @@ export const StudentSubmissions = () => {
           {student.name} has not submitted any answers for this activity!
         </Alert>
       ) : (
-        <>
-          <Tabs
-            variant="fullWidth"
-            value={submissionTab}
-            onChange={(_, label) => setSubmissionTab(label)}
-          >
-            {SUBMISSION_TABS.map((tab) => (
-              <Tab key={tab} label={tab} value={tab} />
-            ))}
-          </Tabs>
-
-          {submissionTab === SUBMISSION_TABS[0] && (
-            <Stack gap={2}>
-              {/* Chart Tabs */}
-              {charts.length > 1 && (
-                <Paper variant="outlined">
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    padding={2}
-                    gap={2}
-                  >
-                    <Typography variant="h6">Charts</Typography>
-                    <Stack direction="row" gap={1} flex={1}>
-                      {charts.map((chart) => (
-                        <Chip
-                          key={chart.id}
-                          label={chart.title}
-                          onClick={() => setActiveChartId(chart.id)}
-                          color={
-                            activeChartId === chart.id ? 'primary' : 'default'
-                          }
-                          variant={
-                            activeChartId === chart.id ? 'filled' : 'outlined'
-                          }
-                        />
-                      ))}
-                    </Stack>
-                  </Stack>
-                </Paper>
-              )}
-
-              <Stack direction="row" gap={2}>
+        <Stack gap={3}>
+          {/* Visualization Panel */}
+          <Paper variant="outlined">
+            <Stack>
+              <Typography variant="h5" sx={{ padding: 2, paddingBottom: 1 }}>
+                Visualization
+              </Typography>
+              <Stack direction="row" gap={2} sx={{ padding: 2, paddingTop: 0 }}>
                 <Stack flex={1}>
                   <Paper variant="outlined">
                     <Stack>
@@ -216,48 +134,80 @@ export const StudentSubmissions = () => {
                 </Stack>
               </Stack>
             </Stack>
-          )}
+          </Paper>
 
-          {submissionTab === SUBMISSION_TABS[1] && (
-            <Stack gap={2}>
-              <Typography variant="h5">Activity's Description</Typography>
-              <Paper variant="outlined">
+          {/* Descriptions Panel */}
+          <Paper variant="outlined">
+            <Stack>
+              <Typography variant="h5" sx={{ padding: 2, paddingBottom: 1 }}>
+                Descriptions
+              </Typography>
+              <Stack gap={2} sx={{ padding: 2, paddingTop: 0 }}>
                 <Stack>
-                  <Typography
-                    dangerouslySetInnerHTML={{ __html: activity.description }}
-                    sx={{ paddingX: 4, paddingY: 2 }}
-                  />
+                  <Typography variant="h6" sx={{ marginBottom: 1 }}>
+                    Activity's Description
+                  </Typography>
+                  <Paper variant="outlined">
+                    <Stack>
+                      <Typography
+                        dangerouslySetInnerHTML={{
+                          __html: activity.description,
+                        }}
+                        sx={{ paddingX: 4, paddingY: 2 }}
+                      />
+                    </Stack>
+                  </Paper>
                 </Stack>
-              </Paper>
 
-              <Typography variant="h5">Unit's Description</Typography>
-              <Paper variant="outlined">
                 <Stack>
-                  <Typography
-                    dangerouslySetInnerHTML={{
-                      __html: unit?.description || '',
-                    }}
-                    sx={{ paddingX: 4, paddingY: 2 }}
-                  />
+                  <Typography variant="h6" sx={{ marginBottom: 1 }}>
+                    Unit's Description
+                  </Typography>
+                  <Paper variant="outlined">
+                    <Stack>
+                      <Typography
+                        dangerouslySetInnerHTML={{
+                          __html: unit?.description || '',
+                        }}
+                        sx={{ paddingX: 4, paddingY: 2 }}
+                      />
+                    </Stack>
+                  </Paper>
                 </Stack>
-              </Paper>
+              </Stack>
             </Stack>
-          )}
+          </Paper>
 
-          {submissionTab === SUBMISSION_TABS[2] && (
-            <DatasetTabs datasets={datasets} />
-          )}
+          {/* Datasets Panel */}
+          <Paper variant="outlined">
+            <Stack>
+              <Typography variant="h5" sx={{ padding: 2, paddingBottom: 1 }}>
+                Datasets
+              </Typography>
+              <Stack sx={{ padding: 2, paddingTop: 0 }}>
+                <DatasetTabs datasets={datasets} />
+              </Stack>
+            </Stack>
+          </Paper>
 
-          {submissionTab === SUBMISSION_TABS[3] && (
-            <Comments
-              comments={comments}
-              onPost={(content) => {
-                if (!submission) return;
-                postComment(submission, content);
-              }}
-            />
-          )}
-        </>
+          {/* Comments Panel */}
+          <Paper variant="outlined">
+            <Stack>
+              <Typography variant="h5" sx={{ padding: 2, paddingBottom: 1 }}>
+                Comments
+              </Typography>
+              <Stack sx={{ padding: 2, paddingTop: 0 }}>
+                <Comments
+                  comments={comments}
+                  onPost={(content) => {
+                    if (!submission) return;
+                    postComment(submission, content);
+                  }}
+                />
+              </Stack>
+            </Stack>
+          </Paper>
+        </Stack>
       )}
     </>
   );
