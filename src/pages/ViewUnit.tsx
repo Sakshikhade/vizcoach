@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Paper, Stack, Typography } from '@mui/material';
 import {
   DeleteRounded,
   EditNoteRounded,

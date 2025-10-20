@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, TextField } from '@mui/material';
+import { Alert, Button, TextField, IconButton, Tooltip } from '@mui/material';
 import { CloudUpload, Save } from '@mui/icons-material';
 import {
   Dashboard,
@@ -96,7 +96,13 @@ export const AddUnit = () => {
       <Dashboard.Header
         heading="Add Task"
         subtitle={`Create new task for "${activity.title}" assignment.`}
-      />
+      >
+        <Tooltip title="Save Task">
+          <IconButton onClick={onSave} color="primary" size="large">
+            <Save />
+          </IconButton>
+        </Tooltip>
+      </Dashboard.Header>
 
       <Alert variant="outlined" severity={errors.generic ? 'error' : 'info'}>
         {errors.generic ? (
@@ -162,16 +168,6 @@ export const AddUnit = () => {
           maxFiles={5}
         />
       </FormField>
-
-      <Dashboard.SpeedDial
-        label="Add Unit SpeedDial"
-        icon={<Save />}
-        onClick={onSave}
-        open={false}
-        staticIcon
-      >
-        {/* Keeping structure without actions to preserve shape/placement */}
-      </Dashboard.SpeedDial>
     </>
   );
 };

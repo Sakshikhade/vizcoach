@@ -7,6 +7,8 @@ import {
   MenuItem,
   Paper,
   Select,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import { CloudUpload, Save } from '@mui/icons-material';
 import { YearCalendar } from '@mui/x-date-pickers';
@@ -98,7 +100,18 @@ export const AddGroup = () => {
         </Dashboard.Breadcrumbs.Link>
       </Dashboard.Breadcrumbs>
 
-      <Dashboard.Header heading="Add Class" subtitle="Create new class." />
+      <Dashboard.Header heading="Add Class" subtitle="Create new class.">
+        <Tooltip title="Save Group">
+          <IconButton
+            onClick={onSave}
+            color="primary"
+            size="large"
+            disabled={saving}
+          >
+            <Save />
+          </IconButton>
+        </Tooltip>
+      </Dashboard.Header>
 
       <Alert
         variant="outlined"
@@ -191,18 +204,6 @@ export const AddGroup = () => {
           />
         </Paper>
       </FormField>
-
-      {!saving && (
-        <Dashboard.SpeedDial
-          label="Add Group SpeedDial"
-          icon={<Save />}
-          onClick={onSave}
-          open={false}
-          staticIcon
-        >
-          {/* Keeping structure without actions to preserve shape/placement */}
-        </Dashboard.SpeedDial>
-      )}
     </>
   );
 };
