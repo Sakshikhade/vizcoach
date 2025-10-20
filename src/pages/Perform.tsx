@@ -42,6 +42,7 @@ export const Perform = () => {
     raiseHand,
     unraiseHand,
     submit,
+    resubmit,
     save,
     postComment,
   } = usePerform();
@@ -111,6 +112,13 @@ export const Perform = () => {
                 </IconButton>
               </Tooltip>
             </>
+          )}
+          {submission?.state === 'submitted' && (
+            <Tooltip title="Resubmit">
+              <IconButton onClick={resubmit} color="primary">
+                <CheckCircleOutlineRounded />
+              </IconButton>
+            </Tooltip>
           )}
         </Stack>
       </Dashboard.Header>

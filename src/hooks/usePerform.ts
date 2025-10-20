@@ -93,6 +93,8 @@ export const usePerform = () => {
 
   const submit = () => createOrUpdate('submitted');
 
+  const resubmit = () => createOrUpdate('draft');
+
   const save = () => createOrUpdate(null);
 
   const postComment = async (content: string) => {
@@ -139,6 +141,7 @@ export const usePerform = () => {
     raiseHand,
     unraiseHand,
     submit,
+    resubmit,
     save,
     postComment,
   };
