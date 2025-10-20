@@ -128,10 +128,11 @@ export const usePerform = () => {
     const interval = setInterval(() => {
       if (submission?.state === 'submitted') return;
       if (saved) return;
-      save();
+      createOrUpdate(null);
     }, 30000);
     return () => clearInterval(interval);
-  }, [submission?.state, saved, save]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submission?.state, saved]);
 
   return {
     ...data,
