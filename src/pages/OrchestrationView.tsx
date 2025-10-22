@@ -17,6 +17,15 @@ import {
   Select,
   MenuItem,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
@@ -30,6 +39,7 @@ import {
   Group,
 } from '@mui/icons-material';
 import { Dashboard } from 'components';
+import { Visualization, JsonEditor, DatasetTabs } from 'components';
 import { useDashboard } from 'hooks';
 import { Activity, Group as GroupType, User } from 'db';
 import client from 'db';
@@ -90,6 +100,56 @@ export const OrchestrationView = () => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [isRealTimeConnected, setIsRealTimeConnected] = useState(false);
+  const [studentActivity, setStudentActivity] = useState<
+    Record<string, { lastSeen: Date; status: string }>
+  >({});
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [workDialogOpen, setWorkDialogOpen] = useState(false);
+  const [workDialogLoading, setWorkDialogLoading] = useState(false);
+  const [workDialogError, setWorkDialogError] = useState<string | null>(null);
+  const [workDialogSubmissions, setWorkDialogSubmissions] = useState<any[]>([]);
+  const [selectedWork, setSelectedWork] = useState<any | null>(null);
+  const [workDialogUnitTitles, setWorkDialogUnitTitles] = useState<
+    Record<string, string>
+  >({});
+  const [workDialogUnit, setWorkDialogUnit] = useState<any | null>(null);
+  const [workDialogDatasets, setWorkDialogDatasets] = useState<any[]>([]);
+  const [workDialogJson, setWorkDialogJson] = useState<string>('{}');
+
+  const stringifySubmissionJson = (input: any): string => {
+    try {
+      let raw: any = input?.json ?? input;
+      if (typeof raw === 'string') {
+        try {
+          raw = JSON.parse(raw);
+        } catch {}
+      }
+      if (Array.isArray(raw)) {
+        const first = raw[0];
+        let spec: any = first?.json ?? first ?? {};
+        if (typeof spec === 'string') {
+          try {
+            spec = JSON.parse(spec);
+          } catch {}
+        }
+        return JSON.stringify(spec || {}, null, 4);
+      }
+      if (raw && typeof raw === 'object' && typeof raw.json !== 'undefined') {
+        let spec: any = raw.json;
+        if (typeof spec === 'string') {
+          try {
+            spec = JSON.parse(spec);
+          } catch {}
+        }
+        return JSON.stringify(spec || {}, null, 4);
+      }
+      return JSON.stringify(raw || {}, null, 4);
+    } catch {
+      return '{}';
+    }
+  };
 
   // Load students when group is selected
   useEffect(() => {
@@ -138,6 +198,109 @@ export const OrchestrationView = () => {
     fetchSubmissions();
   }, [selectedActivity, selectedGroup]);
 
+  // Real-time subscription for submission updates
+  useEffect(() => {
+    if (!selectedActivity || !selectedGroup) return;
+
+    console.log(
+      'Setting up real-time subscription for activity:',
+      selectedActivity.id,
+    );
+    setIsRealTimeConnected(true);
+    setConnectionError(null);
+
+    // no-op activity log removed
+
+    // Subscribe to all submission changes for this activity
+    const unsubscribe = client.pb
+      .collection('submissions')
+      .subscribe('*', async ({ action, record }) => {
+        console.log('Real-time submission update:', { action, record });
+
+        // Only process create and update actions
+        if (!['create', 'update'].includes(action)) return;
+
+        // Check if this submission is for the selected activity
+        if (record.unitId) {
+          // Get the unit to check if it belongs to our activity
+          try {
+            const unit = await client.getUnit(
+              selectedActivity.id,
+              record.unitId,
+            );
+            if (unit) {
+              console.log(
+                'Submission update for our activity, refreshing submissions...',
+              );
+              // Refresh submissions to get the latest data
+              const updatedSubmissions = await client.getSubmissions(
+                selectedActivity.id,
+              );
+              setSubmissions(updatedSubmissions);
+              setLastUpdate(new Date());
+
+              // Update student activity status
+              if (record.userId) {
+                const student = students.find((s) => s.id === record.userId);
+                const studentName = student?.name || 'Unknown student';
+                const status = record.state || 'working';
+
+                setStudentActivity((prev) => ({
+                  ...prev,
+                  [record.userId]: {
+                    lastSeen: new Date(),
+                    status: status,
+                  },
+                }));
+
+                // removed recent updates and activity log writes
+              }
+            }
+          } catch (error) {
+            console.error('Error checking unit for submission update:', error);
+            setConnectionError('Failed to process real-time update');
+          }
+        }
+      });
+
+    // Cleanup subscription on unmount or when dependencies change
+    return () => {
+      console.log('Cleaning up submission subscription');
+      setIsRealTimeConnected(false);
+      unsubscribe.then((unsub) => unsub());
+    };
+  }, [selectedActivity, selectedGroup, students]);
+
+  // Periodic refresh of activity status
+  useEffect(() => {
+    if (!selectedActivity || !selectedGroup) return;
+
+    const interval = setInterval(() => {
+      // Update activity status for all students
+      setStudentActivity((prev) => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach((studentId) => {
+          const activity = updated[studentId];
+          if (activity) {
+            const timeSinceLastSeen = Date.now() - activity.lastSeen.getTime();
+            const minutesAgo = Math.floor(timeSinceLastSeen / (1000 * 60));
+
+            // Mark as inactive if no activity for more than 10 minutes
+            if (minutesAgo > 10) {
+              updated[studentId] = {
+                ...activity,
+                status: 'inactive',
+              };
+            }
+          }
+        });
+        return updated;
+      });
+    }, 30000); // Update every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [selectedActivity, selectedGroup]);
+
   // Mock timer functionality
   useEffect(() => {
     if (!isRunning) return;
@@ -172,10 +335,53 @@ export const OrchestrationView = () => {
     setIsRunning(false);
   };
 
+  const refreshData = async () => {
+    if (!selectedActivity || !selectedGroup) return;
+
+    setLoadingSubmissions(true);
+    setConnectionError(null);
+    try {
+      const updatedSubmissions = await client.getSubmissions(
+        selectedActivity.id,
+      );
+      setSubmissions(updatedSubmissions);
+      setLastUpdate(new Date());
+      console.log('Data refreshed manually');
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      setConnectionError('Failed to refresh data');
+    } finally {
+      setLoadingSubmissions(false);
+    }
+  };
+
+  const retryConnection = () => {
+    setConnectionError(null);
+    setIsRealTimeConnected(false);
+    // The useEffect will automatically retry the connection
+  };
+
+  // activity log cleared feature removed
+
   const getStudentSubmission = (studentId: string) => {
     // Find the student's submission for the selected activity
     return submissions.find((sub) => sub.student.id === studentId);
   };
+
+  const getStudentActivityStatus = (studentId: string) => {
+    const activity = studentActivity[studentId];
+    if (!activity) return 'Unknown';
+
+    const timeSinceLastSeen = Date.now() - activity.lastSeen.getTime();
+    const minutesAgo = Math.floor(timeSinceLastSeen / (1000 * 60));
+
+    if (minutesAgo < 1) return 'Active now';
+    if (minutesAgo < 5) return `${minutesAgo} min ago`;
+    if (minutesAgo < 60) return `${minutesAgo} min ago`;
+    return 'Inactive';
+  };
+
+  // removed student-specific activity log helper
 
   const getStatusCounts = () => {
     const counts = { active: 0, inProgress: 0, completed: 0, help: 0 };
@@ -245,6 +451,44 @@ export const OrchestrationView = () => {
               Activity run-time: {activityTime}
             </Typography>
           )}
+          <Typography variant="body2" color="text.secondary">
+            Last updated: {lastUpdate.toLocaleTimeString()}
+          </Typography>
+          <Chip
+            label={isRealTimeConnected ? 'Live' : 'Offline'}
+            color={isRealTimeConnected ? 'success' : 'default'}
+            size="small"
+            variant={isRealTimeConnected ? 'filled' : 'outlined'}
+          />
+          {connectionError && (
+            <Tooltip title="Click to retry connection">
+              <Chip
+                label="Connection Error"
+                color="error"
+                size="small"
+                variant="outlined"
+                onClick={retryConnection}
+                sx={{ cursor: 'pointer' }}
+              />
+            </Tooltip>
+          )}
+          {Object.values(studentActivity).filter(
+            (activity) =>
+              activity && Date.now() - activity.lastSeen.getTime() < 60000,
+          ).length > 0 && (
+            <Chip
+              label={`${
+                Object.values(studentActivity).filter(
+                  (activity) =>
+                    activity &&
+                    Date.now() - activity.lastSeen.getTime() < 60000,
+                ).length
+              } active`}
+              color="info"
+              size="small"
+              variant="outlined"
+            />
+          )}
           {isRunning ? (
             <>
               <Tooltip title="Pause Activity">
@@ -271,8 +515,12 @@ export const OrchestrationView = () => {
               </span>
             </Tooltip>
           )}
-          <Tooltip title="Refresh">
-            <IconButton color="info">
+          <Tooltip title="Refresh Data">
+            <IconButton
+              color="info"
+              onClick={refreshData}
+              disabled={loadingSubmissions}
+            >
               <Refresh />
             </IconButton>
           </Tooltip>
@@ -352,9 +600,36 @@ export const OrchestrationView = () => {
                 variant="outlined"
                 sx={{ p: 2, backgroundColor: '#f5f5f5' }}
               >
-                <Typography variant="h6" color="error" gutterBottom>
-                  Class Summary Pane
-                </Typography>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ mb: 2 }}
+                >
+                  <Typography variant="h6" color="error">
+                    Class Summary Pane
+                  </Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Chip
+                      label={isRealTimeConnected ? 'Live' : 'Offline'}
+                      color={isRealTimeConnected ? 'success' : 'default'}
+                      size="small"
+                      variant={isRealTimeConnected ? 'filled' : 'outlined'}
+                    />
+                    {connectionError && (
+                      <Chip
+                        label="Error"
+                        color="error"
+                        size="small"
+                        variant="outlined"
+                        onClick={retryConnection}
+                        sx={{ cursor: 'pointer' }}
+                      />
+                    )}
+                  </Stack>
+                </Stack>
+
+                {/* Activity logs removed */}
                 <Grid2 container spacing={2}>
                   <Grid2 xs={3}>
                     <Box textAlign="center">
@@ -393,9 +668,29 @@ export const OrchestrationView = () => {
 
               {/* Overview Grid View */}
               <Paper variant="outlined" sx={{ flex: 1, p: 2 }}>
-                <Typography variant="h6" color="error" gutterBottom>
-                  Overview Grid View
-                </Typography>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ mb: 2 }}
+                >
+                  <Typography variant="h6" color="error">
+                    Overview Grid View
+                  </Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Typography variant="body2" color="text.secondary">
+                      {students.length} students
+                    </Typography>
+                    {isRealTimeConnected && (
+                      <Chip
+                        label="Live Updates"
+                        color="success"
+                        size="small"
+                        variant="outlined"
+                      />
+                    )}
+                  </Stack>
+                </Stack>
 
                 {/* Filter Section */}
                 <Box sx={{ mb: 2 }}>
@@ -445,7 +740,9 @@ export const OrchestrationView = () => {
                                 boxShadow: 2,
                               },
                             }}
-                            onClick={() => setSelectedStudent(student)}
+                            onClick={() => {
+                              setSelectedStudent(student);
+                            }}
                           >
                             <CardContent sx={{ p: 2, textAlign: 'center' }}>
                               <Avatar
@@ -478,6 +775,16 @@ export const OrchestrationView = () => {
                                   size="small"
                                   color={getStatusColor(status) as any}
                                 />
+                                {getStudentActivityStatus(student.id) ===
+                                  'Active now' && (
+                                  <Chip
+                                    label="Live"
+                                    size="small"
+                                    color="success"
+                                    variant="filled"
+                                    sx={{ ml: 1 }}
+                                  />
+                                )}
                               </Box>
                             </CardContent>
                           </Card>
@@ -530,19 +837,29 @@ export const OrchestrationView = () => {
                     >
                       {selectedStudent.email}
                     </Typography>
-                    <Chip
-                      label={getSubmissionStatus(
-                        getStudentSubmission(selectedStudent.id),
+                    <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                      <Chip
+                        label={getSubmissionStatus(
+                          getStudentSubmission(selectedStudent.id),
+                        )}
+                        color={
+                          getStatusColor(
+                            getSubmissionStatus(
+                              getStudentSubmission(selectedStudent.id),
+                            ),
+                          ) as any
+                        }
+                      />
+                      {getStudentActivityStatus(selectedStudent.id) ===
+                        'Active now' && (
+                        <Chip
+                          label="Live"
+                          size="small"
+                          color="success"
+                          variant="filled"
+                        />
                       )}
-                      color={
-                        getStatusColor(
-                          getSubmissionStatus(
-                            getStudentSubmission(selectedStudent.id),
-                          ),
-                        ) as any
-                      }
-                      sx={{ mb: 2 }}
-                    />
+                    </Stack>
                   </Box>
 
                   <Box>
@@ -561,6 +878,9 @@ export const OrchestrationView = () => {
                         getStudentSubmission(selectedStudent.id),
                       )}
                     </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Activity: {getStudentActivityStatus(selectedStudent.id)}
+                    </Typography>
                   </Box>
 
                   <Box>
@@ -573,12 +893,58 @@ export const OrchestrationView = () => {
                           variant="outlined"
                           size="small"
                           startIcon={<Visibility />}
-                          onClick={() => {
-                            // Navigate to student's submission view
-                            // For now, navigate to the activity units page
-                            navigate(
-                              `/dashboard/activities/${selectedActivity?.id}/units`,
-                            );
+                          onClick={async () => {
+                            if (!selectedActivity || !selectedStudent) return;
+                            setWorkDialogOpen(true);
+                            setWorkDialogLoading(true);
+                            setWorkDialogError(null);
+                            setSelectedWork(null);
+                            try {
+                              const subs = await client.getStudentSubmissions(
+                                selectedStudent.id,
+                                selectedActivity.id,
+                              );
+                              setWorkDialogSubmissions(subs);
+                              const latest = subs[0] || null;
+                              setSelectedWork(latest);
+                              const titles: Record<string, string> = {};
+                              for (const s of subs) {
+                                if (s.unitId && !titles[s.unitId]) {
+                                  const unit = await client.getUnit(
+                                    selectedActivity.id,
+                                    s.unitId,
+                                  );
+                                  if (unit) titles[s.unitId] = unit.title;
+                                }
+                              }
+                              setWorkDialogUnitTitles(titles);
+                              if (latest) {
+                                const unit = await client.getUnit(
+                                  selectedActivity.id,
+                                  latest.unitId,
+                                );
+                                setWorkDialogUnit(unit);
+                                const datasets = unit
+                                  ? await client.getDatasets(unit)
+                                  : [];
+                                setWorkDialogDatasets(datasets);
+                                setWorkDialogJson(
+                                  stringifySubmissionJson(latest),
+                                );
+                              } else {
+                                setWorkDialogUnit(null);
+                                setWorkDialogDatasets([]);
+                                setWorkDialogJson('{}');
+                              }
+                            } catch (e: any) {
+                              setWorkDialogError('Failed to load submissions');
+                              setWorkDialogSubmissions([]);
+                              setWorkDialogUnit(null);
+                              setWorkDialogDatasets([]);
+                              setWorkDialogJson('{}');
+                            } finally {
+                              setWorkDialogLoading(false);
+                            }
                           }}
                         >
                           View Work
@@ -587,22 +953,7 @@ export const OrchestrationView = () => {
                     </Stack>
                   </Box>
 
-                  <Box>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Recent Activity
-                    </Typography>
-                    <Stack spacing={1}>
-                      <Typography variant="body2" color="text.secondary">
-                        • Started activity
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        • Working on visualization
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        • Last seen: 2 minutes ago
-                      </Typography>
-                    </Stack>
-                  </Box>
+                  {/* Activity logs removed */}
                 </Stack>
               ) : (
                 <Box
@@ -633,6 +984,122 @@ export const OrchestrationView = () => {
           </Typography>
         </Paper>
       )}
+
+      <Dialog
+        open={workDialogOpen}
+        onClose={() => setWorkDialogOpen(false)}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>Student Work</DialogTitle>
+        <DialogContent dividers>
+          {workDialogLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={28} />
+            </Box>
+          ) : workDialogError ? (
+            <Typography color="error">{workDialogError}</Typography>
+          ) : (
+            <Stack spacing={2}>
+              <List dense>
+                {workDialogSubmissions.map((sub) => (
+                  <ListItem
+                    key={sub.id}
+                    disableGutters
+                    secondaryAction={
+                      <Chip
+                        size="small"
+                        label={getSubmissionStatus(sub)}
+                        color={getStatusColor(getSubmissionStatus(sub)) as any}
+                      />
+                    }
+                  >
+                    <ListItemText
+                      primary={`Unit: ${workDialogUnitTitles[sub.unitId] || sub.unitId}`}
+                      secondary={`Updated: ${new Date(sub.updated).toLocaleString()}  • Attempt: ${sub.attempt || 1}`}
+                      onClick={async () => {
+                        setSelectedWork(sub);
+                        try {
+                          const unit = await client.getUnit(
+                            selectedActivity!.id,
+                            sub.unitId,
+                          );
+                          setWorkDialogUnit(unit);
+                          const datasets = unit
+                            ? await client.getDatasets(unit)
+                            : [];
+                          setWorkDialogDatasets(datasets);
+                          setWorkDialogJson(stringifySubmissionJson(sub));
+                        } catch {
+                          setWorkDialogUnit(null);
+                          setWorkDialogDatasets([]);
+                          setWorkDialogJson('{}');
+                        }
+                      }}
+                      sx={{ cursor: 'pointer' }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+
+              <Divider />
+
+              {selectedWork ? (
+                <Stack direction="row" gap={2}>
+                  <Stack flex={1}>
+                    <Paper variant="outlined">
+                      <Stack>
+                        <Typography variant="subtitle1" sx={{ p: 2, pb: 1 }}>
+                          Visualization
+                        </Typography>
+                        <Box sx={{ p: 2, pt: 0, minHeight: 240 }}>
+                          <Visualization
+                            key={selectedWork?.id}
+                            datasets={workDialogDatasets}
+                            json={workDialogJson}
+                          />
+                        </Box>
+                      </Stack>
+                    </Paper>
+                  </Stack>
+                  <Stack flex={1}>
+                    <Paper variant="outlined">
+                      <Stack>
+                        <Typography variant="subtitle1" sx={{ p: 2, pb: 1 }}>
+                          Submission JSON
+                        </Typography>
+                        <Box sx={{ p: 2, pt: 0 }}>
+                          <JsonEditor json={workDialogJson} readOnly={true} />
+                        </Box>
+                      </Stack>
+                    </Paper>
+                  </Stack>
+                </Stack>
+              ) : (
+                <Typography color="text.secondary">
+                  No submission selected.
+                </Typography>
+              )}
+
+              {workDialogDatasets?.length ? (
+                <Paper variant="outlined">
+                  <Stack>
+                    <Typography variant="subtitle1" sx={{ p: 2, pb: 1 }}>
+                      Datasets
+                    </Typography>
+                    <Box sx={{ p: 2, pt: 0 }}>
+                      <DatasetTabs datasets={workDialogDatasets} />
+                    </Box>
+                  </Stack>
+                </Paper>
+              ) : null}
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setWorkDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

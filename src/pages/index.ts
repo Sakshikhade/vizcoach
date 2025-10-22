@@ -12,6 +12,7 @@ export * from './OrchestrationView';
 export * from './Perform';
 export * from './Students';
 export * from './StudentSubmissions';
+export * from './StudentWorkPopup';
 export * from './Submissions';
 export * from './Units';
 export * from './ViewUnit';

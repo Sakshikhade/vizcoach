@@ -15,6 +15,7 @@ import {
   Perform,
   Students,
   StudentSubmissions,
+  StudentWorkPopup,
   Submissions,
   Units,
   ViewUnit,
@@ -154,6 +155,17 @@ export const router = createBrowserRouter([
               </AuthorizedRoute>
             ),
             loader: studentSubmissionsLoader,
+          },
+          {
+            path: ':activityId/student/:studentId/work',
+            element: (
+              <AuthorizedRoute
+                navigateTo="/dashboard"
+                allowedRoles={['Teacher']}
+              >
+                <StudentWorkPopup />
+              </AuthorizedRoute>
+            ),
           },
           {
             path: '*',
