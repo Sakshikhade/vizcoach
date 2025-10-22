@@ -190,6 +190,27 @@ export const StudentSubmissions = () => {
             </Stack>
           </Paper>
 
+          {/* Student Context Panel */}
+          {submission?.context && (
+            <Paper variant="outlined">
+              <Stack>
+                <Typography variant="h5" sx={{ padding: 2, paddingBottom: 1 }}>
+                  Student Context
+                </Typography>
+                <Stack sx={{ padding: 2, paddingTop: 0 }}>
+                  <Paper variant="outlined" sx={{ padding: 2 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
+                    >
+                      {submission.context}
+                    </Typography>
+                  </Paper>
+                </Stack>
+              </Stack>
+            </Paper>
+          )}
+
           {/* Comments Panel */}
           <Paper variant="outlined">
             <Stack>

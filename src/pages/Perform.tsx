@@ -8,6 +8,7 @@ import {
   Typography,
   IconButton,
   Tooltip,
+  TextField,
 } from '@mui/material';
 import {
   BackHandRounded,
@@ -36,9 +37,11 @@ export const Perform = () => {
     submission,
     unit,
     json,
+    context,
     saved,
     comments,
     updateJson,
+    updateContext,
     raiseHand,
     unraiseHand,
     submit,
@@ -254,6 +257,37 @@ export const Perform = () => {
                   </Paper>
                 </Stack>
               )}
+            </Stack>
+          </Stack>
+        </Paper>
+
+        {/* Context Panel */}
+        <Paper variant="outlined">
+          <Stack>
+            <Typography variant="h5" sx={{ padding: 2, paddingBottom: 1 }}>
+              Context
+            </Typography>
+            <Stack sx={{ padding: 2, paddingTop: 0 }}>
+              <Typography variant="body2" sx={{ marginBottom: 2, color: 'text.secondary' }}>
+                Provide additional context about your approach, insights, or any challenges you encountered while working on this assignment.
+              </Typography>
+              <TextField
+                multiline
+                rows={4}
+                fullWidth
+                variant="outlined"
+                placeholder="Describe your approach, insights, challenges, or any additional context about your work..."
+                value={context}
+                onChange={(e) => updateContext(e.target.value)}
+                disabled={submission?.state === 'submitted'}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'divider',
+                    },
+                  },
+                }}
+              />
             </Stack>
           </Stack>
         </Paper>

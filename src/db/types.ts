@@ -225,11 +225,16 @@ export class Submission {
   get attempt(): number {
     return this.model.attempt || 1;
   }
+
+  get context(): string {
+    return this.model.context || '';
+  }
 }
 
 export type UnsavedSubmission = {
   json: object;
   state?: SubmissionState;
+  context?: string;
 };
 
 export class Comment {

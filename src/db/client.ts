@@ -369,12 +369,13 @@ class PocketbaseClient {
     }
 
     // Creating submission's record in the database
-    const { json, state } = unsavedSubmission;
+    const { json, state, context } = unsavedSubmission;
     const payload: any = {
       json,
       unitId,
       userId: user.id,
       attempt: 1, // Default to attempt 1 for new submissions
+      context: context || '',
     };
     // PocketBase select field: clear by sending empty string
     if (state === 'help' || state === 'submitted') {
@@ -438,6 +439,7 @@ class PocketbaseClient {
       unitId,
       userId: user.id,
       attempt: oldSubmission.attempt || 1, // Keep existing attempt or default to 1
+      context: unsavedSubmission.context || '',
     };
     // PocketBase select field: clear by sending empty string
     if (

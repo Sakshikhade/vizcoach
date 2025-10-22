@@ -28,6 +28,7 @@ export const usePerform = () => {
 
   const [submission, setSubmission] = useState(data.submission);
   const [json, setJson] = useState(getJson(submission));
+  const [context, setContext] = useState(submission?.context || '');
   const [saved, setSaved] = useState(!!submission);
   const [syncing, setSyncing] = useState(false);
   const [comments, setComments] = useState(data.comments);
@@ -37,12 +38,18 @@ export const usePerform = () => {
     setSaved(!!submission && value === getJson(submission));
   };
 
+  const updateContext = (value: string) => {
+    setContext(value);
+    setSaved(!!submission && value === (submission?.context || ''));
+  };
+
   /**
    * This useEffect is expected to set the JSON and saved statues when submission is saved,
    * including by raising or unraising hands, we set the JSON and saved indicator.
    */
   useEffect(() => {
     setJson(getJson(submission));
+    setContext(submission?.context || '');
     setSaved(!!submission);
   }, [submission]);
 
@@ -74,11 +81,12 @@ export const usePerform = () => {
     console.log('Starting sync...');
 
     // Build payload safely; if JSON is invalid, bail and reset syncing
-    let payload: { json: object; state: SubmissionState };
+    let payload: { json: object; state: SubmissionState; context: string };
     try {
       payload = {
         json: JSON.parse(json),
         state,
+        context,
       };
       console.log('JSON parsed successfully, payload:', payload);
     } catch (e) {
@@ -172,9 +180,11 @@ export const usePerform = () => {
     ...data,
     submission,
     json,
+    context,
     saved,
     comments,
     updateJson,
+    updateContext,
     raiseHand,
     unraiseHand,
     submit,
