@@ -117,35 +117,39 @@ export const OrchestrationView = () => {
   const [workDialogUnit, setWorkDialogUnit] = useState<any | null>(null);
   const [workDialogDatasets, setWorkDialogDatasets] = useState<any[]>([]);
   const [workDialogJson, setWorkDialogJson] = useState<string>('{}');
-
-  const stringifySubmissionJson = (input: any): string => {
+  
+  // Enhanced JSON processing for visualization
+  const getEnhancedJson = (submission: any): string => {
+    const baseJson = stringifySubmissionJson(submission);
+    
     try {
-      let raw: any = input?.json ?? input;
-      if (typeof raw === 'string') {
-        try {
-          raw = JSON.parse(raw);
-        } catch {}
-      }
-      if (Array.isArray(raw)) {
-        const first = raw[0];
-        let spec: any = first?.json ?? first ?? {};
-        if (typeof spec === 'string') {
-          try {
-            spec = JSON.parse(spec);
-          } catch {}
+      const parsed = JSON.parse(baseJson);
+      
+      // Add proper dimensions for the dialog visualization - same as Perform page
+      const enhancedJson = {
+        ...parsed,
+        height: 300,
+        width: 'container',
+        autosize: {
+          resize: true,
+          type: 'fit'
         }
-        return JSON.stringify(spec || {}, null, 4);
+      };
+      return JSON.stringify(enhancedJson, null, 4);
+    } catch (error) {
+      console.error('Error processing JSON:', error);
+      return baseJson;
+    }
+  };
+
+  const stringifySubmissionJson = (submission: any): string => {
+    try {
+      if (!submission || !submission.json) {
+        return '{}';
       }
-      if (raw && typeof raw === 'object' && typeof raw.json !== 'undefined') {
-        let spec: any = raw.json;
-        if (typeof spec === 'string') {
-          try {
-            spec = JSON.parse(spec);
-          } catch {}
-        }
-        return JSON.stringify(spec || {}, null, 4);
-      }
-      return JSON.stringify(raw || {}, null, 4);
+      
+      // Use the same approach as Perform page - direct stringify
+      return JSON.stringify(submission.json, null, 4);
     } catch {
       return '{}';
     }
@@ -238,6 +242,30 @@ export const OrchestrationView = () => {
               );
               setSubmissions(updatedSubmissions);
               setLastUpdate(new Date());
+              
+              // If work dialog is open and showing this student's work, refresh it
+              if (workDialogOpen && selectedStudent && record.userId === selectedStudent.id) {
+                console.log('Real-time update detected for open work dialog, refreshing...');
+                try {
+                  const subs = await client.getStudentSubmissions(
+                    selectedStudent.id,
+                    selectedActivity.id,
+                  );
+                  setWorkDialogSubmissions(subs);
+                  const latest = subs[0] || null;
+                  if (latest && selectedWork && latest.unitId === selectedWork.unitId) {
+                    const latestSubmission = await client.getSubmission(
+                      selectedActivity.id,
+                      latest.unitId
+                    );
+                    const submissionToUse = latestSubmission || latest;
+                    setWorkDialogJson(getEnhancedJson(submissionToUse));
+                    setSelectedWork(submissionToUse);
+                  }
+                } catch (error) {
+                  console.error('Error refreshing work dialog:', error);
+                }
+              }
 
               // Update student activity status
               if (record.userId) {
@@ -267,7 +295,15 @@ export const OrchestrationView = () => {
     return () => {
       console.log('Cleaning up submission subscription');
       setIsRealTimeConnected(false);
-      unsubscribe.then((unsub) => unsub());
+      unsubscribe.then((unsub) => {
+        try {
+          unsub();
+        } catch (error) {
+          console.warn('Failed to unsubscribe from submissions:', error);
+        }
+      }).catch((error) => {
+        console.warn('Failed to get unsubscribe function:', error);
+      });
     };
   }, [selectedActivity, selectedGroup, students]);
 
@@ -900,10 +936,12 @@ export const OrchestrationView = () => {
                             setWorkDialogError(null);
                             setSelectedWork(null);
                             try {
+                              console.log('Loading student submissions for:', selectedStudent.name);
                               const subs = await client.getStudentSubmissions(
                                 selectedStudent.id,
                                 selectedActivity.id,
                               );
+                              console.log('Loaded submissions:', subs.length);
                               setWorkDialogSubmissions(subs);
                               const latest = subs[0] || null;
                               setSelectedWork(latest);
@@ -919,6 +957,13 @@ export const OrchestrationView = () => {
                               }
                               setWorkDialogUnitTitles(titles);
                               if (latest) {
+                                // Get the latest submission data to ensure we have recent changes
+                                const latestSubmission = await client.getSubmission(
+                                  selectedActivity.id,
+                                  latest.unitId
+                                );
+                                console.log('Latest submission data:', latestSubmission);
+                                
                                 const unit = await client.getUnit(
                                   selectedActivity.id,
                                   latest.unitId,
@@ -928,15 +973,17 @@ export const OrchestrationView = () => {
                                   ? await client.getDatasets(unit)
                                   : [];
                                 setWorkDialogDatasets(datasets);
-                                setWorkDialogJson(
-                                  stringifySubmissionJson(latest),
-                                );
+                                
+                                // Use the latest submission data
+                                const submissionToUse = latestSubmission || latest;
+                                setWorkDialogJson(getEnhancedJson(submissionToUse));
                               } else {
                                 setWorkDialogUnit(null);
                                 setWorkDialogDatasets([]);
                                 setWorkDialogJson('{}');
                               }
                             } catch (e: any) {
+                              console.error('Error loading student submissions:', e);
                               setWorkDialogError('Failed to load submissions');
                               setWorkDialogSubmissions([]);
                               setWorkDialogUnit(null);
@@ -991,7 +1038,49 @@ export const OrchestrationView = () => {
         maxWidth="lg"
         fullWidth
       >
-        <DialogTitle>Student Work</DialogTitle>
+        <DialogTitle>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h6">Student Work</Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={async () => {
+                if (!selectedActivity || !selectedStudent) return;
+                setWorkDialogLoading(true);
+                try {
+                  console.log('Refreshing student submissions...');
+                  const subs = await client.getStudentSubmissions(
+                    selectedStudent.id,
+                    selectedActivity.id,
+                  );
+                  setWorkDialogSubmissions(subs);
+                  const latest = subs[0] || null;
+                  setSelectedWork(latest);
+                  
+                  if (latest) {
+                    const latestSubmission = await client.getSubmission(
+                      selectedActivity.id,
+                      latest.unitId
+                    );
+                    const submissionToUse = latestSubmission || latest;
+                    setWorkDialogJson(getEnhancedJson(submissionToUse));
+                  }
+                } catch (error) {
+                  console.error('Error refreshing submissions:', error);
+                } finally {
+                  setWorkDialogLoading(false);
+                }
+              }}
+              disabled={workDialogLoading}
+            >
+              {workDialogLoading ? 'Refreshing...' : 'Refresh'}
+            </Button>
+          </Stack>
+        </DialogTitle>
         <DialogContent dividers>
           {workDialogLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
@@ -1017,25 +1106,36 @@ export const OrchestrationView = () => {
                     <ListItemText
                       primary={`Unit: ${workDialogUnitTitles[sub.unitId] || sub.unitId}`}
                       secondary={`Updated: ${new Date(sub.updated).toLocaleString()}  • Attempt: ${sub.attempt || 1}`}
-                      onClick={async () => {
-                        setSelectedWork(sub);
-                        try {
-                          const unit = await client.getUnit(
-                            selectedActivity!.id,
-                            sub.unitId,
-                          );
-                          setWorkDialogUnit(unit);
-                          const datasets = unit
-                            ? await client.getDatasets(unit)
-                            : [];
-                          setWorkDialogDatasets(datasets);
-                          setWorkDialogJson(stringifySubmissionJson(sub));
-                        } catch {
-                          setWorkDialogUnit(null);
-                          setWorkDialogDatasets([]);
-                          setWorkDialogJson('{}');
-                        }
-                      }}
+                          onClick={async () => {
+                            setSelectedWork(sub);
+                            try {
+                              // Get the latest submission data to ensure we have the most recent changes
+                              const latestSubmission = await client.getSubmission(
+                                selectedActivity!.id,
+                                sub.unitId
+                              );
+                              console.log('Loading latest submission data:', latestSubmission);
+                              
+                              const unit = await client.getUnit(
+                                selectedActivity!.id,
+                                sub.unitId,
+                              );
+                              setWorkDialogUnit(unit);
+                              const datasets = unit
+                                ? await client.getDatasets(unit)
+                                : [];
+                              setWorkDialogDatasets(datasets);
+                              
+                              // Use the latest submission data instead of cached data
+                              const submissionToUse = latestSubmission || sub;
+                              setWorkDialogJson(getEnhancedJson(submissionToUse));
+                            } catch (error) {
+                              console.error('Error loading submission data:', error);
+                              setWorkDialogUnit(null);
+                              setWorkDialogDatasets([]);
+                              setWorkDialogJson('{}');
+                            }
+                          }}
                       sx={{ cursor: 'pointer' }}
                     />
                   </ListItem>
@@ -1052,12 +1152,32 @@ export const OrchestrationView = () => {
                         <Typography variant="subtitle1" sx={{ p: 2, pb: 1 }}>
                           Visualization
                         </Typography>
-                        <Box sx={{ p: 2, pt: 0, minHeight: 240 }}>
-                          <Visualization
-                            key={selectedWork?.id}
-                            datasets={workDialogDatasets}
-                            json={workDialogJson}
-                          />
+                        <Box sx={{ 
+                          p: 2, 
+                          pt: 0, 
+                          minHeight: 300, 
+                          maxHeight: 400, 
+                          overflow: 'auto'
+                        }}>
+                          {(() => {
+                            console.log('OrchestrationView rendering visualization:', {
+                              datasetsLength: workDialogDatasets?.length || 0,
+                              jsonLength: workDialogJson?.length || 0,
+                              selectedWorkId: selectedWork?.id,
+                              workDialogJsonPreview: workDialogJson?.substring(0, 200)
+                            });
+                            return workDialogDatasets?.length > 0 ? (
+                              <Visualization
+                                key={selectedWork?.id}
+                                datasets={workDialogDatasets}
+                                json={workDialogJson}
+                              />
+                            ) : (
+                              <Typography color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+                                No datasets available for this submission
+                              </Typography>
+                            );
+                          })()}
                         </Box>
                       </Stack>
                     </Paper>
@@ -1093,6 +1213,27 @@ export const OrchestrationView = () => {
                   </Stack>
                 </Paper>
               ) : null}
+
+              {/* Student Context */}
+              {selectedWork?.context && (
+                <Paper variant="outlined">
+                  <Stack>
+                    <Typography variant="subtitle1" sx={{ p: 2, pb: 1 }}>
+                      Student Context
+                    </Typography>
+                    <Box sx={{ p: 2, pt: 0 }}>
+                      <Paper variant="outlined" sx={{ p: 2 }}>
+                        <Typography
+                          variant="body1"
+                          sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
+                        >
+                          {selectedWork.context}
+                        </Typography>
+                      </Paper>
+                    </Box>
+                  </Stack>
+                </Paper>
+              )}
             </Stack>
           )}
         </DialogContent>

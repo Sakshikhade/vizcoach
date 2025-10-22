@@ -66,34 +66,14 @@ export const StudentWorkPopup = () => {
     getSubmissionDatasets,
   } = useStudentSubmissions();
 
-  const stringifySubmissionJson = (input: any): string => {
+  const stringifySubmissionJson = (submission: any): string => {
     try {
-      let raw: any = input?.json ?? input;
-      if (typeof raw === 'string') {
-        try {
-          raw = JSON.parse(raw);
-        } catch {}
+      if (!submission || !submission.json) {
+        return '{}';
       }
-      if (Array.isArray(raw)) {
-        const first = raw[0];
-        let spec: any = first?.json ?? first ?? {};
-        if (typeof spec === 'string') {
-          try {
-            spec = JSON.parse(spec);
-          } catch {}
-        }
-        return JSON.stringify(spec || {}, null, 4);
-      }
-      if (raw && typeof raw === 'object' && typeof raw.json !== 'undefined') {
-        let spec: any = raw.json;
-        if (typeof spec === 'string') {
-          try {
-            spec = JSON.parse(spec);
-          } catch {}
-        }
-        return JSON.stringify(spec || {}, null, 4);
-      }
-      return JSON.stringify(raw || {}, null, 4);
+      
+      // Use the same approach as Perform page - direct stringify
+      return JSON.stringify(submission.json, null, 4);
     } catch {
       return '{}';
     }
@@ -109,11 +89,27 @@ export const StudentWorkPopup = () => {
     [selectedSubmission, getSubmissionDatasets],
   );
 
-  const json = useMemo(
-    () =>
-      selectedSubmission ? stringifySubmissionJson(selectedSubmission) : '{}',
-    [selectedSubmission],
-  );
+  const json = useMemo(() => {
+    if (!selectedSubmission) return '{}';
+    
+    const baseJson = stringifySubmissionJson(selectedSubmission);
+    try {
+      const parsed = JSON.parse(baseJson);
+      // Add proper dimensions for the popup visualization
+      const enhancedJson = {
+        ...parsed,
+        height: 300,
+        width: 'container',
+        autosize: {
+          resize: true,
+          type: 'fit'
+        }
+      };
+      return JSON.stringify(enhancedJson, null, 4);
+    } catch {
+      return baseJson;
+    }
+  }, [selectedSubmission]);
 
   const handleSubmissionSelect = (submission: any) => {
     setSelectedSubmission(submission);
@@ -195,12 +191,24 @@ export const StudentWorkPopup = () => {
                     <Typography variant="subtitle1" sx={{ p: 2, pb: 1 }}>
                       Visualization
                     </Typography>
-                    <Box sx={{ p: 2, pt: 0, minHeight: 240 }}>
-                      <Visualization
-                        key={selectedSubmission?.id}
-                        datasets={datasets}
-                        json={json}
-                      />
+                    <Box sx={{ 
+                      p: 2, 
+                      pt: 0, 
+                      minHeight: 300, 
+                      maxHeight: 400, 
+                      overflow: 'auto'
+                    }}>
+                      {datasets?.length > 0 ? (
+                        <Visualization
+                          key={selectedSubmission?.id}
+                          datasets={datasets}
+                          json={json}
+                        />
+                      ) : (
+                        <Typography color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+                          No datasets available for this submission
+                        </Typography>
+                      )}
                     </Box>
                   </Stack>
                 </Paper>
@@ -237,6 +245,27 @@ export const StudentWorkPopup = () => {
               </Stack>
             </Paper>
           ) : null}
+
+          {/* Student Context */}
+          {selectedSubmission?.context && (
+            <Paper variant="outlined">
+              <Stack>
+                <Typography variant="subtitle1" sx={{ p: 2, pb: 1 }}>
+                  Student Context
+                </Typography>
+                <Box sx={{ p: 2, pt: 0 }}>
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
+                    >
+                      {selectedSubmission.context}
+                    </Typography>
+                  </Paper>
+                </Box>
+              </Stack>
+            </Paper>
+          )}
         </Stack>
       </DialogContent>
       <DialogActions>

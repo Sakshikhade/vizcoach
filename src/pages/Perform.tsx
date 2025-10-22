@@ -268,8 +268,12 @@ export const Perform = () => {
               Context
             </Typography>
             <Stack sx={{ padding: 2, paddingTop: 0 }}>
-              <Typography variant="body2" sx={{ marginBottom: 2, color: 'text.secondary' }}>
-                Provide additional context about your approach, insights, or any challenges you encountered while working on this assignment.
+              <Typography
+                variant="body2"
+                sx={{ marginBottom: 2, color: 'text.secondary' }}
+              >
+                Provide additional context about your approach, insights, or any
+                challenges you encountered while working on this assignment.
               </Typography>
               <TextField
                 multiline

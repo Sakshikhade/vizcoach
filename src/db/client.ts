@@ -534,7 +534,11 @@ class PocketbaseClient {
   }
 
   unregisterPostCommentCallback() {
-    this.pb.collection('comments').unsubscribe('*');
+    try {
+      this.pb.collection('comments').unsubscribe('*');
+    } catch (error) {
+      console.warn('Failed to unsubscribe from comments:', error);
+    }
   }
 
   registerSubmissionUpdateCallback(
@@ -556,7 +560,11 @@ class PocketbaseClient {
   }
 
   unregisterSubmissionUpdateCallback() {
-    this.pb.collection('submissions').unsubscribe('*');
+    try {
+      this.pb.collection('submissions').unsubscribe('*');
+    } catch (error) {
+      console.warn('Failed to unsubscribe from submissions:', error);
+    }
   }
 
   // Chat System Methods
@@ -793,7 +801,11 @@ class PocketbaseClient {
   }
 
   unregisterChatMessageCallback() {
-    this.pb.collection('chat_messages').unsubscribe('*');
+    try {
+      this.pb.collection('chat_messages').unsubscribe('*');
+    } catch (error) {
+      console.warn('Failed to unsubscribe from chat messages:', error);
+    }
   }
 
   async getAllUsers(): Promise<User[]> {
