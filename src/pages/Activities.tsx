@@ -1,6 +1,12 @@
 import { ChangeEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FormControl, SpeedDialAction, TextField } from '@mui/material';
+import {
+  FormControl,
+  TextField,
+  IconButton,
+  Tooltip,
+  Stack,
+} from '@mui/material';
 import { Addchart, BarChart } from '@mui/icons-material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { ActivityCard, Dashboard } from 'components';
@@ -42,14 +48,27 @@ export const Activities = () => {
             : 'Welcome, track your assigned work.'
         }
       >
-        <FormControl>
-          <TextField
-            id="outlined-basic"
-            label="Filter"
-            variant="outlined"
-            onChange={onChange}
-          />
-        </FormControl>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <FormControl>
+            <TextField
+              id="outlined-basic"
+              label="Filter"
+              variant="outlined"
+              onChange={onChange}
+            />
+          </FormControl>
+          {user?.role === 'Teacher' && (
+            <Tooltip title="Add Assignment">
+              <IconButton
+                onClick={() => navigate('add-activity')}
+                color="primary"
+                size="large"
+              >
+                <Addchart />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Stack>
       </Dashboard.Header>
       {user?.role === 'Teacher' && (
         <Dashboard.SpeedDial

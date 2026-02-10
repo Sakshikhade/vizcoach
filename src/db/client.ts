@@ -9,7 +9,6 @@ import {
   Dataset,
   DatasetRow,
   Group,
-  SubmissionState,
   Submission,
   Unit,
   UnsavedActivity,
@@ -42,6 +41,7 @@ class PocketbaseClient {
     return isValid ? (record as any) : null;
   }
 
+  // Get classes (groups) - returns classes for teachers or student's enrolled classes
   async getGroups(filter?: string): Promise<Group[]> {
     const user = this.getUser();
     if (!user) return [];
@@ -59,7 +59,6 @@ class PocketbaseClient {
       sort: '-created',
       filter: filters.join(' && '),
     });
-
     for (const model of models) {
       const { totalItems } = await this.pb
         .collection('usergroups')
@@ -68,15 +67,16 @@ class PocketbaseClient {
         });
       groups.push(new Group(model, totalItems));
     }
-
     return groups;
   }
 
+  // Get a specific class (group) by ID
   async getGroup(groupId: string): Promise<Group | null> {
     const groups = await this.getGroups(`id='${groupId}'`);
     return groups.length ? groups[0] : null;
   }
 
+  // Get students enrolled in a specific class
   async getStudents(groupId: string): Promise<User[]> {
     const user = this.getUser();
     if (!user || user.role !== 'Teacher') return [];
@@ -90,47 +90,6 @@ class PocketbaseClient {
       .filter((user) => !!user);
   }
 
-  async getGroupMembers(groupId: string): Promise<User[]> {
-    const user = this.getUser();
-    if (!user) return [];
-
-    // Check if user is a member of this group (for students) or if user is a teacher
-    const userGroup = await this.pb
-      .collection('usergroups')
-      .getFirstListItem(`groupId='${groupId}' && userId='${user.id}'`)
-      .catch(() => null);
-
-    // If user is not in the group and not a teacher, return empty array
-    if (!userGroup && user.role !== 'Teacher') return [];
-
-    const userGroups = await this.pb.collection('usergroups').getFullList({
-      expand: 'userId',
-      filter: `groupId='${groupId}'`,
-    });
-    return userGroups
-      .map(({ expand }) => expand?.userId)
-      .filter((user) => !!user);
-  }
-
-  async getUserGroups(): Promise<Group[]> {
-    const user = this.getUser();
-    if (!user) return [];
-
-    if (user.role === 'Teacher') {
-      // Teachers can see all groups
-      return this.getGroups();
-    } else {
-      // Students can only see groups they belong to
-      const userGroups = await this.pb.collection('usergroups').getFullList({
-        expand: 'groupId',
-        filter: `userId='${user.id}'`,
-      });
-      return userGroups
-        .map(({ expand }) => expand?.groupId)
-        .filter((group) => !!group);
-    }
-  }
-
   async getStudent(studentId: string): Promise<User | null> {
     const user = this.getUser();
     if (!user || user.role !== 'Teacher') return null;
@@ -138,6 +97,7 @@ class PocketbaseClient {
     return this.pb.collection('users').getOne(studentId);
   }
 
+  // Get assignments (activities) - returns assignments for teachers or student's assigned work
   async getActivities(filter?: string): Promise<Activity[]> {
     const user = this.getUser();
     if (!user) return [];
@@ -198,7 +158,7 @@ class PocketbaseClient {
     const datasets: Dataset[] = [];
 
     for (const name of unit?.datasets) {
-      const url = this.pb.getFileUrl(unit, name, { token });
+      const url = this.pb.files.getURL(unit, name, { token });
       const rows = await csv(url, autoType);
       const columns: string[] = rows.columns;
       const fields: GridColDef<DatasetRow>[] = columns.map((field) => ({
@@ -265,19 +225,7 @@ class PocketbaseClient {
       activityId,
       `unitId='${unitId}'`,
     );
-    // Return latest attempt (highest attempt number or latest updated)
-    const latest = submissions.sort((a, b) => {
-      if (
-        (a as any).attempt !== undefined &&
-        (b as any).attempt !== undefined
-      ) {
-        return (
-          b.attempt - a.attempt || b.updated.getTime() - a.updated.getTime()
-        );
-      }
-      return b.updated.getTime() - a.updated.getTime();
-    })[0];
-    return latest || null;
+    return submissions.length ? submissions[0] : null;
   }
 
   async getStudentSubmissions(
@@ -319,7 +267,8 @@ class PocketbaseClient {
         .getOne(submissionId, {
           expand: user.role === 'Teacher' ? 'userId' : '',
         });
-      const student = user.role === 'Teacher' ? model.expand?.userId : user;
+      const student =
+        user.role === 'Teacher' ? (model as any).expand?.userId : user;
       return new Submission(model, student as any);
     } catch {
       return null;
@@ -376,13 +325,22 @@ class PocketbaseClient {
 
   async updateUnit(unit: Unit): Promise<Unit | null> {
     try {
-      await this.pb.collection('units').update(unit.id, {
+      const updateData: any = {
         title: unit.title,
         description: unit.description,
         datasets: unit.datasets,
-      });
+      };
+
+      // Only include reference if it exists
+      if (unit.reference) {
+        updateData.reference = unit.reference;
+      }
+
+      console.log('Updating unit with data:', updateData);
+      await this.pb.collection('units').update(unit.id, updateData);
       return this.getUnit(unit.activityId, unit.id);
-    } catch {
+    } catch (error) {
+      console.error('Error updating unit:', error);
       return null;
     }
   }
@@ -392,6 +350,11 @@ class PocketbaseClient {
     unitId: string,
     unsavedSubmission: UnsavedSubmission,
   ): Promise<Submission> {
+    console.log('createSubmission called with:', {
+      activityId,
+      unitId,
+      unsavedSubmission,
+    });
     const user = this.getUser();
     if (!user || user?.role !== 'Student') {
       throw new Error('Only logged-in student can create a submission!');
@@ -405,30 +368,40 @@ class PocketbaseClient {
       );
     }
 
-    // Determine next attempt number for this user+unit
-    const previous = await this.getSubmissions(
-      activityId,
-      `unitId='${unitId}' && userId='${user.id}'`,
-    );
-    const nextAttempt = previous.length
-      ? Math.max(...previous.map((s: any) => s.attempt || 1)) + 1
-      : 1;
-
-    // Creating submission's record in the database with attempt
-    const { json, state } = unsavedSubmission;
-    const data: any = {
+    // Creating submission's record in the database
+    const { json, state, context } = unsavedSubmission;
+    const payload: any = {
       json,
       unitId,
       userId: user.id,
-      attempt: nextAttempt,
+      attempt: 1, // Default to attempt 1 for new submissions
+      context: context || '',
     };
+    // PocketBase select field: clear by sending empty string
     if (state === 'help' || state === 'submitted') {
-      data.state = state;
+      payload.state = state;
     } else {
-      // attempting => clear state
-      data.state = '';
+      payload.state = '';
     }
-    await this.pb.collection('submissions').create(data);
+    console.log(
+      'About to create submission with payload:',
+      JSON.stringify(payload, null, 2),
+    );
+    try {
+      await this.pb.collection('submissions').create(payload);
+      console.log('Submission created successfully');
+    } catch (error) {
+      console.error('Detailed error creating submission:', error);
+      if (error && typeof error === 'object' && 'status' in error) {
+        console.error('Error details:', {
+          status: (error as any).status,
+          data: (error as any).data,
+          message: (error as any).message,
+          url: (error as any).url,
+        });
+      }
+      throw error;
+    }
 
     // Fetching newly created submission
     const submission = await this.getSubmission(activityId, unitId);
@@ -443,9 +416,14 @@ class PocketbaseClient {
     unitId: string,
     unsavedSubmission: UnsavedSubmission,
   ) {
+    console.log('updateSubmission called with:', {
+      activityId,
+      unitId,
+      unsavedSubmission,
+    });
     const user = this.getUser();
-    if (!user) {
-      throw new Error('Only logged-in users can update submissions!');
+    if (!user || user?.role !== 'Student') {
+      throw new Error('Only logged-in student can update submissions!');
     }
 
     const oldSubmission = await this.getSubmission(activityId, unitId);
@@ -456,23 +434,25 @@ class PocketbaseClient {
     }
 
     // Updating submission's record in the database
-    const updateData: any = {
+    const updatePayload: any = {
+      json: unsavedSubmission.json,
       unitId,
       userId: user.id,
-      attempt: (oldSubmission as any).attempt || 1,
-      json: unsavedSubmission.json,
+      attempt: oldSubmission.attempt || 1, // Keep existing attempt or default to 1
+      context: unsavedSubmission.context || '',
     };
+    // PocketBase select field: clear by sending empty string
     if (
       unsavedSubmission.state === 'help' ||
       unsavedSubmission.state === 'submitted'
     ) {
-      updateData.state = unsavedSubmission.state;
+      updatePayload.state = unsavedSubmission.state;
     } else {
-      updateData.state = '';
+      updatePayload.state = '';
     }
     await this.pb
       .collection('submissions')
-      .update(oldSubmission.id, updateData);
+      .update(oldSubmission.id, updatePayload);
 
     // Fetching updated submission
     const newSubmission = await this.getSubmission(activityId, unitId);
@@ -480,31 +460,6 @@ class PocketbaseClient {
       throw new Error(`Unable to update submission!`);
     }
     return newSubmission;
-  }
-
-  async updateSubmissionById(
-    submissionId: string,
-    data: Partial<{ state: SubmissionState; score: number }>,
-  ) {
-    const user = this.getUser();
-    if (!user || user.role !== 'Teacher') {
-      throw new Error('Only logged-in teachers can modify submissions!');
-    }
-    const update: any = { ...data };
-    if (data.hasOwnProperty('state') && data.state == null) {
-      // PocketBase select field clear
-      update.state = '';
-    }
-    await this.pb.collection('submissions').update(submissionId, update);
-  }
-
-  async resubmit(
-    activityId: string,
-    unitId: string,
-    unsavedSubmission: UnsavedSubmission,
-  ): Promise<Submission> {
-    // Force a new attempt by calling createSubmission to allocate next attempt
-    return this.createSubmission(activityId, unitId, unsavedSubmission);
   }
 
   async postComment(submission: Submission, content: string): Promise<Comment> {
@@ -579,57 +534,40 @@ class PocketbaseClient {
   }
 
   unregisterPostCommentCallback() {
-    this.pb.collection('comments').unsubscribe('*');
+    try {
+      this.pb.collection('comments').unsubscribe('*');
+    } catch (error) {
+      console.warn('Failed to unsubscribe from comments:', error);
+    }
   }
-
-  // Chat System Methods
-  private submissionSubscriptionId: (() => void) | null = null;
 
   registerSubmissionUpdateCallback(
     submissionId: string,
-    activityId: string,
-    unitId: string,
     callback: (submission: Submission) => void,
   ) {
     const user = this.getUser();
     if (!user) {
       throw new Error('Only logged-in users can subscribe to submissions');
     }
-
-    // Unsubscribe from any existing subscription first
-    if (this.submissionSubscriptionId) {
-      this.unregisterSubmissionUpdateCallback();
-    }
-
     this.pb
       .collection('submissions')
       .subscribe('*', async ({ action, record }) => {
-        if (action !== 'update') return;
+        if (!['create', 'update'].includes(action)) return;
         if (record.id !== submissionId) return;
-        const updated = await this.getSubmission(activityId, unitId);
+        const updated = await this.getSubmissionById(submissionId);
         if (updated) callback(updated);
-      })
-      .then((unsubscribe) => {
-        this.submissionSubscriptionId = unsubscribe;
-      })
-      .catch((error) => {
-        console.error('Failed to subscribe to submission updates:', error);
       });
   }
 
   unregisterSubmissionUpdateCallback() {
-    if (this.submissionSubscriptionId) {
-      this.submissionSubscriptionId();
-      this.submissionSubscriptionId = null;
+    try {
+      this.pb.collection('submissions').unsubscribe('*');
+    } catch (error) {
+      console.warn('Failed to unsubscribe from submissions:', error);
     }
   }
 
-  // Cleanup all subscriptions
-  cleanup() {
-    this.unregisterSubmissionUpdateCallback();
-    this.unregisterPostCommentCallback();
-  }
-
+  // Chat System Methods
   async getChatRooms(): Promise<ChatRoom[]> {
     const user = this.getUser();
     if (!user) {
@@ -863,7 +801,11 @@ class PocketbaseClient {
   }
 
   unregisterChatMessageCallback() {
-    this.pb.collection('chat_messages').unsubscribe('*');
+    try {
+      this.pb.collection('chat_messages').unsubscribe('*');
+    } catch (error) {
+      console.warn('Failed to unsubscribe from chat messages:', error);
+    }
   }
 
   async getAllUsers(): Promise<User[]> {

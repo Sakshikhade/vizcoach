@@ -1,23 +1,11 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Avatar,
-  IconButton,
-  ListItemIcon,
-  Menu,
-  MenuItem,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Paper, Stack, Typography, IconButton, Tooltip } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
   DeleteRounded,
   EditNoteRounded,
   PlaylistAddCheckRounded,
   PlaylistAddRounded,
-  MoreVert,
-  TaskAltRounded,
 } from '@mui/icons-material';
 import { Dashboard, UnitCard } from 'components';
 import client, { GetSubmissionsResponse, Submission } from 'db';
@@ -27,8 +15,6 @@ export const Units = () => {
   const { user, useData } = useDashboard();
   const { activity, units, submissions } = useData!<GetSubmissionsResponse>();
   const navigate = useNavigate();
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const menuOpen = Boolean(menuAnchorEl);
 
   const submissionMap = submissions.reduce((map, submission) => {
     map.set(submission.unitId, submission);
@@ -50,12 +36,6 @@ export const Units = () => {
     }
   };
 
-  const openMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setMenuAnchorEl(event.currentTarget);
-  };
-
-  const closeMenu = () => setMenuAnchorEl(null);
-
   return (
     <>
       <Dashboard.Breadcrumbs title={activity.title}>
@@ -73,77 +53,37 @@ export const Units = () => {
         }
       >
         {user?.role === 'Teacher' && (
-          <>
-            <IconButton aria-label="activity actions" onClick={openMenu}>
-              <MoreVert sx={{ color: 'black' }} />
-            </IconButton>
-            <Menu
-              anchorEl={menuAnchorEl}
-              open={menuOpen}
-              onClose={closeMenu}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-              <MenuItem
-                onClick={() => {
-                  closeMenu();
-                  navigate(`../${activity.id}/add-unit`);
-                }}
+          <Stack direction="row" spacing={1}>
+            <Tooltip title="Add Task">
+              <IconButton
+                onClick={() => navigate(`../${activity.id}/add-unit`)}
+                color="primary"
               >
-                <ListItemIcon>
-                  <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
-                    <PlaylistAddRounded
-                      fontSize="small"
-                      sx={{ color: 'black' }}
-                    />
-                  </Avatar>
-                </ListItemIcon>
-                Add Unit
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeMenu();
-                  navigate(`../${activity.id}/submissions`);
-                }}
+                <PlaylistAddRounded />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="View Submissions">
+              <IconButton
+                onClick={() => navigate(`../${activity.id}/submissions`)}
+                color="info"
               >
-                <ListItemIcon>
-                  <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
-                    <PlaylistAddCheckRounded
-                      fontSize="small"
-                      sx={{ color: 'black' }}
-                    />
-                  </Avatar>
-                </ListItemIcon>
-                View Submissions
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeMenu();
-                  navigate(`../${activity.id}/edit-activity`);
-                }}
+                <PlaylistAddCheckRounded />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Edit Assignment">
+              <IconButton
+                onClick={() => navigate(`../${activity.id}/edit-activity`)}
+                color="warning"
               >
-                <ListItemIcon>
-                  <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
-                    <EditNoteRounded fontSize="small" sx={{ color: 'black' }} />
-                  </Avatar>
-                </ListItemIcon>
-                Edit Activity
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  closeMenu();
-                  onDeleteActivity();
-                }}
-              >
-                <ListItemIcon>
-                  <Avatar sx={{ bgcolor: 'grey.200', width: 28, height: 28 }}>
-                    <DeleteRounded fontSize="small" sx={{ color: 'black' }} />
-                  </Avatar>
-                </ListItemIcon>
-                Delete Activity
-              </MenuItem>
-            </Menu>
-          </>
+                <EditNoteRounded />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete Assignment">
+              <IconButton onClick={onDeleteActivity} color="error">
+                <DeleteRounded />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         )}
       </Dashboard.Header>
 

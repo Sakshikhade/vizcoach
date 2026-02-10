@@ -10,6 +10,9 @@ import {
   OutlinedInput,
   Select,
   SelectChangeEvent,
+  IconButton,
+  Tooltip,
+  Stack,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { Dashboard, GroupCard } from 'components';
@@ -70,31 +73,42 @@ export const Groups = () => {
         heading="Classes"
         subtitle="Create, manage, and track your classes."
       >
-        <FormControl>
-          <InputLabel id="filter-select-label">Filter</InputLabel>
-          <Select
-            labelId="filter-select-label"
-            multiple
-            value={filters}
-            input={<OutlinedInput id="filter-select" label="Chip" />}
-            onChange={onChange}
-            renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {selected.map((value) => (
-                  <Chip key={value} label={value} />
-                ))}
-              </Box>
-            )}
-          >
-            {[...courses, ...semesters, ...years].map((value) => {
-              return (
-                <MenuItem key={value} value={value}>
-                  {value}
-                </MenuItem>
-              );
-            })}
-          </Select>
-        </FormControl>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <FormControl>
+            <InputLabel id="filter-select-label">Filter</InputLabel>
+            <Select
+              labelId="filter-select-label"
+              multiple
+              value={filters}
+              input={<OutlinedInput id="filter-select" label="Chip" />}
+              onChange={onChange}
+              renderValue={(selected) => (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {selected.map((value) => (
+                    <Chip key={value} label={value} />
+                  ))}
+                </Box>
+              )}
+            >
+              {[...courses, ...semesters, ...years].map((value) => {
+                return (
+                  <MenuItem key={value} value={value}>
+                    {value}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
+          <Tooltip title="Add Class">
+            <IconButton
+              onClick={() => navigate('add-group')}
+              color="primary"
+              size="large"
+            >
+              <GroupAdd />
+            </IconButton>
+          </Tooltip>
+        </Stack>
       </Dashboard.Header>
 
       <Grid2 container rowSpacing={1} columnSpacing={1}>
@@ -106,16 +120,6 @@ export const Groups = () => {
           );
         })}
       </Grid2>
-
-      <Dashboard.SpeedDial
-        label="Groups SpeedDial"
-        icon={<GroupAdd />}
-        onClick={() => navigate('add-group')}
-        open={false}
-        staticIcon
-      >
-        {/* Keeping structure without actions to preserve shape/placement */}
-      </Dashboard.SpeedDial>
     </>
   );
 };

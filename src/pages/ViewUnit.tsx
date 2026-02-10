@@ -1,11 +1,6 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Paper, Stack, Typography } from '@mui/material';
-import {
-  DeleteRounded,
-  EditNoteRounded,
-  TaskAltRounded,
-} from '@mui/icons-material';
+import { Paper, Stack, Typography, IconButton, Tooltip } from '@mui/material';
+import { DeleteRounded, EditNoteRounded } from '@mui/icons-material';
 import { Dashboard, DatasetTabs, ImageGallery } from 'components';
 import client, { GetUnitResponse } from 'db';
 import { useDashboard } from 'hooks';
@@ -14,8 +9,6 @@ export const ViewUnit = () => {
   const { useData } = useDashboard();
   const { activity, unit, datasets } = useData!<GetUnitResponse>();
   const navigate = useNavigate();
-  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const menuOpen = Boolean(menuAnchorEl);
 
   const onUnitDelete = async () => {
     if (
@@ -31,11 +24,6 @@ export const ViewUnit = () => {
       }
     }
   };
-
-  const openMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setMenuAnchorEl(event.currentTarget);
-  };
-  const closeMenu = () => setMenuAnchorEl(null);
 
   return (
     <>
@@ -53,7 +41,27 @@ export const ViewUnit = () => {
       <Dashboard.Header
         heading={unit.title}
         subtitle="View this task's description and datasets."
-      />
+      >
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Edit Task">
+            <IconButton
+              onClick={() =>
+                navigate(
+                  `/dashboard/activities/${activity.id}/units/${unit.id}/edit-unit`,
+                )
+              }
+              color="primary"
+            >
+              <EditNoteRounded />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete Task">
+            <IconButton onClick={onUnitDelete} color="error">
+              <DeleteRounded />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Dashboard.Header>
 
       <Stack padding={0.5}>
         <Paper variant="outlined">

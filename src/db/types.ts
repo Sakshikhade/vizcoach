@@ -9,18 +9,23 @@ export class User {
   get id(): string {
     return this.model.id;
   }
+
   get avatar(): string {
     return this.model.avatar || '';
   }
+
   get name(): string {
     return this.model.name || this.model.username || 'Unknown';
   }
+
   get email(): string {
     return this.model.email || '';
   }
+
   get username(): string {
     return this.model.username || '';
   }
+
   get role(): UserRole {
     return this.model.role || 'Student';
   }
@@ -57,6 +62,9 @@ export class Group {
     return `${course}-${semester}-${year}`;
   }
 }
+
+// Frontend alias for better UX
+export type Class = Group;
 
 export const UNSAVED_GROUP_FIELDS = [
   'course',
@@ -110,6 +118,9 @@ export class Activity {
   }
 }
 
+// Frontend alias for better UX
+export type Assignment = Activity;
+
 export const UNSAVED_ACTIVITY_REQUIRED_FIELDS = [
   'title',
   'description',
@@ -135,6 +146,9 @@ export interface GetActivityResponse {
   units: Unit[];
 }
 
+// Frontend aliases for better UX
+export type GetAssignmentResponse = GetActivityResponse;
+
 export type DatasetRow = { [key: string]: any };
 
 export interface Dataset {
@@ -147,17 +161,20 @@ export interface Unit extends RecordModel {
   title: string;
   description: string;
   datasets: string[];
+  reference?: string | string[];
   order: number;
-  reference?: string[];
 }
+
+// Frontend alias for better UX
+export type Task = Unit;
 
 export type UnsavedUnit = Partial<{
   title: string;
   description: string;
   datasets: File[];
+  reference: File[];
   activityId: string;
   order: number;
-  reference: File[];
 }>;
 
 export type UnsavedUnitField = keyof UnsavedUnit;
@@ -173,6 +190,9 @@ export interface GetUnitResponse {
   unit: Unit;
   datasets: Dataset[];
 }
+
+// Frontend aliases for better UX
+export type GetTaskResponse = GetUnitResponse;
 
 export type SubmissionState = 'help' | 'submitted' | null;
 
@@ -191,17 +211,7 @@ export class Submission {
   }
 
   get state(): SubmissionState {
-    const value = (this.model as any).state;
-    return value === '' ? null : value;
-  }
-
-  get attempt(): number {
-    return this.model.attempt || 1;
-  }
-
-  get score(): number | null {
-    const value = (this.model as any).score;
-    return typeof value === 'number' ? value : null;
+    return this.model.state;
   }
 
   get updated(): Date {
@@ -211,11 +221,20 @@ export class Submission {
   get unitId(): string {
     return this.model.unitId;
   }
+
+  get attempt(): number {
+    return this.model.attempt || 1;
+  }
+
+  get context(): string {
+    return this.model.context || '';
+  }
 }
 
 export type UnsavedSubmission = {
   json: object;
   state?: SubmissionState;
+  context?: string;
 };
 
 export class Comment {

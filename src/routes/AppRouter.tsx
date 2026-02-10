@@ -5,14 +5,17 @@ import {
   AddActivity,
   AddGroup,
   AddUnit,
+  Chat,
   EditActivity,
   EditUnit,
   Groups,
   Login,
   NotFound,
+  OrchestrationView,
   Perform,
   Students,
   StudentSubmissions,
+  StudentWorkPopup,
   Submissions,
   Units,
   ViewUnit,
@@ -154,6 +157,17 @@ export const router = createBrowserRouter([
             loader: studentSubmissionsLoader,
           },
           {
+            path: ':activityId/student/:studentId/work',
+            element: (
+              <AuthorizedRoute
+                navigateTo="/dashboard"
+                allowedRoles={['Teacher']}
+              >
+                <StudentWorkPopup />
+              </AuthorizedRoute>
+            ),
+          },
+          {
             path: '*',
             element: <Navigate to="/dashboard" />,
           },
@@ -182,6 +196,25 @@ export const router = createBrowserRouter([
             loader: studentsLoader,
           },
         ],
+      },
+      {
+        path: 'chat',
+        element: <Chat />,
+      },
+      {
+        path: 'orchestration',
+        element: (
+          <AuthorizedRoute navigateTo="/dashboard" allowedRoles={['Teacher']}>
+            <OrchestrationView />
+          </AuthorizedRoute>
+        ),
+        loader: async () => {
+          const [activities, groups] = await Promise.all([
+            activitiesLoader(),
+            groupsLoader(),
+          ]);
+          return { activities, groups };
+        },
       },
       {
         path: '',

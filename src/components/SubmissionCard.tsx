@@ -208,7 +208,9 @@ const UnitListItem = ({ unit, submission }: UnitListItemProps) => {
         secondary={
           !submission
             ? 'Not started'
-            : `Last updated on ${submission.updated.toLocaleString()}`
+            : submission.context
+              ? `Last updated on ${submission.updated.toLocaleString()} • Has context`
+              : `Last updated on ${submission.updated.toLocaleString()}`
         }
       />
     </ListItem>
