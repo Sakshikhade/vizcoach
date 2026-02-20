@@ -125,16 +125,41 @@ export const OrchestrationView = () => {
     try {
       const parsed = JSON.parse(baseJson);
 
-      // Add proper dimensions for the dialog visualization - same as Perform page
-      const enhancedJson = {
-        ...parsed,
+      // Log for debugging
+      console.log('getEnhancedJson - parsed:', {
+        parsedKeys: Object.keys(parsed),
+        hasmark: 'mark' in parsed,
+        hasData: 'data' in parsed,
+        hasEncoding: 'encoding' in parsed,
+        fullParsed: parsed,
+      });
+
+      // Build the enhanced spec, spreading parsed AFTER our defaults so student values win.
+      // IMPORTANT: Replace width: "container" with a fixed pixel width.
+      // In a MUI Dialog the ResizeObserver fires too late on first render, so
+      // width: "container" resolves to 0px and the chart is invisible.
+      const enhancedJson: any = {
         height: 300,
-        width: 'container',
-        autosize: {
-          resize: true,
-          type: 'fit',
-        },
+        autosize: { resize: true, type: 'fit' },
+        ...parsed,
+        // Always use a fixed width in the dialog — overrides any "container" value
+        width: 480,
       };
+
+      // Strip empty encoding channels so Vega-Lite doesn't drop them with warnings
+      if (enhancedJson.encoding && typeof enhancedJson.encoding === 'object') {
+        Object.keys(enhancedJson.encoding).forEach((channel) => {
+          const enc = enhancedJson.encoding[channel];
+          if (!enc || Object.keys(enc).length === 0) {
+            delete enhancedJson.encoding[channel];
+          }
+        });
+        // Remove encoding key entirely if all channels were empty
+        if (Object.keys(enhancedJson.encoding).length === 0) {
+          delete enhancedJson.encoding;
+        }
+      }
+
       return JSON.stringify(enhancedJson, null, 4);
     } catch (error) {
       console.error('Error processing JSON:', error);
@@ -144,13 +169,31 @@ export const OrchestrationView = () => {
 
   const stringifySubmissionJson = (submission: any): string => {
     try {
+      console.log('stringifySubmissionJson - input:', {
+        hasSubmission: !!submission,
+        submissionKeys: submission ? Object.keys(submission) : [],
+        hasJsonProperty: submission ? 'json' in submission : false,
+        jsonType: submission?.json ? typeof submission.json : 'undefined',
+        jsonValue: submission?.json,
+        isSubmissionInstance: submission?.constructor?.name,
+      });
+
       if (!submission || !submission.json) {
+        console.log(
+          'stringifySubmissionJson - returning empty because no json',
+        );
         return '{}';
       }
 
       // Use the same approach as Perform page - direct stringify
-      return JSON.stringify(submission.json, null, 4);
-    } catch {
+      const result = JSON.stringify(submission.json, null, 4);
+      console.log(
+        'stringifySubmissionJson - result preview:',
+        result.substring(0, 200),
+      );
+      return result;
+    } catch (error) {
+      console.error('stringifySubmissionJson - error:', error);
       return '{}';
     }
   };
@@ -1188,36 +1231,23 @@ export const OrchestrationView = () => {
                             p: 2,
                             pt: 0,
                             minHeight: 300,
-                            maxHeight: 400,
-                            overflow: 'auto',
+                            overflow: 'visible',
                           }}
                         >
-                          {(() => {
-                            console.log(
-                              'OrchestrationView rendering visualization:',
-                              {
-                                datasetsLength: workDialogDatasets?.length || 0,
-                                jsonLength: workDialogJson?.length || 0,
-                                selectedWorkId: selectedWork?.id,
-                                workDialogJsonPreview:
-                                  workDialogJson?.substring(0, 200),
-                              },
-                            );
-                            return workDialogDatasets?.length > 0 ? (
-                              <Visualization
-                                key={selectedWork?.id}
-                                datasets={workDialogDatasets}
-                                json={workDialogJson}
-                              />
-                            ) : (
-                              <Typography
-                                color="text.secondary"
-                                sx={{ textAlign: 'center', py: 4 }}
-                              >
-                                No datasets available for this submission
-                              </Typography>
-                            );
-                          })()}
+                          {workDialogDatasets?.length > 0 ? (
+                            <Visualization
+                              key={selectedWork?.id}
+                              datasets={workDialogDatasets}
+                              json={workDialogJson}
+                            />
+                          ) : (
+                            <Typography
+                              color="text.secondary"
+                              sx={{ textAlign: 'center', py: 4 }}
+                            >
+                              No datasets available for this submission
+                            </Typography>
+                          )}
                         </Box>
                       </Stack>
                     </Paper>
