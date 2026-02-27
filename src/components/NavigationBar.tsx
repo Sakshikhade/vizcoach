@@ -23,7 +23,6 @@ import { VizCoachLogo } from 'components';
 import { useAuth, useDashboard } from 'hooks';
 
 export const NavigationBar = () => {
-  const { user } = useDashboard();
   return (
     <AppBar position="fixed">
       <Container maxWidth="xl">
@@ -50,14 +49,6 @@ const NavigationPages = () => {
 
   return (
     <>
-      <Button
-        variant="text"
-        startIcon={<Chat />}
-        sx={{ color: 'white' }}
-        onClick={() => navigate('chat')}
-      >
-        Chat
-      </Button>
       <Button
         variant="text"
         startIcon={<BarChart />}

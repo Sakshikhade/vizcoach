@@ -7,7 +7,7 @@ import {
   Tooltip,
   Stack,
 } from '@mui/material';
-import { Addchart, BarChart } from '@mui/icons-material';
+import { Addchart } from '@mui/icons-material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import { ActivityCard, Dashboard } from 'components';
 import { Activity } from 'db';
@@ -70,17 +70,7 @@ export const Activities = () => {
           )}
         </Stack>
       </Dashboard.Header>
-      {user?.role === 'Teacher' && (
-        <Dashboard.SpeedDial
-          label="Activities SpeedDial"
-          icon={<BarChart />}
-          onClick={() => navigate('add-activity')}
-          open={false}
-        >
-          {/* No actions to keep single-click behavior; we keep structure and icon */}
-          {/* Intentionally left empty */}
-        </Dashboard.SpeedDial>
-      )}
+
       <Grid2 container rowSpacing={1} columnSpacing={1}>
         {activities.map((activity) => {
           return (

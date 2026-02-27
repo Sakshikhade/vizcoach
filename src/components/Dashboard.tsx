@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Home, NavigateNext } from '@mui/icons-material';
-import { ButtonLink, Loading, NavigationBar } from 'components';
+import { ButtonLink, FloatingChat, Loading, NavigationBar } from 'components';
 import { User } from 'db';
 import { useAuth } from 'hooks';
 
@@ -41,6 +41,7 @@ export const Dashboard = () => {
           </Stack>
         </Container>
       )}
+      <FloatingChat />
     </DashboardContext.Provider>
   );
 };

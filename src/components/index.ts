@@ -4,6 +4,7 @@ export * from './CardEllipsisableBody';
 export * from './CardFooter';
 export * from './ChatSidebar';
 export * from './ChatWindow';
+export * from './FloatingChat';
 export * from './Chips';
 export * from './Comments';
 export * from './Dashboard';
