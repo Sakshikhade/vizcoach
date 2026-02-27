@@ -574,13 +574,22 @@ class PocketbaseClient {
       throw new Error('Authentication required to access chat rooms');
     }
 
+    // Filter by participant at the DB level so PocketBase ACL doesn't block students.
+    // participants is stored as a JSON string (e.g. '["id1","id2"]'),
+    // so the ~ (contains) operator works as a substring match on the stored text.
+    // Sort by +created (oldest first) so the deduplication Map always keeps the
+    // ORIGINAL room between two users, not the most-recently-created duplicate.
+    // Duplicate rooms were created during testing; the messages live in the oldest one.
     const models = await this.pb.collection('chat_rooms').getFullList({
-      filter: `isActive = true`,
-      sort: '-updated',
-      expand: 'groupId,createdBy',
+      filter: `isActive = true && participants ~ "${user.id}"`,
+      sort: '+created',
     });
 
-    return models.map((model) => new ChatRoom(model));
+    const rooms = models.map((model) => new ChatRoom(model));
+
+    // Client-side safety net: ensure the parsed participants array actually
+    // contains the current user (guards against JSON parse edge cases).
+    return rooms.filter((room) => room.participants.includes(user.id));
   }
 
   async getChatRoom(roomId: string): Promise<ChatRoom | null> {
@@ -662,32 +671,24 @@ class PocketbaseClient {
       throw new Error('Authentication required to get chat messages');
     }
 
-    // First get the chat room to check if user is a participant
-    const room = await this.getChatRoom(roomId);
-    if (!room) {
-      throw new Error('Chat room not found');
+    try {
+      // No expand on userId/replyTo — students may lack permission to expand
+      // user relations. Display names are resolved client-side from allUsers state.
+      const models = await this.pb
+        .collection('chat_messages')
+        .getList(1, limit, {
+          filter: `roomId = "${roomId}"`,
+          sort: '-created',
+        });
+      return models.items.map((model) => new ChatMessage(model));
+    } catch (error: any) {
+      console.error(
+        `getChatMessages failed for room ${roomId}:`,
+        error?.status,
+        error?.message,
+      );
+      return [];
     }
-
-    // Check if user is a participant in the room
-    if (!room.participants.includes(user.id)) {
-      console.log('User not participant in room (getChatMessages):', {
-        userId: user.id,
-        userRole: user.role,
-        roomId: roomId,
-        roomType: room.type,
-        roomParticipants: room.participants,
-        roomName: room.name,
-      });
-      throw new Error('User is not a participant in this chat room');
-    }
-
-    const models = await this.pb.collection('chat_messages').getList(1, limit, {
-      filter: `roomId = "${roomId}"`,
-      sort: '-created',
-      expand: 'userId,replyTo',
-    });
-
-    return models.items.map((model) => new ChatMessage(model));
   }
 
   async postChatMessage(
@@ -698,89 +699,40 @@ class PocketbaseClient {
       throw new Error('Authentication required to post messages');
     }
 
-    // First get the chat room to check if user is a participant
-    const room = await this.getChatRoom(message.roomId);
-    if (!room) {
-      throw new Error('Chat room not found');
-    }
+    // Create without expand — construct ChatMessage directly from the response
+    // to avoid a second getOne call that may be blocked by PocketBase view rules.
+    const model = await this.pb.collection('chat_messages').create({
+      ...message,
+      userId: user.id,
+      type: message.type || 'text',
+      readBy: [user.id],
+    });
 
-    // Check if user is a participant in the room
-    if (!room.participants.includes(user.id)) {
-      console.log('User not participant in room (postChatMessage):', {
-        userId: user.id,
-        userRole: user.role,
-        roomId: message.roomId,
-        roomType: room.type,
-        roomParticipants: room.participants,
-        roomName: room.name,
-      });
-      throw new Error('User is not a participant in this chat room');
-    }
-
-    try {
-      const model = await this.pb.collection('chat_messages').create(
-        {
-          ...message,
-          userId: user.id,
-          type: message.type || 'text',
-        },
-        {
-          expand: 'userId,replyTo',
-        },
-      );
-      return new ChatMessage(model);
-    } catch {
-      return null;
-    }
+    return new ChatMessage(model);
   }
 
   registerChatMessageCallback(
     roomId: string,
-    callback: (message: ChatMessage) => void,
+    callback: (action: string, message: ChatMessage) => void,
   ) {
     const user = this.getUser();
     if (!user) {
       throw new Error('Authentication required to subscribe to chat messages');
     }
 
-    // First get the chat room to check if user is a participant
-    this.getChatRoom(roomId)
-      .then((room) => {
-        if (!room) {
-          throw new Error('Chat room not found');
+    // Subscribe synchronously — no async getChatRoom gate.
+    // Construct ChatMessage directly from the realtime record to avoid a
+    // second getOne fetch that may be blocked by PocketBase view rules.
+    this.pb
+      .collection('chat_messages')
+      .subscribe('*', ({ action, record }) => {
+        // we omit `if (action !== 'create') return;` so we get updates/deletes too
+        if (record.roomId !== roomId) return;
+
+        const message = new ChatMessage(record);
+        if (message.roomId === roomId) {
+          callback(action, message);
         }
-
-        // Check if user is a participant in the room
-        if (!room.participants.includes(user.id)) {
-          console.log(
-            'User not participant in room (registerChatMessageCallback):',
-            {
-              userId: user.id,
-              roomId: roomId,
-              roomParticipants: room.participants,
-              roomName: room.name,
-            },
-          );
-          throw new Error('User is not a participant in this chat room');
-        }
-
-        this.pb
-          .collection('chat_messages')
-          .subscribe('*', async ({ action, record }) => {
-            if (action !== 'create') {
-              return;
-            }
-
-            // Strict filtering - only process messages for the specific room
-            if (record.roomId !== roomId) {
-              return;
-            }
-
-            const message = await this.getChatMessage(record.id);
-            if (message && message.roomId === roomId) {
-              callback(message);
-            }
-          });
       })
       .catch((error) => {
         console.error('Failed to setup chat message subscription:', error);
@@ -789,11 +741,9 @@ class PocketbaseClient {
 
   async getChatMessage(messageId: string): Promise<ChatMessage | null> {
     try {
-      const model = await this.pb
-        .collection('chat_messages')
-        .getOne(messageId, {
-          expand: 'userId,replyTo',
-        });
+      // No expand — avoids 403 when students lack permission to expand
+      // user relations. Names are resolved from allUsers state in the UI.
+      const model = await this.pb.collection('chat_messages').getOne(messageId);
       return new ChatMessage(model);
     } catch {
       return null;
@@ -801,47 +751,161 @@ class PocketbaseClient {
   }
 
   unregisterChatMessageCallback() {
+    this.pb
+      .collection('chat_messages')
+      .unsubscribe('*')
+      .catch((error) => {
+        console.warn('Failed to unsubscribe from chat messages:', error);
+      });
+  }
+
+  async getRoomOverview(roomIds: string[]): Promise<{
+    unread: Record<string, number>;
+    latest: Record<string, string>;
+  }> {
+    const user = this.getUser();
+    if (!user) return { unread: {}, latest: {} };
+
+    const unread: Record<string, number> = {};
+    const latest: Record<string, string> = {};
+
     try {
-      this.pb.collection('chat_messages').unsubscribe('*');
+      // 1. Unread counts
+      const unreadModels = await this.pb
+        .collection('chat_messages')
+        .getFullList({
+          filter: `userId != "${user.id}" && readBy !~ "${user.id}"`,
+          fields: 'roomId',
+        });
+      for (const m of unreadModels) {
+        unread[m.roomId] = (unread[m.roomId] || 0) + 1;
+      }
+
+      // 2. Latest message timestamps for the active sidebars
+      if (roomIds.length > 0) {
+        const results = await Promise.allSettled(
+          roomIds.map(async (id) => {
+            const res = await this.pb
+              .collection('chat_messages')
+              .getList(1, 1, {
+                filter: `roomId = "${id}"`,
+                sort: '-created',
+                fields: 'roomId,created',
+              });
+            if (res.items.length > 0) {
+              latest[id] = res.items[0].created;
+            }
+          }),
+        );
+        results.forEach((r, i) => {
+          if (r.status === 'rejected') {
+            console.error(
+              `getRoomOverview failed for room ${roomIds[i]}:`,
+              r.reason,
+            );
+          }
+        });
+      }
     } catch (error) {
-      console.warn('Failed to unsubscribe from chat messages:', error);
+      console.error('Failed to get room overview:', error);
     }
+
+    return { unread, latest };
+  }
+
+  async markMessagesAsRead(messageIds: string[]): Promise<void> {
+    const user = this.getUser();
+    if (!user || !messageIds.length) return;
+
+    await Promise.allSettled(
+      messageIds.map(async (id) => {
+        try {
+          const msg = await this.pb.collection('chat_messages').getOne(id);
+          const readBy = msg.readBy || [];
+          if (!readBy.includes(user.id)) {
+            await this.pb.collection('chat_messages').update(id, {
+              readBy: [...readBy, user.id],
+            });
+          }
+        } catch (error) {
+          console.error(`Failed to mark message ${id} as read:`, error);
+        }
+      }),
+    );
   }
 
   async getAllUsers(): Promise<User[]> {
     try {
-      console.log('=== GET ALL USERS DEBUG ===');
-      console.log('Current user:', this.getUser());
-
       const models = await this.pb.collection('_pb_users_auth_').getFullList({
         sort: 'name',
       });
-      console.log(
-        'Raw user models from PocketBase:',
-        models.map((m) => ({
-          id: m.id,
-          name: m.name,
-          role: m.role,
-          email: m.email,
-        })),
-      );
-
-      const users = models.map((model) => new User(model));
-      console.log(
-        'Processed users:',
-        users.map((u) => ({
-          id: u.id,
-          name: u.name,
-          role: u.role,
-          email: u.email,
-        })),
-      );
-      console.log('=== END GET ALL USERS DEBUG ===');
-      return users;
+      return models.map((model) => new User(model));
     } catch (error) {
       console.error('Error getting all users:', error);
       return [];
     }
+  }
+  // ── Presence / Online Status ────────────────────────────────
+  /** Ping: update current user's lastSeen timestamp */
+  // ── Presence feature flag ───────────────────────────────────
+  // Set to true only after adding a `lastSeen` (DateTime, optional) field
+  // to the `users` collection in PocketBase Admin → Collections → users.
+  private static readonly PRESENCE_ENABLED = false;
+
+  async updatePresence(): Promise<void> {
+    if (!PocketbaseClient.PRESENCE_ENABLED) return;
+    const user = this.getUser();
+    if (!user) return;
+    try {
+      await this.pb.collection('users').update(user.id, {
+        lastSeen: new Date().toISOString(),
+      });
+    } catch {
+      // Silently ignore
+    }
+  }
+
+  /**
+   * Returns a Set of user IDs seen within the last `thresholdMs` ms.
+   * Returns an empty Set when PRESENCE_ENABLED is false (no API call).
+   */
+  async getOnlineUserIds(thresholdMs = 90_000): Promise<Set<string>> {
+    if (!PocketbaseClient.PRESENCE_ENABLED) return new Set();
+    try {
+      const cutoff = new Date(Date.now() - thresholdMs).toISOString();
+      const models = await this.pb.collection('users').getFullList({
+        filter: `lastSeen >= "${cutoff}"`,
+        fields: 'id',
+      });
+      return new Set(models.map((m) => m.id));
+    } catch {
+      return new Set();
+    }
+  }
+
+  /** Subscribe to user record changes for online indicator updates. */
+  subscribeToPresence(callback: (userId: string) => void): void {
+    if (!PocketbaseClient.PRESENCE_ENABLED) return;
+    const user = this.getUser();
+    if (!user) return;
+    this.pb
+      .collection('users')
+      .subscribe('*', ({ record }) => {
+        callback(record.id);
+      })
+      .catch(() => {
+        /* ignore – presence is best-effort */
+      });
+  }
+
+  unsubscribeFromPresence(): void {
+    if (!PocketbaseClient.PRESENCE_ENABLED) return;
+    this.pb
+      .collection('users')
+      .unsubscribe('*')
+      .catch(() => {
+        /* ignore – presence is best-effort */
+      });
   }
 }
 

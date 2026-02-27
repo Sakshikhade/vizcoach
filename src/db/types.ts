@@ -358,6 +358,10 @@ export class ChatMessage {
     return this.model.replyTo;
   }
 
+  get readBy(): string[] {
+    return this.model.readBy || [];
+  }
+
   get created(): Date {
     return new Date(this.model.created);
   }
@@ -391,6 +395,7 @@ export type UnsavedChatMessage = {
   content: string;
   type?: ChatMessageType;
   replyTo?: string;
+  readBy?: string[];
 };
 
 export interface GetChatRoomsResponse {
