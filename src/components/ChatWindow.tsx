@@ -357,13 +357,38 @@ export const ChatWindow = ({
                   >
                     {formatMessageTime(message.created)}
                     {own &&
-                      (message.readBy.length > 1 ? (
-                        <DoneAll
-                          sx={{ fontSize: '0.8rem', color: '#3b82f6' }}
-                        />
-                      ) : (
-                        <Done sx={{ fontSize: '0.8rem' }} />
-                      ))}
+                      (() => {
+                        const allRead = room.participants.every((id) =>
+                          message.readBy.includes(id),
+                        );
+                        const someRead = message.readBy.length > 1;
+
+                        if (allRead) {
+                          return (
+                            <DoneAll
+                              sx={{ fontSize: '0.8rem', color: '#3b82f6' }}
+                            />
+                          );
+                        } else if (someRead) {
+                          return (
+                            <DoneAll
+                              sx={{
+                                fontSize: '0.8rem',
+                                color: 'text.disabled',
+                              }}
+                            />
+                          );
+                        } else {
+                          return (
+                            <Done
+                              sx={{
+                                fontSize: '0.8rem',
+                                color: 'text.disabled',
+                              }}
+                            />
+                          );
+                        }
+                      })()}
                   </Typography>
                 </Box>
               </Box>

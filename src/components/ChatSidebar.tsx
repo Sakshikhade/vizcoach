@@ -10,8 +10,8 @@ import {
   Typography,
 } from '@mui/material';
 import { OnlineAvatar } from './OnlineAvatar';
-import { ChatBubbleOutline, PersonAdd } from '@mui/icons-material';
-import { ChatRoom, User } from 'db';
+import { ChatBubbleOutline, PersonAdd, Campaign } from '@mui/icons-material';
+import { ChatRoom, User, Group } from 'db';
 import client from 'db/client';
 import { useDashboard } from 'hooks';
 
@@ -58,13 +58,19 @@ export const ChatSidebar = ({
   const [roomTimestamps, setRoomTimestamps] = useState<Record<string, string>>(
     {},
   );
+  const [classes, setClasses] = useState<Group[]>([]);
+  const [teacherChatMode, setTeacherChatMode] = useState<'users' | 'classes'>(
+    'users',
+  );
 
   useEffect(() => {
     const initializeChat = async () => {
       await loadAllUsers();
       await loadChatRooms();
-      if (user?.role === 'Teacher') loadUsers();
-      else if (user?.role === 'Student') loadTeachers();
+      if (user?.role === 'Teacher') {
+        loadUsers();
+        loadClasses();
+      } else if (user?.role === 'Student') loadTeachers();
     };
     initializeChat();
   }, [user]);
@@ -94,16 +100,25 @@ export const ChatSidebar = ({
     try {
       const chatRooms = await client.getChatRooms();
 
-      // Deduplicate: keep only the most-recently-updated room per other participant.
-      // getChatRooms() returns rooms sorted by -updated, so the first hit per
-      // participant wins (= most recent conversation).
-      const seen = new Map<string, ChatRoom>();
+      // Deduplicate: group chats by groupId, private chats by other participant.
+      const seenGroup = new Map<string, ChatRoom>();
+      const seenPrivate = new Map<string, ChatRoom>();
+
       for (const room of chatRooms) {
-        const otherId = room.participants.find((id) => id !== user?.id);
-        if (!otherId) continue; // skip malformed rooms
-        if (!seen.has(otherId)) seen.set(otherId, room);
+        if (room.type === 'group') {
+          if (!seenGroup.has(room.name)) {
+            seenGroup.set(room.name, room);
+          }
+        } else {
+          const otherId = room.participants.find((id) => id !== user?.id);
+          if (!otherId) continue;
+          if (!seenPrivate.has(otherId)) seenPrivate.set(otherId, room);
+        }
       }
-      setRooms(Array.from(seen.values()));
+      setRooms([
+        ...Array.from(seenGroup.values()),
+        ...Array.from(seenPrivate.values()),
+      ]);
     } catch (error) {
       console.error('Failed to load chat rooms:', error);
     } finally {
@@ -117,6 +132,15 @@ export const ChatSidebar = ({
       setUsers(usersData.filter((u) => u.id !== user?.id));
     } catch (error) {
       console.error('Failed to load users:', error);
+    }
+  };
+
+  const loadClasses = async () => {
+    try {
+      const groups = await client.getGroups();
+      setClasses(groups);
+    } catch (error) {
+      console.error('Failed to load classes:', error);
     }
   };
 
@@ -202,7 +226,54 @@ export const ChatSidebar = ({
     }
   };
 
+  const createBroadcastChat = async (group: Group) => {
+    try {
+      const roomName = `📢 ${group.title} Announcements`;
+
+      const existingRoomLocal = rooms.find(
+        (room) => room.type === 'group' && room.name === roomName,
+      );
+      if (existingRoomLocal) {
+        onRoomSelect(existingRoomLocal);
+        setShowNewChat(false);
+        return;
+      }
+      const allRooms = await client.getChatRooms();
+      const existingRoom = allRooms.find(
+        (room) => room.type === 'group' && room.name === roomName,
+      );
+      if (existingRoom) {
+        setRooms((prev) => [
+          existingRoom,
+          ...prev.filter((r) => r.id !== existingRoom.id),
+        ]);
+        onRoomSelect(existingRoom);
+        setShowNewChat(false);
+        return;
+      }
+      const students = await client.getStudents(group.id);
+      const studentIds = students.map((s) => s.id);
+      const participants = Array.from(new Set([user!.id, ...studentIds]));
+
+      const room = await client.createChatRoom({
+        name: roomName,
+        type: 'group',
+        description: `Class broadcast for ${group.title}`,
+        participants,
+      });
+      if (room) {
+        setRooms((prev) => [room, ...prev]);
+        onRoomSelect(room);
+        setShowNewChat(false);
+      }
+    } catch (error) {
+      console.error('Failed to create broadcast chat:', error);
+    }
+  };
+
   const getRoomName = (room: ChatRoom) => {
+    if (room.type === 'group') return room.name;
+
     const otherParticipantId = room.participants.find((id) => id !== user?.id);
     if (otherParticipantId) {
       const otherUser = allUsers.find((u) => u.id === otherParticipantId);
@@ -380,7 +451,9 @@ export const ChatSidebar = ({
                       {name}
                     </Typography>
                     <Typography variant="caption" color="text.secondary" noWrap>
-                      Private Chat
+                      {room.type === 'group'
+                        ? 'Class Broadcast'
+                        : 'Private Chat'}
                     </Typography>
                   </Box>
                   {unreadCounts[room.id] > 0 && (
@@ -464,8 +537,101 @@ export const ChatSidebar = ({
               </Stack>
             )}
 
+            {/* Teachers: tab toggle */}
+            {user?.role === 'Teacher' && (
+              <Stack direction="row" spacing={0.5} mb={1}>
+                {(['users', 'classes'] as const).map((mode) => (
+                  <Button
+                    key={mode}
+                    size="small"
+                    onClick={() => setTeacherChatMode(mode)}
+                    sx={{
+                      flex: 1,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      borderRadius: '8px',
+                      py: 0.4,
+                      textTransform: 'none',
+                      bgcolor:
+                        teacherChatMode === mode
+                          ? 'primary.main'
+                          : 'transparent',
+                      color:
+                        teacherChatMode === mode ? 'white' : 'text.secondary',
+                      border: '1.5px solid',
+                      borderColor:
+                        teacherChatMode === mode ? 'primary.main' : 'divider',
+                      '&:hover': {
+                        bgcolor:
+                          teacherChatMode === mode
+                            ? 'primary.dark'
+                            : 'rgba(0,0,0,0.04)',
+                      },
+                    }}
+                  >
+                    {mode === 'users' ? 'Direct Message' : 'Broadcast'}
+                  </Button>
+                ))}
+              </Stack>
+            )}
+
             <Box sx={{ maxHeight: 150, overflow: 'auto' }}>
-              {users.length === 0 ? (
+              {user?.role === 'Teacher' && teacherChatMode === 'classes' ? (
+                classes.length === 0 ? (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ pl: 0.5 }}
+                  >
+                    No classes available
+                  </Typography>
+                ) : (
+                  classes.map((group) => (
+                    <Box
+                      key={group.id}
+                      onClick={() => createBroadcastChat(group)}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        px: 1,
+                        py: 0.8,
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        '&:hover': { bgcolor: 'rgba(25,118,210,0.07)' },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: 'rgba(25,118,210,0.1)',
+                          color: 'primary.main',
+                        }}
+                      >
+                        <Campaign sx={{ fontSize: 16 }} />
+                      </Box>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="body2" fontWeight={500} noWrap>
+                          {group.title}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          noWrap
+                        >
+                          Class Broadcast
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))
+                )
+              ) : users.length === 0 ? (
                 <Typography
                   variant="caption"
                   color="text.secondary"

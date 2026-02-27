@@ -275,7 +275,7 @@ export const toTextContent = (innerHTML: string): string => {
 };
 
 // Chat System Types
-export type ChatRoomType = 'private';
+export type ChatRoomType = 'private' | 'group';
 
 export class ChatRoom {
   constructor(readonly model: RecordModel) {}
@@ -294,6 +294,10 @@ export class ChatRoom {
 
   get description(): string {
     return this.model.description;
+  }
+
+  get groupId(): string | undefined {
+    return this.model.groupId;
   }
 
   get participants(): string[] {
@@ -387,6 +391,7 @@ export type UnsavedChatRoom = {
   name: string;
   type: ChatRoomType;
   description?: string;
+  groupId?: string;
   participants: string[];
 };
 

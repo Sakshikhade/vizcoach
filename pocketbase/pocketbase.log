@@ -1,0 +1,522 @@
+[4.00ms] CREATE TABLE IF NOT EXISTS `_migrations` (file VARCHAR(255) PRIMARY KEY NOT NULL, applied INTEGER NOT NULL)
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1640988000_aux_init.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1640988000_init.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233556_v0.23_migrate.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233557_v0.23_migrate2.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233558_v0.23_migrate3.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233559_v0.23_migrate4.go' LIMIT 1
+[0.00ms] SELECT `_collections`.* FROM `_collections` ORDER BY `rowid` ASC
+[0.00ms] SELECT `_params`.* FROM `_params` WHERE `id`='settings'
+[0.00ms] SELECT `_collections`.* FROM `_collections` ORDER BY `rowid` ASC
+[0.00ms] CREATE TABLE IF NOT EXISTS `_migrations` (file VARCHAR(255) PRIMARY KEY NOT NULL, applied INTEGER NOT NULL)
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1640988000_aux_init.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1640988000_init.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233556_v0.23_migrate.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233557_v0.23_migrate2.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233558_v0.23_migrate3.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233559_v0.23_migrate4.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711210_updated_users.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711347_created_groups.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711425_created_usergroups.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711517_created_activities.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711615_created_units.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711726_created_submissions.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711804_created_comments.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711839_updated_users.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711892_updated_groups.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711911_updated_usergroups.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711972_updated_activities.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749711998_updated_units.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749712037_updated_submissions.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749712068_updated_comments.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749712100_created_chat_rooms.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1749712200_created_chat_messages.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1758934044_updated_activities.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1758934126_updated_activities.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1758935318_updated_units.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1759292000_remove_group_chat_fields.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1759292100_cleanup_group_chat_data.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1759292300_allow_multiple_submission_attempts.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1759292400_update_submissions_scoring.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1759292500_add_context_to_submissions_fixed.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1759519580_updated_units.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1760071730_manual_changes_from_ui.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1772158742_fix_chat_acl_rules.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1772159654_updated_chat_messages.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1772160786_updated_chat_messages.js' LIMIT 1
+2026/02/26 20:41:01 Server started at http://127.0.0.1:8090
+├─ REST API:  http://127.0.0.1:8090/api/
+└─ Dashboard: http://127.0.0.1:8090/_/
+[0.00ms] SELECT count(*) FROM `_superusers` WHERE NOT (`email`='__pbinstaller@example.com')
+DEBUG Realtime connection established.
+└─ {"clientId":"H6BlEmsbNZb2gKarGBldKuGSBUoeFge3yGPMZZTL"}
+[1.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+DEBUG Realtime subscriptions updated.
+└─ {"clientId":"H6BlEmsbNZb2gKarGBldKuGSBUoeFge3yGPMZZTL","subscriptions":["chat_messages/*"]}
+INFO POST /api/realtime
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[1.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+[2.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[2.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[2.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[2.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[1.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[1.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[5.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `_superusers`.* FROM `_superusers` WHERE `email`='skhade5@asu.edu' LIMIT 1
+[0.00ms] SELECT `_authOrigins`.* FROM `_authOrigins` WHERE `collectionRef`='pbc_3142635823' AND `recordRef`='ne9w2r3tz496u6y' ORDER BY `created` DESC
+[0.00ms] SELECT `_collections`.* FROM `_collections` WHERE `id`='pbc_3142635823'
+[0.00ms] SELECT (1) FROM `_superusers` WHERE `id`='ne9w2r3tz496u6y' LIMIT 1
+[0.00ms] UPDATE `_authOrigins` SET `collectionRef`='pbc_3142635823', `created`='2026-02-27 02:52:15.918Z', `fingerprint`='b17b447badbf55c9c244b9b8fb71ca96', `id`='vre6792dya79oz7', `recordRef`='ne9w2r3tz496u6y', `updated`='2026-02-27 03:41:18.865Z' WHERE `id`='vre6792dya79oz7'
+INFO POST /api/collections/_superusers/auth-with-password
+[0.00ms] SELECT `_superusers`.* FROM `_superusers` WHERE `_superusers`.`id`='ne9w2r3tz496u6y' LIMIT 1
+INFO GET /api/collections/chat_rooms
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[4.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `_superusers`.* FROM `_superusers` WHERE `email`='skhade5@asu.edu' LIMIT 1
+[0.00ms] SELECT `_authOrigins`.* FROM `_authOrigins` WHERE `collectionRef`='pbc_3142635823' AND `recordRef`='ne9w2r3tz496u6y' ORDER BY `created` DESC
+[0.00ms] SELECT `_collections`.* FROM `_collections` WHERE `id`='pbc_3142635823'
+[0.00ms] SELECT (1) FROM `_superusers` WHERE `id`='ne9w2r3tz496u6y' LIMIT 1
+[0.00ms] UPDATE `_authOrigins` SET `collectionRef`='pbc_3142635823', `created`='2026-02-27 02:52:15.918Z', `fingerprint`='b17b447badbf55c9c244b9b8fb71ca96', `id`='vre6792dya79oz7', `recordRef`='ne9w2r3tz496u6y', `updated`='2026-02-27 03:41:30.871Z' WHERE `id`='vre6792dya79oz7'
+INFO POST /api/collections/_superusers/auth-with-password
+[0.00ms] SELECT `_superusers`.* FROM `_superusers` WHERE `_superusers`.`id`='ne9w2r3tz496u6y' LIMIT 1
+INFO GET /api/collections/chat_rooms
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[1.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `_superusers`.* FROM `_superusers` WHERE `email`='skhade5@asu.edu' LIMIT 1
+[0.00ms] SELECT `_authOrigins`.* FROM `_authOrigins` WHERE `collectionRef`='pbc_3142635823' AND `recordRef`='ne9w2r3tz496u6y' ORDER BY `created` DESC
+[0.00ms] SELECT `_collections`.* FROM `_collections` WHERE `id`='pbc_3142635823'
+[0.00ms] SELECT (1) FROM `_superusers` WHERE `id`='ne9w2r3tz496u6y' LIMIT 1
+[0.00ms] UPDATE `_authOrigins` SET `collectionRef`='pbc_3142635823', `created`='2026-02-27 02:52:15.918Z', `fingerprint`='b17b447badbf55c9c244b9b8fb71ca96', `id`='vre6792dya79oz7', `recordRef`='ne9w2r3tz496u6y', `updated`='2026-02-27 03:41:50.946Z' WHERE `id`='vre6792dya79oz7'
+INFO POST /api/collections/_superusers/auth-with-password
+[0.00ms] SELECT `_superusers`.* FROM `_superusers` WHERE `_superusers`.`id`='ne9w2r3tz496u6y' LIMIT 1
+INFO GET /api/collections/chat_rooms
+[0.00ms] SELECT `_superusers`.* FROM `_superusers` WHERE `_superusers`.`id`='ne9w2r3tz496u6y' LIMIT 1
+INFO GET /api/collections/groups
+[0.00ms] SELECT `_superusers`.* FROM `_superusers` WHERE `_superusers`.`id`='ne9w2r3tz496u6y' LIMIT 1
+[0.00ms] SELECT `_collections`.* FROM `_collections` WHERE `id`='chat_rooms' OR LOWER(`name`)='chat_rooms' LIMIT 1
+[0.00ms] SELECT `_collections`.* FROM `_collections` WHERE `id`='pbc_7890123456' OR LOWER(`name`)='pbc_7890123456' LIMIT 1
+[0.00ms] SELECT `_collections`.* FROM `_collections` WHERE `id`='pbc_7890123456'
+[0.00ms] SELECT count(*) FROM `_collections` WHERE (LOWER(`name`)='chat_rooms') AND (`id`<>'pbc_7890123456') LIMIT 1
+[0.00ms] SELECT `_collections`.* FROM `_collections` WHERE `id`='chat_rooms'
+[0.00ms] SELECT `_collections`.* FROM `_collections` WHERE `id`='pbc_7890123456' OR LOWER(`name`)='pbc_7890123456' LIMIT 1
+[0.00ms] SELECT `_collections`.* FROM `_collections` WHERE `id`='pbc_7890123456' OR LOWER(`name`)='pbc_7890123456' LIMIT 1
+[0.00ms] SELECT `tbl_name` FROM `sqlite_master` WHERE (((`type`='index') AND (LOWER(`tbl_name`)!=LOWER('chat_rooms'))) AND (LOWER(`tbl_name`)!=LOWER('chat_rooms'))) AND (LOWER(`name`)=LOWER('idx_chat_rooms_type')) LIMIT 1
+[0.00ms] SELECT `tbl_name` FROM `sqlite_master` WHERE (((`type`='index') AND (LOWER(`tbl_name`)!=LOWER('chat_rooms'))) AND (LOWER(`tbl_name`)!=LOWER('chat_rooms'))) AND (LOWER(`name`)=LOWER('idx_chat_rooms_created_by')) LIMIT 1
+[0.00ms] SELECT `_collections`.* FROM `_collections` ORDER BY `rowid` ASC
+ERROR PATCH /api/collections/chat_rooms
+└─ Failed to update collection.
+   └─ map[fields:9: (collectionId: cannot be blank.).]
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[4.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[1.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND ((`chat_messages`.`userId` IS NOT '2lkv94ba3507tlu' AND (CASE WHEN json_valid(`chat_messages`.`readBy`) THEN JSON_EXTRACT(`chat_messages`.`readBy`, '$') ELSE JSON_EXTRACT(json_object('pb', `chat_messages`.`readBy`), '$.pb') END) NOT LIKE '%2lkv94ba3507tlu%' ESCAPE '\')) LIMIT 500
+INFO GET /api/collections/chat_messages/records?page=1&perPage=500&skipTotal=1&filter=userId != "2lkv94ba3507tlu" && readBy !~ "2lkv94ba3507tlu"&fields=roomId
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `users`.* FROM `users` WHERE `users`.`id`='2lkv94ba3507tlu' LIMIT 1
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '1938126ngv29e6m')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '43wq7s36yi6l522')
+[0.00ms] SELECT COUNT(DISTINCT `chat_messages`.`_rowid_`) FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb')
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = 'bt0tkk08do3q7i7') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "43wq7s36yi6l522"&sort=-created&fields=roomId,created
+[0.00ms] SELECT `chat_messages`.* FROM `chat_messages` WHERE ('2lkv94ba3507tlu' IS NOT '') AND (`chat_messages`.`roomId` = '4h51qpnrr0a86kb') ORDER BY `chat_messages`.`created` DESC LIMIT 1
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "bt0tkk08do3q7i7"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "1938126ngv29e6m"&sort=-created&fields=roomId,created
+INFO GET /api/collections/chat_messages/records?page=1&perPage=1&filter=roomId = "4h51qpnrr0a86kb"&sort=-created&fields=roomId,created
+DEBUG Realtime connection closed (cancelled request)
+└─ {"clientId":"H6BlEmsbNZb2gKarGBldKuGSBUoeFge3yGPMZZTL"}
+[5.00ms] SELECT `_collections`.* FROM `_collections` WHERE `type`='auth' ORDER BY `rowid` ASC
+[5.00ms] SELECT `_collections`.* FROM `_collections` WHERE `type`='auth' ORDER BY `rowid` ASC
+[0.00ms] SELECT `_mfas`.* FROM `_mfas` WHERE (`collectionRef`='pbc_3142635823') AND (`created` < '2026-02-27 03:30:59.981Z')
+[0.00ms] SELECT `_otps`.* FROM `_otps` WHERE (`collectionRef`='pbc_3142635823') AND (`created` < '2026-02-27 03:57:59.981Z')
+[0.00ms] SELECT `_mfas`.* FROM `_mfas` WHERE (`collectionRef`='_pb_users_auth_') AND (`created` < '2026-02-27 03:30:59.981Z')
+[0.00ms] SELECT `_otps`.* FROM `_otps` WHERE (`collectionRef`='_pb_users_auth_') AND (`created` < '2026-02-27 03:57:59.981Z')
