@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from 'hooks';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import {
@@ -9,6 +9,7 @@ import {
   Paper,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material';
 import { FormField, VizCoachLogo } from 'components';
 import { LoginOutlined } from '@mui/icons-material';
@@ -104,6 +105,26 @@ export const Login = () => {
               {!loading && <>Login</>}
             </Button>
             {!!error.length && <Alert severity="error">{error}</Alert>}
+            <Typography
+              variant="body2"
+              textAlign="center"
+              color="text.secondary"
+            >
+              Don't have an account?{' '}
+              <Typography
+                component={Link}
+                to="/signup"
+                variant="body2"
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  '&:hover': { textDecoration: 'underline' },
+                }}
+              >
+                Sign up
+              </Typography>
+            </Typography>
           </Stack>
         </form>
       </Paper>

@@ -90,8 +90,21 @@ const DashboardHeader = ({
   return (
     <Stack direction="row" justifyContent="space-between">
       <Stack>
-        <Typography variant="h4">{heading}</Typography>
-        <Typography variant="subtitle1">{subtitle}</Typography>
+        <Typography
+          variant="h4"
+          fontWeight={800}
+          sx={{
+            background: 'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 0.5,
+          }}
+        >
+          {heading}
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary">
+          {subtitle}
+        </Typography>
       </Stack>
       {children}
     </Stack>

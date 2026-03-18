@@ -32,6 +32,30 @@ class PocketbaseClient {
     await this.pb.collection('users').authWithPassword(email, password);
   }
 
+  async registerUser(
+    name: string,
+    email: string,
+    password: string,
+    role: 'Student' | 'Teacher',
+  ): Promise<void> {
+    // PocketBase requires a non-blank username — derive one from the email
+    // local part and append a random suffix to avoid collisions.
+    const localPart = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_');
+    const suffix = Math.floor(1000 + Math.random() * 9000);
+    const username = `${localPart}_${suffix}`;
+
+    await this.pb.collection('users').create({
+      name,
+      username,
+      email,
+      password,
+      passwordConfirm: password,
+      role,
+    });
+    // Auto-authenticate after successful registration
+    await this.pb.collection('users').authWithPassword(email, password);
+  }
+
   clearAuthStore(): void {
     this.pb.authStore.clear();
   }
@@ -41,13 +65,17 @@ class PocketbaseClient {
     return isValid ? (record as any) : null;
   }
 
-  // Get classes (groups) - returns classes for teachers or student's enrolled classes
+  // Get classes (groups) - teachers see only their own; students see only enrolled classes
   async getGroups(filter?: string): Promise<Group[]> {
     const user = this.getUser();
     if (!user) return [];
 
     const filters = [];
-    if (user.role === 'Student') {
+    if (user.role === 'Teacher') {
+      // Only fetch groups owned by this teacher
+      filters.push(`teacherId='${user.id}'`);
+    } else {
+      // Students only see their enrolled groups
       filters.push(`usergroups_via_groupId.userId='${user.id}'`);
     }
     if (filter) {
@@ -97,13 +125,16 @@ class PocketbaseClient {
     return this.pb.collection('users').getOne(studentId);
   }
 
-  // Get assignments (activities) - returns assignments for teachers or student's assigned work
+  // Get assignments (activities) - teachers see only their own; students see only assigned work
   async getActivities(filter?: string): Promise<Activity[]> {
     const user = this.getUser();
     if (!user) return [];
 
     const filters = [];
-    if (user.role === 'Student') {
+    if (user.role === 'Teacher') {
+      // Only activities that belong to a group owned by this teacher
+      filters.push(`groupId.teacherId='${user.id}'`);
+    } else {
       filters.push(
         `groupId.usergroups_via_groupId.userId?='${user.id}'`,
         `(scheduled='' || scheduled<'${new Date().toISOString()}')`,
@@ -276,8 +307,13 @@ class PocketbaseClient {
   }
 
   async createGroup(group: UnsavedGroup): Promise<Group | null> {
+    const user = this.getUser();
     try {
-      const { id } = await this.pb.collection('groups').create(group);
+      // Attach the current teacher's ID so ownership is enforced
+      const { id } = await this.pb.collection('groups').create({
+        ...group,
+        teacherId: user?.id,
+      });
       return this.getGroup(id);
     } catch (error) {
       console.error(error);

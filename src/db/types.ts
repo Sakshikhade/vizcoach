@@ -80,6 +80,7 @@ export type UnsavedGroup = Partial<{
   semester: string;
   year: number;
   'csv+': File;
+  teacherId: string;
 }>;
 
 export interface GetStudentsResponse {

@@ -11,6 +11,7 @@ import {
   Groups,
   Login,
   NotFound,
+  Signup,
   OrchestrationView,
   Perform,
   Students,
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/signup',
+    element: <Signup />,
   },
   {
     path: '/dashboard',

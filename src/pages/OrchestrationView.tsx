@@ -95,7 +95,7 @@ export const OrchestrationView = () => {
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [activityTime, setActivityTime] = useState('00:00');
   const [isRunning, setIsRunning] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
   const [students, setStudents] = useState<User[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
@@ -362,11 +362,28 @@ export const OrchestrationView = () => {
     };
   }, [selectedActivity, selectedGroup, students]);
 
-  // Periodic refresh of activity status
+  // Periodic background refresh of data and activity status
   useEffect(() => {
     if (!selectedActivity || !selectedGroup) return;
 
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
+      // Background data refresh
+      try {
+        const updatedSubmissions = await client.getSubmissions(
+          selectedActivity.id,
+        );
+        setSubmissions((prev) => {
+          // Only update if there are changes to avoid unnecessary re-renders
+          if (JSON.stringify(prev) !== JSON.stringify(updatedSubmissions)) {
+            return updatedSubmissions;
+          }
+          return prev;
+        });
+        setLastUpdate(new Date());
+      } catch (error) {
+        console.error('Error in background refresh:', error);
+      }
+
       // Update activity status for all students
       setStudentActivity((prev) => {
         const updated = { ...prev };
@@ -387,7 +404,7 @@ export const OrchestrationView = () => {
         });
         return updated;
       });
-    }, 30000); // Update every 30 seconds
+    }, 15000); // Update every 15 seconds for responsive background refresh
 
     return () => clearInterval(interval);
   }, [selectedActivity, selectedGroup]);
@@ -409,12 +426,6 @@ export const OrchestrationView = () => {
     return () => clearInterval(interval);
   }, [isRunning]);
 
-  const filteredStudents = students.filter(
-    (student) =>
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
   const startActivity = () => {
     if (selectedActivity && selectedGroup) {
       setIsRunning(true);
@@ -424,26 +435,6 @@ export const OrchestrationView = () => {
 
   const stopActivity = () => {
     setIsRunning(false);
-  };
-
-  const refreshData = async () => {
-    if (!selectedActivity || !selectedGroup) return;
-
-    setLoadingSubmissions(true);
-    setConnectionError(null);
-    try {
-      const updatedSubmissions = await client.getSubmissions(
-        selectedActivity.id,
-      );
-      setSubmissions(updatedSubmissions);
-      setLastUpdate(new Date());
-      console.log('Data refreshed manually');
-    } catch (error) {
-      console.error('Error refreshing data:', error);
-      setConnectionError('Failed to refresh data');
-    } finally {
-      setLoadingSubmissions(false);
-    }
   };
 
   const retryConnection = () => {
@@ -458,6 +449,13 @@ export const OrchestrationView = () => {
     // Find the student's submission for the selected activity
     return submissions.find((sub) => sub.student.id === studentId);
   };
+
+  const filteredStudents = students.filter((student) => {
+    if (statusFilter === 'All') return true;
+    const submission = getStudentSubmission(student.id);
+    const status = getSubmissionStatus(submission);
+    return status === statusFilter;
+  });
 
   const getStudentActivityStatus = (studentId: string) => {
     const activity = studentActivity[studentId];
@@ -475,17 +473,27 @@ export const OrchestrationView = () => {
   // removed student-specific activity log helper
 
   const getStatusCounts = () => {
-    const counts = { active: 0, inProgress: 0, completed: 0, help: 0 };
+    const counts = {
+      active: 0,
+      inProgress: 0,
+      completed: 0,
+      help: 0,
+      notStarted: 0,
+    };
     students.forEach((student) => {
       const submission = getStudentSubmission(student.id);
       const status = getSubmissionStatus(submission);
       switch (status) {
         case 'In Progress':
-          counts.active++;
+          counts.inProgress++;
+          if (getStudentActivityStatus(student.id) === 'Active now')
+            counts.active++;
           break;
         case 'Not Started':
-          counts.inProgress++;
-          break; // Treat "Not Started" as "In Progress" for display
+          counts.notStarted++;
+          if (getStudentActivityStatus(student.id) === 'Active now')
+            counts.active++;
+          break;
         case 'Completed':
           counts.completed++;
           break;
@@ -534,23 +542,9 @@ export const OrchestrationView = () => {
         }
       >
         <Stack direction="row" spacing={2} alignItems="center">
-          {selectedActivity && (
-            <Typography
-              variant="h6"
-              sx={{ color: 'primary.main', fontWeight: 'bold' }}
-            >
-              Activity run-time: {activityTime}
-            </Typography>
-          )}
           <Typography variant="body2" color="text.secondary">
             Last updated: {lastUpdate.toLocaleTimeString()}
           </Typography>
-          <Chip
-            label={isRealTimeConnected ? 'Live' : 'Offline'}
-            color={isRealTimeConnected ? 'success' : 'default'}
-            size="small"
-            variant={isRealTimeConnected ? 'filled' : 'outlined'}
-          />
           {connectionError && (
             <Tooltip title="Click to retry connection">
               <Chip
@@ -580,41 +574,6 @@ export const OrchestrationView = () => {
               variant="outlined"
             />
           )}
-          {isRunning ? (
-            <>
-              <Tooltip title="Pause Activity">
-                <IconButton onClick={() => setIsRunning(false)} color="primary">
-                  <Pause />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Stop Activity">
-                <IconButton onClick={stopActivity} color="error">
-                  <Stop />
-                </IconButton>
-              </Tooltip>
-            </>
-          ) : (
-            <Tooltip title="Start Activity">
-              <span>
-                <IconButton
-                  onClick={startActivity}
-                  color="primary"
-                  disabled={!selectedActivity || !selectedGroup}
-                >
-                  <PlayArrow />
-                </IconButton>
-              </span>
-            </Tooltip>
-          )}
-          <Tooltip title="Refresh Data">
-            <IconButton
-              color="info"
-              onClick={refreshData}
-              disabled={loadingSubmissions}
-            >
-              <Refresh />
-            </IconButton>
-          </Tooltip>
         </Stack>
       </Dashboard.Header>
 
@@ -667,17 +626,6 @@ export const OrchestrationView = () => {
               ))}
             </Select>
           </FormControl>
-
-          {selectedActivity && selectedGroup && (
-            <Button
-              variant="contained"
-              startIcon={<PlayArrow />}
-              onClick={startActivity}
-              disabled={isRunning}
-            >
-              Start Orchestration
-            </Button>
-          )}
         </Stack>
       </Paper>
 
@@ -701,12 +649,6 @@ export const OrchestrationView = () => {
                     Class Summary Pane
                   </Typography>
                   <Stack direction="row" spacing={1} alignItems="center">
-                    <Chip
-                      label={isRealTimeConnected ? 'Live' : 'Offline'}
-                      color={isRealTimeConnected ? 'success' : 'default'}
-                      size="small"
-                      variant={isRealTimeConnected ? 'filled' : 'outlined'}
-                    />
                     {connectionError && (
                       <Chip
                         label="Error"
@@ -722,7 +664,7 @@ export const OrchestrationView = () => {
 
                 {/* Activity logs removed */}
                 <Grid2 container spacing={2}>
-                  <Grid2 xs={3}>
+                  <Grid2 xs={2.4}>
                     <Box textAlign="center">
                       <Typography variant="h4" color="success.main">
                         {statusCounts.active}
@@ -730,7 +672,15 @@ export const OrchestrationView = () => {
                       <Typography variant="body2">Active</Typography>
                     </Box>
                   </Grid2>
-                  <Grid2 xs={3}>
+                  <Grid2 xs={2.4}>
+                    <Box textAlign="center">
+                      <Typography variant="h4" color="text.secondary">
+                        {statusCounts.notStarted}
+                      </Typography>
+                      <Typography variant="body2">Not Started</Typography>
+                    </Box>
+                  </Grid2>
+                  <Grid2 xs={2.4}>
                     <Box textAlign="center">
                       <Typography variant="h4" color="warning.main">
                         {statusCounts.inProgress}
@@ -738,7 +688,7 @@ export const OrchestrationView = () => {
                       <Typography variant="body2">In Progress</Typography>
                     </Box>
                   </Grid2>
-                  <Grid2 xs={3}>
+                  <Grid2 xs={2.4}>
                     <Box textAlign="center">
                       <Typography variant="h4" color="info.main">
                         {statusCounts.completed}
@@ -746,7 +696,7 @@ export const OrchestrationView = () => {
                       <Typography variant="body2">Completed</Typography>
                     </Box>
                   </Grid2>
-                  <Grid2 xs={3}>
+                  <Grid2 xs={2.4}>
                     <Box textAlign="center">
                       <Typography variant="h4" color="error.main">
                         {statusCounts.help}
@@ -772,31 +722,27 @@ export const OrchestrationView = () => {
                     <Typography variant="body2" color="text.secondary">
                       {students.length} students
                     </Typography>
-                    {isRealTimeConnected && (
-                      <Chip
-                        label="Live Updates"
-                        color="success"
-                        size="small"
-                        variant="outlined"
-                      />
-                    )}
                   </Stack>
                 </Stack>
 
                 {/* Filter Section */}
                 <Box sx={{ mb: 2 }}>
-                  <TextField
-                    placeholder="Filter students..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    InputProps={{
-                      startAdornment: (
-                        <Search sx={{ mr: 1, color: 'text.secondary' }} />
-                      ),
-                    }}
-                    size="small"
-                    sx={{ width: 300 }}
-                  />
+                  <FormControl size="small" sx={{ width: 300 }}>
+                    <InputLabel id="status-filter-label">
+                      Filter students by status
+                    </InputLabel>
+                    <Select
+                      labelId="status-filter-label"
+                      value={statusFilter}
+                      label="Filter students by status"
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      <MenuItem value="All">All students</MenuItem>
+                      <MenuItem value="Not Started">Not Started</MenuItem>
+                      <MenuItem value="In Progress">In Progress</MenuItem>
+                      <MenuItem value="Completed">Completed</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Box>
 
                 {/* Student Grid */}

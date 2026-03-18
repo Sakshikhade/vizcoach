@@ -52,7 +52,11 @@ const NavigationPages = () => {
       <Button
         variant="text"
         startIcon={<BarChart />}
-        sx={{ color: 'white' }}
+        sx={{
+          color: 'text.primary',
+          fontWeight: 600,
+          '&:hover': { color: 'primary.main', backgroundColor: 'transparent' },
+        }}
         onClick={() => navigate('activities')}
       >
         Assignments
@@ -62,7 +66,14 @@ const NavigationPages = () => {
           <Button
             variant="text"
             startIcon={<Group />}
-            sx={{ color: 'white' }}
+            sx={{
+              color: 'text.primary',
+              fontWeight: 600,
+              '&:hover': {
+                color: 'primary.main',
+                backgroundColor: 'transparent',
+              },
+            }}
             onClick={() => navigate('groups')}
           >
             Classes
@@ -70,7 +81,14 @@ const NavigationPages = () => {
           <Button
             variant="text"
             startIcon={<DashboardIcon />}
-            sx={{ color: 'white' }}
+            sx={{
+              color: 'text.primary',
+              fontWeight: 600,
+              '&:hover': {
+                color: 'primary.main',
+                backgroundColor: 'transparent',
+              },
+            }}
             onClick={() => navigate('orchestration')}
           >
             Orchestration View
@@ -101,11 +119,28 @@ const NavigationProfile = () => {
     <>
       <Button
         variant="outlined"
-        startIcon={<Avatar alt={user?.name} src={user?.avatar} />}
+        color="inherit"
+        startIcon={
+          <Avatar
+            alt={user?.name}
+            src={user?.avatar}
+            sx={{ width: 32, height: 32 }}
+          />
+        }
         onClick={openProfileMenu}
-        sx={{ p: 0, color: 'white' }}
+        sx={{
+          p: 0.5,
+          pr: 1.5,
+          borderRadius: '24px',
+          backgroundColor: '#ffffff',
+          color: 'text.primary',
+          borderColor: 'divider',
+          '&:hover': { backgroundColor: 'action.hover' },
+        }}
       >
-        <Typography textAlign="center">{user?.name}</Typography>
+        <Typography textAlign="center" fontWeight={600} variant="body2">
+          {user?.name}
+        </Typography>
       </Button>
       <Menu
         anchorEl={profileMenuEl}
