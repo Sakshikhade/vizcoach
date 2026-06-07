@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import {
   AccountBox,
+  AdminPanelSettings,
   BarChart,
   Chat,
   Group,
@@ -94,6 +95,22 @@ const NavigationPages = () => {
             Orchestration View
           </Button>
         </>
+      )}
+      {user?.role === 'Admin' && (
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<AdminPanelSettings />}
+          sx={{
+            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            fontWeight: 700,
+            borderRadius: 2,
+            ml: 1,
+          }}
+          onClick={() => navigate('/admin')}
+        >
+          Admin Panel
+        </Button>
       )}
     </>
   );

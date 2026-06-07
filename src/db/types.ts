@@ -1,7 +1,7 @@
 import { RecordModel } from 'pocketbase';
 import { GridColDef } from '@mui/x-data-grid';
 
-export type UserRole = 'Teacher' | 'Student';
+export type UserRole = 'Teacher' | 'Student' | 'Admin';
 
 export class User {
   constructor(readonly model: RecordModel) {}
@@ -141,6 +141,45 @@ export type UnsavedActivityField = (typeof UNSAVED_ACTIVITY_FIELDS)[number];
 export type UnsavedActivity = Partial<{
   [key in UnsavedActivityField]: string;
 }>;
+
+export class Material {
+  constructor(readonly model: RecordModel) {}
+
+  get id(): string {
+    return this.model.id;
+  }
+
+  get groupId(): string {
+    return this.model.groupId;
+  }
+
+  get title(): string {
+    return this.model.title;
+  }
+
+  get type(): string {
+    return this.model.type;
+  }
+
+  get file(): string[] {
+    return Array.isArray(this.model.file)
+      ? this.model.file
+      : this.model.file
+        ? [this.model.file]
+        : [];
+  }
+
+  get created(): Date {
+    return new Date(this.model.created);
+  }
+}
+
+export type UnsavedMaterial = {
+  groupId: string;
+  title: string;
+  type: string;
+  file?: File[];
+};
 
 export interface GetActivityResponse {
   activity: Activity;

@@ -1,0 +1,16 @@
+[Unit]
+Description=VizCoach PocketBase Server
+After=network.target
+
+[Service]
+Type=simple
+User=exouser
+WorkingDirectory=/home/exouser/viz-coach/pocketbase
+ExecStart=/home/exouser/viz-coach/pocketbase/backend serve --http=0.0.0.0:8090
+Restart=always
+RestartSec=5
+StandardOutput=append:/tmp/viz-coach.out
+StandardError=append:/tmp/viz-coach.err
+
+[Install]
+WantedBy=multi-user.target

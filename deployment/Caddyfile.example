@@ -1,0 +1,10 @@
+# Example: HTTPS for PocketBase on Jetstream (Option A in NETLIFY.md)
+# 1. Point api-vizcoach.duckdns.org → 149.165.153.148
+# 2. sudo apt install caddy
+# 3. sudo cp deployment/Caddyfile.example /etc/caddy/Caddyfile
+# 4. Edit domain, then: sudo systemctl reload caddy
+# 5. PocketBase stays on 127.0.0.1:8090 (vizcoach systemd service)
+
+api-vizcoach.duckdns.org {
+	reverse_proxy 127.0.0.1:8090
+}

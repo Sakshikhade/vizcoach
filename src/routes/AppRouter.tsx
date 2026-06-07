@@ -2,6 +2,7 @@ import { Navigate, Outlet, createBrowserRouter } from 'react-router-dom';
 import { Dashboard } from 'components';
 import {
   Activities,
+  AdminPanel,
   AddActivity,
   AddGroup,
   AddUnit,
@@ -43,6 +44,16 @@ export const router = createBrowserRouter([
   {
     path: '/signup',
     element: <Signup />,
+  },
+  {
+    path: '/admin',
+    element: (
+      <AuthenticatedRoute>
+        <AuthorizedRoute navigateTo="/dashboard" allowedRoles={['Admin']}>
+          <AdminPanel />
+        </AuthorizedRoute>
+      </AuthenticatedRoute>
+    ),
   },
   {
     path: '/dashboard',

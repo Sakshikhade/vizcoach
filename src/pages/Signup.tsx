@@ -22,6 +22,7 @@ import {
   PersonAddOutlined,
   SchoolOutlined,
   CastForEducationOutlined,
+  Google,
 } from '@mui/icons-material';
 import { UserRole } from 'db';
 
@@ -33,7 +34,7 @@ type SignupState = Partial<{
 }>;
 
 export const Signup = () => {
-  const { user, register } = useAuth();
+  const { user, register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const { search } = useLocation();
   const [state, setState] = useState<SignupState>({});
@@ -91,6 +92,14 @@ export const Signup = () => {
           setError(err.message || 'Registration failed. Please try again.');
         }
       }
+      setLoading(false);
+    });
+  };
+
+  const handleGoogleSignup = () => {
+    setLoading(true);
+    loginWithGoogle((error) => {
+      setError(error?.message || '');
       setLoading(false);
     });
   };
@@ -226,6 +235,46 @@ export const Signup = () => {
                 </RadioGroup>
               </FormControl>
             </Stack>
+
+            <Button
+              variant="outlined"
+              size="large"
+              fullWidth
+              startIcon={<Google />}
+              onClick={handleGoogleSignup}
+              disabled={loading}
+              sx={{
+                py: 1.5,
+                mt: 1,
+                borderColor: 'divider',
+                color: 'text.primary',
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  bgcolor: 'primary.50',
+                },
+              }}
+            >
+              Sign up with Google
+            </Button>
+
+            <Alert
+              severity="info"
+              variant="outlined"
+              sx={{
+                py: 0,
+                '& .MuiAlert-message': {
+                  mx: 'auto',
+                  textAlign: 'center',
+                  width: '100%',
+                  py: 1,
+                },
+                border: 'none',
+                color: 'text.secondary',
+                '& .MuiAlert-icon': { display: 'none' },
+              }}
+            >
+              OR SIGN UP WITH EMAIL
+            </Alert>
 
             {/* Name field */}
             <FormField label="Full Name" required>

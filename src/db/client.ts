@@ -9,15 +9,18 @@ import {
   Dataset,
   DatasetRow,
   Group,
+  Material,
   Submission,
   Unit,
   UnsavedActivity,
   UnsavedChatMessage,
   UnsavedChatRoom,
   UnsavedGroup,
+  UnsavedMaterial,
   UnsavedSubmission,
   UnsavedUnit,
   User,
+  UserRole,
 } from 'db';
 
 class PocketbaseClient {
@@ -32,11 +35,19 @@ class PocketbaseClient {
     await this.pb.collection('users').authWithPassword(email, password);
   }
 
+  async authWithGoogle(): Promise<void> {
+    await this.pb.collection('users').authWithOAuth2({ provider: 'google' });
+  }
+
+  async requestPasswordReset(email: string): Promise<void> {
+    await this.pb.collection('users').requestPasswordReset(email);
+  }
+
   async registerUser(
     name: string,
     email: string,
     password: string,
-    role: 'Student' | 'Teacher',
+    role: UserRole,
   ): Promise<void> {
     // PocketBase requires a non-blank username — derive one from the email
     // local part and append a random suffix to avoid collisions.
@@ -54,6 +65,25 @@ class PocketbaseClient {
     });
     // Auto-authenticate after successful registration
     await this.pb.collection('users').authWithPassword(email, password);
+  }
+  async createUserAdmin(
+    name: string,
+    email: string,
+    password: string,
+    role: UserRole,
+  ): Promise<void> {
+    const localPart = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_');
+    const suffix = Math.floor(1000 + Math.random() * 9000);
+    const username = `${localPart}_${suffix}`;
+
+    await this.pb.collection('users').create({
+      name,
+      username,
+      email,
+      password,
+      passwordConfirm: password,
+      role,
+    });
   }
 
   clearAuthStore(): void {
@@ -943,7 +973,173 @@ class PocketbaseClient {
         /* ignore – presence is best-effort */
       });
   }
-}
 
+  // ── Admin-only methods ────────────────────────────────────────────────────
+
+  /** Returns every user on the platform (Admin role required). */
+  async getAllUsersAdmin(roleFilter?: string): Promise<User[]> {
+    const filter = roleFilter ? `role='${roleFilter}'` : '';
+    const models = await this.pb.collection('users').getFullList({
+      sort: 'name',
+      filter,
+    });
+    return models.map((m) => new User(m));
+  }
+
+  /** Update any user's name and/or role (Admin only). */
+  async updateUserAdmin(
+    userId: string,
+    data: { name?: string; role?: UserRole },
+  ): Promise<void> {
+    await this.pb.collection('users').update(userId, data);
+  }
+
+  /** Delete any user account (Admin only). */
+  async deleteUserAdmin(userId: string): Promise<void> {
+    await this.pb.collection('users').delete(userId);
+  }
+
+  /** Returns ALL groups across all teachers (Admin only). */
+  async getAllGroupsAdmin(): Promise<Group[]> {
+    const models = await this.pb.collection('groups').getFullList({
+      sort: '-created',
+      expand: 'teacherId',
+    });
+    const groups: Group[] = [];
+    for (const model of models) {
+      const { totalItems } = await this.pb
+        .collection('usergroups')
+        .getList(1, 1, {
+          filter: `groupId='${model.id}' && userId.role='Student'`,
+        });
+      groups.push(new Group(model, totalItems));
+    }
+    return groups;
+  }
+
+  /** Returns ALL activities across all classes (Admin only). */
+  async getAllActivitiesAdmin(): Promise<Activity[]> {
+    const models = await this.pb.collection('activities').getFullList({
+      sort: '-created',
+      expand: 'groupId',
+    });
+    const activities: Activity[] = [];
+    for (const model of models) {
+      const { totalItems } = await this.pb.collection('units').getList(1, 1, {
+        filter: `activityId='${model.id}'`,
+      });
+      activities.push(new Activity(model, totalItems));
+    }
+    return activities;
+  }
+
+  /** Platform-wide stats for the admin overview cards. */
+  async getAdminStats(): Promise<{
+    totalUsers: number;
+    totalTeachers: number;
+    totalStudents: number;
+    totalGroups: number;
+    totalActivities: number;
+    totalSubmissions: number;
+  }> {
+    const [users, teachers, students, groups, activities, submissions] =
+      await Promise.all([
+        this.pb
+          .collection('users')
+          .getList(1, 1, {})
+          .then((r) => r.totalItems),
+        this.pb
+          .collection('users')
+          .getList(1, 1, { filter: "role='Teacher'" })
+          .then((r) => r.totalItems),
+        this.pb
+          .collection('users')
+          .getList(1, 1, { filter: "role='Student'" })
+          .then((r) => r.totalItems),
+        this.pb
+          .collection('groups')
+          .getList(1, 1, {})
+          .then((r) => r.totalItems),
+        this.pb
+          .collection('activities')
+          .getList(1, 1, {})
+          .then((r) => r.totalItems),
+        this.pb
+          .collection('submissions')
+          .getList(1, 1, {})
+          .then((r) => r.totalItems),
+      ]);
+    return {
+      totalUsers: users,
+      totalTeachers: teachers,
+      totalStudents: students,
+      totalGroups: groups,
+      totalActivities: activities,
+      totalSubmissions: submissions,
+    };
+  }
+
+  // Admin Group Enrollment management
+  async addUserToGroupAdmin(groupId: string, userId: string): Promise<void> {
+    await this.pb.collection('usergroups').create({
+      groupId,
+      userId,
+    });
+  }
+
+  async removeUserFromGroupAdmin(
+    groupId: string,
+    userId: string,
+  ): Promise<void> {
+    const userGroups = await this.pb.collection('usergroups').getFullList({
+      filter: `groupId='${groupId}' && userId='${userId}'`,
+    });
+    for (const ug of userGroups) {
+      await this.pb.collection('usergroups').delete(ug.id);
+    }
+  }
+
+  async updateGroupTeacherAdmin(
+    groupId: string,
+    teacherId: string,
+  ): Promise<void> {
+    await this.pb.collection('groups').update(groupId, {
+      teacherId,
+    });
+  }
+
+  // --- Materials ---
+  async getMaterials(groupId: string): Promise<Material[]> {
+    const records = await this.pb.collection('materials').getFullList({
+      filter: `groupId='${groupId}'`,
+      sort: '-created',
+    });
+    return records.map((r) => new Material(r));
+  }
+
+  async addMaterial(data: UnsavedMaterial): Promise<Material> {
+    const formData = new FormData();
+    formData.append('groupId', data.groupId);
+    formData.append('title', data.title);
+    formData.append('type', data.type);
+
+    if (data.file) {
+      for (const f of data.file) {
+        formData.append('file', f);
+      }
+    }
+
+    const record = await this.pb.collection('materials').create(formData);
+    return new Material(record);
+  }
+
+  async deleteMaterial(materialId: string): Promise<void> {
+    await this.pb.collection('materials').delete(materialId);
+  }
+
+  getMaterialFileUrl(material: Material, filename: string): string {
+    return this.pb.files.getUrl(material.model, filename);
+  }
+}
 const client = new PocketbaseClient();
 export default client;

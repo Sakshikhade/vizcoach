@@ -16,6 +16,9 @@ interface AuthContextValue {
     role: UserRole,
     callback: (error: ClientResponseError | null) => void,
   ) => void;
+  loginWithGoogle: (
+    callback: (error: ClientResponseError | null) => void,
+  ) => void;
   logout: () => void;
 }
 
@@ -23,6 +26,7 @@ const defaultAuthContextValue: AuthContextValue = {
   user: null,
   login: () => {},
   register: () => {},
+  loginWithGoogle: () => {},
   logout: () => {},
 };
 
@@ -38,6 +42,17 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     ) => {
       client
         .authWithPassword(email, password)
+        .then(() => {
+          setUser(client.getUser());
+          callback(null);
+        })
+        .catch(callback);
+    },
+    loginWithGoogle: (
+      callback: (error: ClientResponseError | null) => void,
+    ) => {
+      client
+        .authWithGoogle()
         .then(() => {
           setUser(client.getUser());
           callback(null);

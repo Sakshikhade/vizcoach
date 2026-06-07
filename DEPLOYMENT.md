@@ -1,6 +1,16 @@
-# Deployment Guide: Mac Mini Server
+# Deployment Guide
 
-This guide explains how to host VizCoach on a Mac Mini so it is accessible to everyone on your organization's private Wi-Fi network.
+## Netlify + Jetstream (recommended for public demo)
+
+Host the **React frontend on Netlify** and **PocketBase on Jetstream** (`149.165.153.148:8090`). See **[deployment/NETLIFY.md](./deployment/NETLIFY.md)** for env vars, HTTPS, and API proxy options.
+
+Use `REACT_APP_POCKETBASE_URL` (this project uses Create React App, not `VITE_API_URL`). PocketBase port is **8090**.
+
+---
+
+## Mac Mini Server (private Wi-Fi)
+
+This section explains how to host VizCoach on a Mac Mini so it is accessible to everyone on your organization's private Wi-Fi network.
 
 ## Prerequisities
 

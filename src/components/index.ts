@@ -1,4 +1,7 @@
 export * from './ActivityCard';
+export * from './AdminBulkAddUsersDialog';
+export * from './AdminCreateUserDialog';
+export * from './AdminManageClassDialog';
 export * from './ButtonLink';
 export * from './CardEllipsisableBody';
 export * from './CardFooter';

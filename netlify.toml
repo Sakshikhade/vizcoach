@@ -1,0 +1,11 @@
+# Netlify: frontend only. PocketBase stays on Jetstream (149.165.153.148:8090).
+# Set REACT_APP_POCKETBASE_URL in Netlify UI → Site settings → Environment variables.
+
+[build]
+  command = "npm run build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA fallback (React Router). API proxy rules live in public/_redirects.

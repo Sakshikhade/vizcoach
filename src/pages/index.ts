@@ -1,4 +1,5 @@
 export * from './Activities';
+export * from './AdminPanel';
 export * from './AddActivity';
 export * from './AddGroup';
 export * from './AddUnit';

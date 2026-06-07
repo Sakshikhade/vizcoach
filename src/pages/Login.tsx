@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import { FormField, VizCoachLogo } from 'components';
-import { LoginOutlined } from '@mui/icons-material';
+import { LoginOutlined, Google } from '@mui/icons-material';
 
 type LoginState = Partial<{
   email: string;
@@ -20,12 +20,13 @@ type LoginState = Partial<{
 }>;
 
 export const Login = () => {
-  const { user, login } = useAuth();
+  const { user, login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const { search } = useLocation();
   const [state, setState] = useState<LoginState>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resetSuccess, setResetSuccess] = useState('');
 
   const getReturnRoute = useCallback(
     (): string => search.replace('?return=', '') || '/dashboard',
@@ -63,6 +64,33 @@ export const Login = () => {
     });
   };
 
+  const handleGoogleLogin = () => {
+    setLoading(true);
+    loginWithGoogle((error) => {
+      setError(error?.message || '');
+      setLoading(false);
+    });
+  };
+
+  const handlePasswordReset = async () => {
+    if (!state.email) {
+      setError('Please enter your email address to reset your password.');
+      return;
+    }
+    setLoading(true);
+    try {
+      // Trigger native PocketBase password reset email logic
+      const { default: client } = await import('db');
+      await client.requestPasswordReset(state.email);
+      setResetSuccess('Password reset email sent! Check your inbox.');
+      setError('');
+    } catch (err: any) {
+      setError(err?.response?.message || 'Failed to send reset email.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Grid2 alignContent="center" height="100svh">
       <Paper
@@ -70,8 +98,49 @@ export const Login = () => {
         sx={{ width: '90%', maxWidth: '500px', marginX: 'auto' }}
       >
         <form>
-          <Stack gap={4} padding={2}>
+          <Stack gap={3} padding={2}>
             <VizCoachLogo />
+
+            <Button
+              variant="outlined"
+              size="large"
+              fullWidth
+              startIcon={<Google />}
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              sx={{
+                py: 1.5,
+                mt: 1,
+                borderColor: 'divider',
+                color: 'text.primary',
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  bgcolor: 'primary.50',
+                },
+              }}
+            >
+              Continue with Google
+            </Button>
+
+            <Alert
+              severity="info"
+              variant="outlined"
+              sx={{
+                py: 0,
+                '& .MuiAlert-message': {
+                  mx: 'auto',
+                  textAlign: 'center',
+                  width: '100%',
+                  py: 1,
+                },
+                border: 'none',
+                color: 'text.secondary',
+                '& .MuiAlert-icon': { display: 'none' },
+              }}
+            >
+              OR LOG IN WITH EMAIL
+            </Alert>
+
             <FormField label="Email Address" required>
               <TextField
                 variant="outlined"
@@ -92,6 +161,20 @@ export const Login = () => {
                 required
               />
             </FormField>
+
+            <Typography
+              variant="body2"
+              sx={{
+                textAlign: 'right',
+                mt: -2,
+                color: 'primary.main',
+                cursor: 'pointer',
+                '&:hover': { textDecoration: 'underline' },
+              }}
+              onClick={handlePasswordReset}
+            >
+              Forgot your password?
+            </Typography>
             <Button
               variant="contained"
               type="submit"
@@ -104,6 +187,9 @@ export const Login = () => {
             >
               {!loading && <>Login</>}
             </Button>
+            {!!resetSuccess.length && (
+              <Alert severity="success">{resetSuccess}</Alert>
+            )}
             {!!error.length && <Alert severity="error">{error}</Alert>}
             <Typography
               variant="body2"

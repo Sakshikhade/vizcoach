@@ -1,0 +1,8 @@
+# --- Option B: Netlify proxies API to Jetstream (avoids mixed-content for REST) ---
+# Use when REACT_APP_POCKETBASE_URL = your Netlify site URL (e.g. https://vizcoach.netlify.app)
+# Uncomment the line below and comment out Option A's SPA-only block if using the proxy.
+#
+# /api/*  http://149.165.153.148:8090/api/:splat  200
+
+# --- React Router: all non-file routes → index.html ---
+/*    /index.html   200

@@ -2,4 +2,4 @@
 
 cd "$(dirname "$0")"
 
-./backend serve
+./backend serve --http=0.0.0.0:8090
