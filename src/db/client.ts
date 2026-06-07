@@ -35,8 +35,15 @@ class PocketbaseClient {
     await this.pb.collection('users').authWithPassword(email, password);
   }
 
-  async authWithGoogle(): Promise<void> {
-    await this.pb.collection('users').authWithOAuth2({ provider: 'google' });
+  async authWithGoogle(role: UserRole = 'Student'): Promise<void> {
+    const suffix = Math.floor(1000 + Math.random() * 9000);
+    await this.pb.collection('users').authWithOAuth2({
+      provider: 'google',
+      createData: {
+        role,
+        username: `oauth_${suffix}`,
+      },
+    });
   }
 
   async requestPasswordReset(email: string): Promise<void> {

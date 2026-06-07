@@ -18,6 +18,7 @@ interface AuthContextValue {
   ) => void;
   loginWithGoogle: (
     callback: (error: ClientResponseError | null) => void,
+    role?: UserRole,
   ) => void;
   logout: () => void;
 }
@@ -50,9 +51,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     },
     loginWithGoogle: (
       callback: (error: ClientResponseError | null) => void,
+      role?: UserRole,
     ) => {
       client
-        .authWithGoogle()
+        .authWithGoogle(role)
         .then(() => {
           setUser(client.getUser());
           callback(null);

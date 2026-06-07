@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gocarina/gocsv"
 	"github.com/google/uuid"
@@ -231,6 +232,47 @@ func OnGroupAfterCreateSuccess(app *pocketbase.PocketBase, e *core.RecordEvent) 
 	return e.Next()
 }
 
+func sanitizeUsernameFromEmail(email string) string {
+	localPart := email
+	if at := strings.Index(email, "@"); at > 0 {
+		localPart = email[:at]
+	}
+
+	var b strings.Builder
+	for _, r := range localPart {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_' || r == '-' {
+			b.WriteRune(r)
+		} else {
+			b.WriteRune('_')
+		}
+	}
+
+	result := b.String()
+	if result == "" {
+		result = "user"
+	}
+	if len(result) > 24 {
+		result = result[:24]
+	}
+
+	return fmt.Sprintf("%s_%d", result, time.Now().UnixNano()%10000)
+}
+
+func OnUserBeforeCreate(e *core.RecordEvent) error {
+	record := e.Record
+
+	username := record.GetString("username")
+	if email := record.GetString("email"); email != "" && (username == "" || strings.HasPrefix(username, "oauth_")) {
+		record.Set("username", sanitizeUsernameFromEmail(email))
+	}
+
+	if record.GetString("role") == "" {
+		record.Set("role", StudentRole)
+	}
+
+	return e.Next()
+}
+
 func main() {
 	app := pocketbase.New()
 
@@ -264,6 +306,9 @@ func main() {
 	})
 
 	// ----- VIZCOACH RELATED EXTENSIONS ----- //
+
+	// Auto-fill username and role for OAuth sign-ups.
+	app.OnRecordCreate(UsersCollection).BindFunc(OnUserBeforeCreate)
 
 	// Adding hook to peform actions before saving the group.
 	// Creating student accounts from the csv file uploaded with the student group record.

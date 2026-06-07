@@ -6,7 +6,7 @@ After=network.target
 Type=simple
 User=exouser
 WorkingDirectory=/home/exouser/viz-coach/pocketbase
-ExecStart=/home/exouser/viz-coach/pocketbase/backend serve --http=0.0.0.0:8090
+ExecStart=/home/exouser/viz-coach/pocketbase/backend serve --http=0.0.0.0:8090 --origins=https://vizcoachs.netlify.app,https://vizcoach-api.duckdns.org,http://localhost:3000
 Restart=always
 RestartSec=5
 StandardOutput=append:/tmp/viz-coach.out

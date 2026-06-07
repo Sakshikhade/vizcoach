@@ -101,7 +101,7 @@ export const Signup = () => {
     loginWithGoogle((error) => {
       setError(error?.message || '');
       setLoading(false);
-    });
+    }, role);
   };
 
   const isFormValid =
