@@ -15,7 +15,6 @@ import {
   AccountBox,
   AdminPanelSettings,
   BarChart,
-  Chat,
   Group,
   Logout,
   Dashboard as DashboardIcon,

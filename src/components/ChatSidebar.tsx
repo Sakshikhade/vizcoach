@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Badge,
   Box,
@@ -63,40 +63,7 @@ export const ChatSidebar = ({
     'users',
   );
 
-  useEffect(() => {
-    const initializeChat = async () => {
-      await loadAllUsers();
-      await loadChatRooms();
-      if (user?.role === 'Teacher') {
-        loadUsers();
-        loadClasses();
-      } else if (user?.role === 'Student') loadTeachers();
-    };
-    initializeChat();
-  }, [user]);
-
-  useEffect(() => {
-    if (!user) return;
-    const fetchOverview = async () => {
-      const { unread, latest } = await client.getRoomOverview(
-        rooms.map((r) => r.id),
-      );
-      setUnreadCounts(unread);
-      setRoomTimestamps((prev) => ({ ...prev, ...latest }));
-    };
-    if (rooms.length > 0) fetchOverview();
-    const interval = setInterval(fetchOverview, 5000); // Poll every 5 seconds
-    return () => clearInterval(interval);
-  }, [user, rooms]);
-
-  useEffect(() => {
-    if (user?.role === 'Student') {
-      if (activeUserSection === 'teachers') loadTeachers();
-      else if (activeUserSection === 'students') loadStudents();
-    }
-  }, [activeUserSection, user]);
-
-  const loadChatRooms = async () => {
+  const loadChatRooms = useCallback(async () => {
     try {
       const chatRooms = await client.getChatRooms();
 
@@ -124,36 +91,36 @@ export const ChatSidebar = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const usersData = await client.getAllUsers();
       setUsers(usersData.filter((u) => u.id !== user?.id));
     } catch (error) {
       console.error('Failed to load users:', error);
     }
-  };
+  }, [user?.id]);
 
-  const loadClasses = async () => {
+  const loadClasses = useCallback(async () => {
     try {
       const groups = await client.getGroups();
       setClasses(groups);
     } catch (error) {
       console.error('Failed to load classes:', error);
     }
-  };
+  }, []);
 
-  const loadAllUsers = async () => {
+  const loadAllUsers = useCallback(async () => {
     try {
       const usersData = await client.getAllUsers();
       setAllUsers(usersData);
     } catch (error) {
       console.error('Failed to load all users:', error);
     }
-  };
+  }, []);
 
-  const loadTeachers = async () => {
+  const loadTeachers = useCallback(async () => {
     try {
       const usersData = await client.getAllUsers();
       const teachers = usersData.filter(
@@ -167,9 +134,9 @@ export const ChatSidebar = ({
     } catch (error) {
       console.error('Failed to load teachers:', error);
     }
-  };
+  }, [user?.id]);
 
-  const loadStudents = async () => {
+  const loadStudents = useCallback(async () => {
     try {
       const usersData = await client.getAllUsers();
       setUsers(
@@ -178,7 +145,40 @@ export const ChatSidebar = ({
     } catch (error) {
       console.error('Failed to load students:', error);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    const initializeChat = async () => {
+      await loadAllUsers();
+      await loadChatRooms();
+      if (user?.role === 'Teacher') {
+        loadUsers();
+        loadClasses();
+      } else if (user?.role === 'Student') loadTeachers();
+    };
+    initializeChat();
+  }, [user, loadAllUsers, loadChatRooms, loadUsers, loadClasses, loadTeachers]);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchOverview = async () => {
+      const { unread, latest } = await client.getRoomOverview(
+        rooms.map((r) => r.id),
+      );
+      setUnreadCounts(unread);
+      setRoomTimestamps((prev) => ({ ...prev, ...latest }));
+    };
+    if (rooms.length > 0) fetchOverview();
+    const interval = setInterval(fetchOverview, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, [user, rooms]);
+
+  useEffect(() => {
+    if (user?.role === 'Student') {
+      if (activeUserSection === 'teachers') loadTeachers();
+      else if (activeUserSection === 'students') loadStudents();
+    }
+  }, [activeUserSection, user, loadTeachers, loadStudents]);
 
   const createPrivateChat = async (targetUser: User) => {
     try {
@@ -286,8 +286,6 @@ export const ChatSidebar = ({
     return room.name;
   };
 
-  const getRoomInitial = (room: ChatRoom) =>
-    getRoomName(room).charAt(0).toUpperCase();
   const getRoomColor = (room: ChatRoom) => stringToColor(getRoomName(room));
 
   if (loading) {
@@ -401,7 +399,6 @@ export const ChatSidebar = ({
             .map((room) => {
               const isSelected = selectedRoomId === room.id;
               const name = getRoomName(room);
-              const color = getRoomColor(room);
               return (
                 <Box
                   key={room.id}

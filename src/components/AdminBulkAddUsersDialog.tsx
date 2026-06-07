@@ -2,12 +2,10 @@ import React, { useState, useRef } from 'react';
 import {
   Box,
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Link,
   LinearProgress,
   Stack,
   Typography,

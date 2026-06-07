@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   CircularProgress,
@@ -20,24 +20,6 @@ type ChatWindowProps = {
   onlineIds?: Set<string>;
 };
 
-/** Deterministic avatar color */
-const stringToColor = (str: string) => {
-  const palette = [
-    '#1565c0',
-    '#6a1b9a',
-    '#00695c',
-    '#e65100',
-    '#283593',
-    '#ad1457',
-    '#2e7d32',
-    '#004d40',
-  ];
-  let hash = 0;
-  for (let i = 0; i < str.length; i++)
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
-};
-
 export const ChatWindow = ({
   room,
   onlineIds = new Set(),
@@ -51,20 +33,16 @@ export const ChatWindow = ({
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    loadAllUsers();
-    loadMessages();
-    setupMessageSubscription();
-    return () => {
-      client.unregisterChatMessageCallback();
-    };
-  }, [room.id]);
+  const loadAllUsers = useCallback(async () => {
+    try {
+      const usersData = await client.getAllUsers();
+      setAllUsers(usersData);
+    } catch (error) {
+      console.error('Failed to load all users:', error);
+    }
+  }, []);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     if (!user) return;
     try {
       setLoading(true);
@@ -83,9 +61,9 @@ export const ChatWindow = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [room.id, user]);
 
-  const setupMessageSubscription = () => {
+  const setupMessageSubscription = useCallback(() => {
     if (!user) return;
     client.registerChatMessageCallback(room.id, (action, message) => {
       if (message.roomId === room.id) {
@@ -110,20 +88,20 @@ export const ChatWindow = ({
         });
       }
     });
-  };
+  }, [room.id, user]);
 
-  const scrollToBottom = () => {
+  useEffect(() => {
+    loadAllUsers();
+    loadMessages();
+    setupMessageSubscription();
+    return () => {
+      client.unregisterChatMessageCallback();
+    };
+  }, [loadAllUsers, loadMessages, setupMessageSubscription]);
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const loadAllUsers = async () => {
-    try {
-      const usersData = await client.getAllUsers();
-      setAllUsers(usersData);
-    } catch (error) {
-      console.error('Failed to load all users:', error);
-    }
-  };
+  }, [messages]);
 
   const getUserName = (userId: string) => {
     const foundUser = allUsers.find((u) => u.id === userId);

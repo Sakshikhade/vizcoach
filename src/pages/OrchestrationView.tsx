@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -7,10 +6,8 @@ import {
   Chip,
   Paper,
   Stack,
-  TextField,
   Typography,
   Avatar,
-  IconButton,
   Tooltip,
   FormControl,
   InputLabel,
@@ -28,16 +25,7 @@ import {
   ListItemText,
 } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
-import {
-  Search,
-  PlayArrow,
-  Pause,
-  Stop,
-  Refresh,
-  Visibility,
-  Assignment,
-  Group,
-} from '@mui/icons-material';
+import { Visibility, Assignment, Group } from '@mui/icons-material';
 import { Dashboard } from 'components';
 import { Visualization, JsonEditor, DatasetTabs } from 'components';
 import { useDashboard } from 'hooks';
@@ -78,7 +66,6 @@ const getStatusColor = (status: string) => {
 
 export const OrchestrationView = () => {
   const { useData } = useDashboard();
-  const navigate = useNavigate();
 
   // Get activities and groups data from the loader
   const loaderData = useData!<{
@@ -93,15 +80,13 @@ export const OrchestrationView = () => {
   );
   const [selectedGroup, setSelectedGroup] = useState<GroupType | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
-  const [activityTime, setActivityTime] = useState('00:00');
-  const [isRunning, setIsRunning] = useState(false);
   const [statusFilter, setStatusFilter] = useState('All');
   const [students, setStudents] = useState<User[]>([]);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
-  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+  const [, setLoadingSubmissions] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [isRealTimeConnected, setIsRealTimeConnected] = useState(false);
+  const [, setIsRealTimeConnected] = useState(false);
   const [studentActivity, setStudentActivity] = useState<
     Record<string, { lastSeen: Date; status: string }>
   >({});
@@ -114,89 +99,60 @@ export const OrchestrationView = () => {
   const [workDialogUnitTitles, setWorkDialogUnitTitles] = useState<
     Record<string, string>
   >({});
-  const [workDialogUnit, setWorkDialogUnit] = useState<any | null>(null);
+  const [, setWorkDialogUnit] = useState<any | null>(null);
   const [workDialogDatasets, setWorkDialogDatasets] = useState<any[]>([]);
   const [workDialogJson, setWorkDialogJson] = useState<string>('{}');
 
-  // Enhanced JSON processing for visualization
-  const getEnhancedJson = (submission: any): string => {
-    const baseJson = stringifySubmissionJson(submission);
-
+  const stringifySubmissionJson = useCallback((submission: any): string => {
     try {
-      const parsed = JSON.parse(baseJson);
-
-      // Log for debugging
-      console.log('getEnhancedJson - parsed:', {
-        parsedKeys: Object.keys(parsed),
-        hasmark: 'mark' in parsed,
-        hasData: 'data' in parsed,
-        hasEncoding: 'encoding' in parsed,
-        fullParsed: parsed,
-      });
-
-      // Build the enhanced spec, spreading parsed AFTER our defaults so student values win.
-      // IMPORTANT: Replace width: "container" with a fixed pixel width.
-      // In a MUI Dialog the ResizeObserver fires too late on first render, so
-      // width: "container" resolves to 0px and the chart is invisible.
-      const enhancedJson: any = {
-        height: 300,
-        autosize: { resize: true, type: 'fit' },
-        ...parsed,
-        // Always use a fixed width in the dialog — overrides any "container" value
-        width: 480,
-      };
-
-      // Strip empty encoding channels so Vega-Lite doesn't drop them with warnings
-      if (enhancedJson.encoding && typeof enhancedJson.encoding === 'object') {
-        Object.keys(enhancedJson.encoding).forEach((channel) => {
-          const enc = enhancedJson.encoding[channel];
-          if (!enc || Object.keys(enc).length === 0) {
-            delete enhancedJson.encoding[channel];
-          }
-        });
-        // Remove encoding key entirely if all channels were empty
-        if (Object.keys(enhancedJson.encoding).length === 0) {
-          delete enhancedJson.encoding;
-        }
-      }
-
-      return JSON.stringify(enhancedJson, null, 4);
-    } catch (error) {
-      console.error('Error processing JSON:', error);
-      return baseJson;
-    }
-  };
-
-  const stringifySubmissionJson = (submission: any): string => {
-    try {
-      console.log('stringifySubmissionJson - input:', {
-        hasSubmission: !!submission,
-        submissionKeys: submission ? Object.keys(submission) : [],
-        hasJsonProperty: submission ? 'json' in submission : false,
-        jsonType: submission?.json ? typeof submission.json : 'undefined',
-        jsonValue: submission?.json,
-        isSubmissionInstance: submission?.constructor?.name,
-      });
-
       if (!submission || !submission.json) {
-        console.log(
-          'stringifySubmissionJson - returning empty because no json',
-        );
         return '{}';
       }
 
-      // Use the same approach as Perform page - direct stringify
-      const result = JSON.stringify(submission.json, null, 4);
-      console.log(
-        'stringifySubmissionJson - result preview:',
-        result.substring(0, 200),
-      );
-      return result;
+      return JSON.stringify(submission.json, null, 4);
     } catch (error) {
       console.error('stringifySubmissionJson - error:', error);
       return '{}';
     }
-  };
+  }, []);
+
+  const getEnhancedJson = useCallback(
+    (submission: any): string => {
+      const baseJson = stringifySubmissionJson(submission);
+
+      try {
+        const parsed = JSON.parse(baseJson);
+
+        const enhancedJson: any = {
+          height: 300,
+          autosize: { resize: true, type: 'fit' },
+          ...parsed,
+          width: 480,
+        };
+
+        if (
+          enhancedJson.encoding &&
+          typeof enhancedJson.encoding === 'object'
+        ) {
+          Object.keys(enhancedJson.encoding).forEach((channel) => {
+            const enc = enhancedJson.encoding[channel];
+            if (!enc || Object.keys(enc).length === 0) {
+              delete enhancedJson.encoding[channel];
+            }
+          });
+          if (Object.keys(enhancedJson.encoding).length === 0) {
+            delete enhancedJson.encoding;
+          }
+        }
+
+        return JSON.stringify(enhancedJson, null, 4);
+      } catch (error) {
+        console.error('Error processing JSON:', error);
+        return baseJson;
+      }
+    },
+    [stringifySubmissionJson],
+  );
 
   // Load students when group is selected
   useEffect(() => {
@@ -322,8 +278,6 @@ export const OrchestrationView = () => {
 
               // Update student activity status
               if (record.userId) {
-                const student = students.find((s) => s.id === record.userId);
-                const studentName = student?.name || 'Unknown student';
                 const status = record.state || 'working';
 
                 setStudentActivity((prev) => ({
@@ -333,8 +287,6 @@ export const OrchestrationView = () => {
                     status: status,
                   },
                 }));
-
-                // removed recent updates and activity log writes
               }
             }
           } catch (error) {
@@ -360,7 +312,15 @@ export const OrchestrationView = () => {
           console.warn('Failed to get unsubscribe function:', error);
         });
     };
-  }, [selectedActivity, selectedGroup, students]);
+  }, [
+    selectedActivity,
+    selectedGroup,
+    students,
+    getEnhancedJson,
+    selectedStudent,
+    selectedWork,
+    workDialogOpen,
+  ]);
 
   // Periodic background refresh of data and activity status
   useEffect(() => {
@@ -408,34 +368,6 @@ export const OrchestrationView = () => {
 
     return () => clearInterval(interval);
   }, [selectedActivity, selectedGroup]);
-
-  // Mock timer functionality
-  useEffect(() => {
-    if (!isRunning) return;
-
-    const interval = setInterval(() => {
-      setActivityTime((prev) => {
-        const [hours, minutes] = prev.split(':').map(Number);
-        const totalMinutes = hours * 60 + minutes + 1;
-        const newHours = Math.floor(totalMinutes / 60);
-        const newMinutes = totalMinutes % 60;
-        return `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}`;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isRunning]);
-
-  const startActivity = () => {
-    if (selectedActivity && selectedGroup) {
-      setIsRunning(true);
-      setActivityTime('00:00');
-    }
-  };
-
-  const stopActivity = () => {
-    setIsRunning(false);
-  };
 
   const retryConnection = () => {
     setConnectionError(null);

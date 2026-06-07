@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -18,7 +17,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { Dashboard, Visualization, JsonEditor, DatasetTabs } from 'components';
+import { Visualization, JsonEditor, DatasetTabs } from 'components';
 import { useStudentSubmissions } from 'hooks';
 
 // Mock submission status data - in real app this would come from the database
@@ -78,11 +77,6 @@ export const StudentWorkPopup = () => {
       return '{}';
     }
   };
-
-  const unit = useMemo(
-    () => (selectedSubmission ? getSubmissionUnit(selectedSubmission) : null),
-    [selectedSubmission, getSubmissionUnit],
-  );
 
   const datasets = useMemo(
     () => (selectedSubmission ? getSubmissionDatasets(selectedSubmission) : []),

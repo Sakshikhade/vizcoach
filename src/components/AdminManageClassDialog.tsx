@@ -6,7 +6,6 @@ import {
   Chip,
   CircularProgress,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
@@ -30,7 +29,6 @@ import {
   DeleteOutline,
   FilePresentOutlined,
   CloudUploadOutlined,
-  SchoolOutlined,
   Close,
 } from '@mui/icons-material';
 import { Group, Material, User, UnsavedMaterial } from 'db';
@@ -72,13 +70,7 @@ export const AdminManageClassDialog: React.FC<Props> = ({
   const [addingStudent, setAddingStudent] = useState(false);
   const [uploadingMaterial, setUploadingMaterial] = useState(false);
 
-  useEffect(() => {
-    if (open) {
-      loadData();
-    }
-  }, [open, group.id]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [tList, sList, eList, mList] = await Promise.all([
@@ -98,7 +90,13 @@ export const AdminManageClassDialog: React.FC<Props> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [group.id, group.model?.teacherId]);
+
+  useEffect(() => {
+    if (open) {
+      loadData();
+    }
+  }, [open, loadData]);
 
   // ─── Actions ───
 

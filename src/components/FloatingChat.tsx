@@ -1,12 +1,5 @@
 import { useState } from 'react';
-import {
-  Avatar,
-  Box,
-  IconButton,
-  Slide,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, IconButton, Slide, Tooltip, Typography } from '@mui/material';
 import { Chat, Close } from '@mui/icons-material';
 import { ChatRoom } from 'db';
 import { ChatSidebar, ChatWindow } from 'components';
