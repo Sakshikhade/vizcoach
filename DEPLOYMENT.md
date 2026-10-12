@@ -1,92 +1,95 @@
-# Deployment Guide
+# Deployment
 
-## Netlify + Jetstream (recommended for public demo)
+## Netlify + Jetstream (public demo)
 
-Host the **React frontend on Netlify** and **PocketBase on Jetstream** (`149.165.153.148:8090`). See **[deployment/NETLIFY.md](./deployment/NETLIFY.md)** for env vars, HTTPS, and API proxy options.
+Host the React app on Netlify and PocketBase on the Jetstream VM. Step-by-step commands are in [docs/howto-deploy-netlify-jetstream.md](docs/howto-deploy-netlify-jetstream.md). Hostnames, env vars, and the mixed-content rules are in [deployment/NETLIFY.md](deployment/NETLIFY.md).
 
-Use `REACT_APP_POCKETBASE_URL` (this project uses Create React App, not `VITE_API_URL`). PocketBase port is **8090**.
+This app is Create React App. The API URL is `REACT_APP_POCKETBASE_URL`. PocketBase listens on port **8090**.
 
----
+Current public pieces, matching `deployment/vizcoach.service` and `deployment/Caddyfile.example`:
 
-## Mac Mini Server (private Wi-Fi)
+- Frontend: `https://vizcoachs.netlify.app`
+- API: `https://vizcoach-api.duckdns.org` (Caddy on the VM proxies to `127.0.0.1:8090`)
 
-This section explains how to host VizCoach on a Mac Mini so it is accessible to everyone on your organization's private Wi-Fi network.
+## All-in-one on a Linux VM (systemd)
 
-## Prerequisities
+`deployment/vizcoach.service` is the unit that runs the API. It expects:
 
-On the Mac Mini, ensure you have the following installed:
+- User `exouser`
+- Working directory `/home/exouser/viz-coach/pocketbase`
+- Binary `/home/exouser/viz-coach/pocketbase/backend`
+- HTTP `0.0.0.0:8090`
+- CORS origins `https://vizcoachs.netlify.app`, `https://vizcoach-api.duckdns.org`, and `http://localhost:3000`
 
-1.  **Node.js** (for building the frontend)
-2.  **Go** (for compiling the backend)
-3.  **Git** (to pull the code)
+Install on the VM (adjust paths if the checkout is elsewhere):
 
-## Step 1: Network Setup
+```bash
+sudo cp deployment/vizcoach.service /etc/systemd/system/vizcoach.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now vizcoach
+sudo systemctl status vizcoach
+```
 
-1.  **Connect** the Mac Mini to the organization's Wi-Fi or (preferably) Ethernet.
-2.  **Find the IP Address**:
-    Run `ipconfig getifaddr en0` (Wi-Fi) or `ipconfig getifaddr en1` (Ethernet) in the terminal.
-    _Example IP: `10.10.1.50`_
-3.  **(Optional but Recommended)** Set a **Static IP** in System Settings -> Network so the address doesn't change after a reboot.
+Logs: `/tmp/viz-coach.out` and `/tmp/viz-coach.err`.
 
-## Step 2: Configure Environment
+HTTPS in front of that port is `deployment/Caddyfile.example`:
 
-1.  Clone/Copy the project to the Mac Mini (e.g., to `/Users/admin/viz-coach`).
-2.  Create/Edit the `.env` file in the project root:
-    ```bash
-    nano .env
-    ```
-3.  Set the URL to the Mac Mini's IP address:
-    ```ini
-    REACT_APP_POCKETBASE_URL=http://<YOUR_MAC_MINI_IP>:8090
-    ```
-    _Example: `REACT_APP_POCKETBASE_URL=http://10.10.1.50:8090`_
+```bash
+sudo apt install caddy
+sudo cp deployment/Caddyfile.example /etc/caddy/Caddyfile
+sudo systemctl reload caddy
+```
 
-## Step 3: Automated Build
+The example site block is `vizcoach-api.duckdns.org` reverse-proxying to `127.0.0.1:8090`. Point that DNS name at the VM before reloading Caddy so certificate issuance can succeed.
 
-We have included a script to automate the build process.
+Build the binary on the VM from `pocketbase/`:
 
-1.  Make the script executable:
-    ```bash
-    chmod +x deployment/deploy.sh
-    ```
-2.  Run the deployment script:
-    ```bash
-    ./deployment/deploy.sh
-    ```
+```bash
+go mod tidy
+./build.sh
+```
 
-This will:
+Restart after a binary or migration change:
 
-- Install dependencies.
-- Build the React frontend with your IP configuration.
-- Copy the frontend files to the backend.
-- Compile the PocketBase backend binary.
+```bash
+sudo systemctl restart vizcoach
+```
 
-## Step 4: Run as a Background Service (Auto-start)
+## All-in-one on a private LAN
 
-To ensure the server runs automatically when the Mac Mini turns on and restarts if it crashes, use `launchd`.
+Use this when every browser is on the same network as the machine running PocketBase. There is no `deployment/deploy.sh` and no launchd plist in this repo. The supported commands are the ones below.
 
-1.  **Edit the plist file**:
-    Open `deployment/com.vizcoach.server.plist` and update the paths to match where you put the project on the Mac Mini.
-    _Replace `/Users/YOUR_USER/Desktop/viz-coach` with the actual path._
+1. On the server, set the frontend env to the server's LAN address:
 
-2.  **Install the Service**:
-    Copy the plist file to the LaunchAgents folder:
+   ```ini
+   REACT_APP_POCKETBASE_URL=http://192.0.2.10:8090
+   ```
 
-    ```bash
-    cp deployment/com.vizcoach.server.plist ~/Library/LaunchAgents/
-    ```
+   macOS: `ipconfig getifaddr en0` (Wi-Fi) or `ipconfig getifaddr en1` (Ethernet). A DHCP reservation keeps that address stable.
 
-3.  **Load the Service**:
-    ```bash
-    launchctl load ~/Library/LaunchAgents/com.vizcoach.server.plist
-    ```
+2. From the repo root, build the React app and copy it into PocketBase's static dir:
 
-The server is now running! You can access it at `http://<YOUR_MAC_MINI_IP>:8090`.
+   ```bash
+   npm install
+   npm run build
+   rm -rf pocketbase/pb_public
+   cp -R build pocketbase/pb_public
+   ```
 
-## Maintenance Commands
+3. Build and serve:
 
-- **Stop Server**: `launchctl unload ~/Library/LaunchAgents/com.vizcoach.server.plist`
-- **Start Server**: `launchctl load ~/Library/LaunchAgents/com.vizcoach.server.plist`
-- **View Logs**:
-  - stdout: `/tmp/viz-coach.out`
-  - stderr: `/tmp/viz-coach.err`
+   ```bash
+   cd pocketbase
+   ./build.sh
+   ./backend serve --http=0.0.0.0:8090 --origins=http://192.0.2.10:8090
+   ```
+
+   `./serve.sh` hardcodes the Netlify and DuckDNS origins. On a LAN-only host, pass `--origins` yourself so the browser origin matches the URL students type.
+
+4. Open `http://192.0.2.10:8090`. The admin UI is `http://192.0.2.10:8090/_/`.
+
+PocketBase serves `pb_public` for any GET that is not already a route (`main.go`). The React build must exist before you serve, or the UI will not load from that host. API-only hosting (Netlify for the UI) can leave `pb_public` unused. PocketBase still needs `pb_data`.
+
+## Local development
+
+See [README.md](README.md). Frontend on port 3000, PocketBase on port 8090, `REACT_APP_POCKETBASE_URL=http://127.0.0.1:8090`.

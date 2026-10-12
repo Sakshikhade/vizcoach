@@ -1,177 +1,87 @@
-# Pocketbase Setup Steps
+# PocketBase setup
 
-Follow these steps to setup Pocketbase database for the application.
+The collections, fields, and API rules live in `pb_migrations/`. On startup, PocketBase applies those migrations. Do not recreate the collections by hand in the admin UI if the migrations have already run. The field-by-field reference is [docs/reference-collections.md](../docs/reference-collections.md).
 
 ## Installation
 
-> [!NOTE]
-> Ensure that all scripts in the `pocketbase` directory have execution permissions. If you are not sure, run the `chmod +x *.sh` command inside the `pocketbase` directory.
+The module file is already `go.mod` (`viz-coach-pocketbase`, Go 1.24.4, PocketBase v0.28.3).
 
-1. Follow the [PocketBase documentation](https://pocketbase.io/docs/go-overview/) and install Go on your system.
-2. Install the project's dependency using the [install.sh](install.sh) script.
-3. Run the development server using the [dev.sh](dev.sh) script.
-4. Build production version of the server using [build.sh](build.sh) script and serve it using the [serve.sh](serve.sh) script.
-5. Set the application name in the settings tab to `VizCoach`.
-
-## SMTP Setup
-
-All these settings are under the Mail settings.
-
-1. Set `Sender name` to somthing like `VizCoach Admin` or `[Admin name] via VizCoach`. All emails will be sent under this name.
-2. Set `Sender email` to admin/professor's email. All emails will be in the `from` section of the email.
-3. Enable the `SMTP mail server` option. **Note:** You need to configure the SMTP mail server to send password reset email to students.
-
-> [!TIP]
-> To use Gmail's SMTP mail server, set `SMTP server host` to `smtp.gmail.com`. You can use any gmail/asu email address as `username` under this setting. For password, you will need to create an `App Password` for the Google Account you populated in the `username` field. Follow [this guide](https://knowledge.workspace.google.com/kb/how-to-create-app-passwords-000009237) to create an App Password for your Google Account.
-
-## Users Auth Collection
-
-1. Add a new field called `role` to the default `users` collection of type `Select`. This field should be set to `non-empty` and `single-valued`. Values for the select `Teacher` and `Student`.
-2. Add a new field called `username` to the default `users` collection of type `Plain Text`. This field should be set to `non-empty` and validation pattern `^[a-zA-Z0-9_\-]+$`.
-3. Add an unique constraint on the `username` field ensuring one user per username.
-4. Update `List/Search Rule` and `View rule` in the `API Rules` for the `users` collection to `id = @request.auth.id || @request.auth.role = 'Teacher'`. This step will ensure that teachers can view student's records, apart from the requesting user.
-
-## Groups Collection
-
-> [!NOTE]
-> Before a group record is inserted in the database, the backend server will parse the associated `csv` file and try to create users from it. For the CSV file, please follow the following specifications.
->
-> | username | email           | name     |
-> | -------- | --------------- | -------- |
-> | asurite  | asurite@asu.edu | John Doe |
->
-> To understand how this works, refer to the [main.go](main.go) file in this directory.
-
-1.  Create a new collection called `groups`. This collection will store all student groups.
-2.  Add fields `semester`, `year`, `course`, and `csv` to the `groups` collection.
-3.  The field `semester` in the `groups` collection is of type `Select`. This field should be set to `non-empty` and `single-valued`. Values for the select `Fall`, `Spring`, and `Summer`.
-4.  The field `year` in the `groups` collection is of type `Number`. This field should be set to `non-zero` and `no-decimal`. Values should be between `2000` and `2100`.
-5.  The field `course` in the `groups` collection is of type `Select`. This field should be set to `non-empty` and `single-valued`. Values for the select `CSE578`.
-6.  The field `csv` in the `groups` collection is of type `File`. This field should be set to `non-empty`, `protected`, and `single-valued`. Allowed mime types include `text/csv`.
-7.  Add an unique constraint on fields `course`, `semester`, and `year`, ensuring one group per semester per course per year.
-8.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `groups` collection to the following value. This step will ensure that only teachers and associated students can view student groups.
-
-```
-// Teachers can access all groups
-@request.auth.role = 'Teacher' ||
-// Students can only access their associated group
-@request.auth.id ?= @collection.groups.usergroups_via_groupId.userId
+```bash
+cd pocketbase
+go mod tidy
+chmod +x *.sh
+./dev.sh
 ```
 
-9.  Update the `Create rule`, `Update rule`, and `Delete rule` in the `API Rules` for the `groups` collection to the following value. This step will ensure that only teachers can create, update, and delete groups.
+`./dev.sh` runs `go run main.go --dev serve`. The admin UI is [http://127.0.0.1:8090/_/](http://127.0.0.1:8090/_/).
 
-```
-@request.auth.role = 'Teacher'
-```
+Skip `./install.sh` when `go.mod` is already present. That script runs `go mod init backend`, which replaces the module name this repo already uses.
 
-## User-Groups Collection
+Production binary:
 
-1.  Create a new collection called `usergroups`. This collection will store the relationship between `users` and `groups`.
-2.  Add fields `userId` and `groupId` to the `usergroups` collection.
-3.  The field `userId` in the `usergroups` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `users` collection.
-4.  The field `groupId` in the `usergroups` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `groups` collection.
-5.  Add an unique constraint on fields `userId` and `groupId`, ensuring one user belongs to one group.
-6.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `usergroups` collection to the following value. This step will ensure that only teachers and associated students can view student groups.
-
-```
-// Teachers can access all usergroups
-@request.auth.role = 'Teacher' ||
-// Students can only access their associated usergroup
-@request.auth.id ?= @collection.usergroups.userId
+```bash
+./build.sh    # CGO_ENABLED=0 go build -o backend
+./serve.sh    # ./backend serve --http=0.0.0.0:8090 with the demo CORS origins
 ```
 
-## Activities Collection
+In the admin UI, set the application name to `VizCoach`.
 
-1.  Create a new collection called `activities`.
-2.  Add fields `title`, `description`, `groupId`, and `scheduled` to the `activities` collection.
-3.  The field `title` in the `activities` collection is of type `Plain Text`. This field should be set to `non-empty`.
-4.  The field `description` in the `activities` collection is of type `Rich Text`. This field should be set to `non-empty`.
-5.  The field `groupId` in the `activities` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `groups` collection.
-6.  The field `scheduled` in the `activities` collection is of type `DateTime`. This field can be empty, meaning activities will post immediately.
-7.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `activities` collection to the following value. This step will ensure that only teachers and associated students can view activities.
+## SMTP
 
-```
-// Teacher can access all the activities
-@request.auth.role = 'Teacher' ||
-// Students should have only access if in associated group
-@request.auth.id ?= @collection.activities.groupId.usergroups_via_groupId.userId
-```
+Password-reset mail is sent when a class CSV creates student accounts, and when a user asks for a reset on the login page. Both paths no-op or fail closed if SMTP is off. The import hook logs a warning and still links the student to the class.
 
-8.  Update the `Create rule`, `Update rule`, and `Delete rule` in the `API Rules` for the `activities` collection to the following value. This step will ensure that only teachers can create, update, and delete activities.
+Under **Settings → Mail**:
 
-```
-@request.auth.role = 'Teacher'
-```
+1. Set **Sender name** to something like `VizCoach Admin`.
+2. Set **Sender address** to the address students should see in From.
+3. Turn on the SMTP server.
 
-## Units Collection
+Gmail: host `smtp.gmail.com`, port 587, and an [App Password](https://knowledge.workspace.google.com/kb/how-to-create-app-passwords-000009237) for the account in the username field. Do not put the app password in git or in `REACT_APP_*` variables.
 
-1.  Create a new collection called `units`.
-2.  Add fields `title`, `description`, `datasets`, `order`, and `activityId` to the `units` collection.
-3.  The field `title` in the `units` collection is of type `Plain Text`. This field should be set to `non-empty`.
-4.  The field `description` in the `units` collection is of type `Rich Text`. This field should be set to `non-empty`.
-5.  The field `datasets` in the `units` collection is of type `File`. This field should be set to `non-empty`, `protected`, and `multi-valued`. Allowed mime types include `text/csv`.
-6.  The field `order` in the `units` collection is of type `Number`. This field should be set to `non-zero` and `no-decimals`. Values should be between `1` and `5`.
-7.  The field `activityId` in the `units` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `activities` collection.
-8.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `units` collection to the following value. This step will ensure that only teachers and associated students can view activities.
+## Google OAuth
 
-```
-// Teacher can access all the units
-@request.auth.role = 'Teacher' ||
-// Students should have only access if associated with activity
-@request.auth.id ?= @collection.units.activityId.groupId.usergroups_via_groupId.userId
-```
+Google login is PocketBase OAuth2, configured under **Settings → Auth providers → Google**. Client id and secret stay in PocketBase. `.env.example` lists the names as a reminder. They are not read by the React app.
 
-9.  Update the `Create rule`, `Update rule`, and `Delete rule` in the `API Rules` for the `units` collection to the following value. This step will ensure that only teachers can create, update, and delete units.
+`main.go` rewrites OAuth usernames that are empty or start with `oauth_` into a sanitized email local-part plus a short suffix, and sets `role` to `Student` when the record has no role yet. The signup form can still send `Teacher` in `createData` before that hook runs. If `role` is already set, the hook leaves it.
 
-```
-@request.auth.role = 'Teacher'
-```
+Add the frontend origin to the OAuth redirect URLs (local: `http://localhost:3000`, production: the Netlify URL).
 
-## Submissions Collection
+## First Admin
 
-1.  Create a new collection called `submissions`.
-2.  Add fields `json`, `unitId`, `userId`, and `state` to the `submissions` collection.
-3.  The field `json` in the `submissions` collection is of type `JSON`. This field should be set to `non-empty`. Value of this field will store student's Vegalite solution.
-4.  The field `unitId` in the `submissions` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `units` collection.
-5.  The field `userId` in the `submissions` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `users` collection.
-6.  The field `state` in the `submissions` collection is of type `Select`. Values for the select `help` and `submitted`. An `empty` state means that student is working on thier submission.
-7.  Add an unique constraint on fields `userId` and `unitId`, ensuring one submission per unit per student.
-8.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `submissions` collection to the following value. This step will ensure that only teachers and owning students can view submissions.
+`/signup` only offers `Student` and `Teacher`. To get an Admin:
 
-```
-// Teacher can access all the submissions
-@request.auth.role = 'Teacher' ||
-// Students should have only access their submissions
-@request.auth.id ?= @collection.submissions.userId
-```
+1. Create a user (signup, or the PocketBase users collection).
+2. In the admin UI, set that user's `role` to `Admin`.
 
-9.  Update the `Create rule` and `Update rule` in the `API Rules` for the `submissions` collection to the following value. This step will ensure that only students can create and update submissions.
+An Admin can then create other users from `/admin`.
 
-```
-@request.auth.id ?= @request.body.unitId.activityId.groupId.usergroups_via_groupId.userId
-```
+## CSV import
 
-## Comments Collection
+Creating a `groups` record with a `csv` file runs two hooks in `main.go`:
 
-1.  Create a new collection called `comments`.
-2.  Add fields `content`, `submissionId`, and `userId` to the `comments` collection.
-3.  The field `content` in the `comments` collection is of type `Rich Text`. This field should be set to `non-empty`. Value of this field will store comments' contents.
-4.  The field `submissionId` in the `comments` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `submissions` collection.
-5.  The field `userId` in the `submissions` collection is of type `Relation`. This field should be set to `non-empty` and `single-valued`. Values for this field maps to the `users` collection.
-6.  Update the `List/Search Rule` and `View rule` in the `API Rules` for the `comments` collection to the following value. This step will ensure that only teachers and owning students can view comments.
+1. Before save: parse the CSV (max 10 MB) and create a `users` row per row that does not already exist. New users get role `Student` and a random password.
+2. After save: link each email to the new group through `usergroups`, then send a password-reset email if SMTP is enabled.
 
-```
-// Teacher can access all the submissions' comments
-@request.auth.role = 'Teacher' ||
-// Students should have only access their submissions' comments
-@request.auth.id ?= @collection.comments.submissionId.userId
-```
+CSV columns:
 
-7. Update the `Create rule` in the `API Rules` for the `comments` collection to the following value. This step will ensure that only teachers and students with its submission can create comments.
+| username | email           | name     |
+| -------- | --------------- | -------- |
+| asurite  | asurite@asu.edu | John Doe |
 
-```
-// Teacher can access all the submissions' comments
-@request.auth.role = 'Teacher' ||
-// Students should have only access their submissions' comments
-@request.auth.id ?= @request.body.submissionId.userId
-```
+`username` must match `^[a-zA-Z0-9_\-]+$`. Email must be unique. `course` values are currently `CSE578`. `semester` is `Fall`, `Spring`, or `Summer`. `year` is an integer from 2000 to 2100. The unique index on `course` + `semester` + `year` was removed so two teachers can each have a class with the same course, term, and year.
+
+The teacher who creates the class should be stored on `groups.teacherId`. List and update rules only show that class to that teacher (and to Admins, and to students in the class).
+
+## What the migrations add beyond the first schema
+
+Treat `pb_migrations/` as the list. The pieces people usually miss when reading an old setup note:
+
+- `users.role` includes `Admin`, plus `Teacher` and `Student`.
+- `groups.teacherId` scopes teacher access.
+- `activities.Image` is an optional multi-file field.
+- `units.reference` is an optional multi-file field. `units.order` is an integer from 1 to 5.
+- `submissions` has `attempt` (required, minimum 1), `score` (optional, minimum 0), and `context` (optional text). Uniqueness is `(userId, unitId, attempt)`, so a student can have more than one attempt on a unit. `state` is `help` or `submitted`. An empty state is in-progress work. There is no `draft` select value. The file `1760071800_add_draft_state.js` is empty.
+- `materials` holds class files (`Syllabus`, `Presentation`, `Document`, `Video`, `Other`), up to 5 files, 50 MB each.
+- `chat_rooms` and `chat_messages` back `/dashboard/chat`. Room list and view require the caller's id to appear in the `participants` JSON. Any logged-in user can create a room or a message. Message delete is the author or a Teacher.
+
+API rules after the Admin migration are in [docs/reference-collections.md](../docs/reference-collections.md).

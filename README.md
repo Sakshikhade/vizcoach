@@ -1,187 +1,161 @@
 # VizCoach
 
-VizCoach is an innovative classroom orchestration toolkit for visualization education that aims to revolutionize how we teach and learn data visualization. This NSF-funded project empowers educators with the tools to effectively teach data visualization theories and design principles, addressing the critical need for software tools that help students learn visualization design theories and principles in modern data-driven decision-making processes.
+VizCoach is a classroom toolkit for visualization education. Instructors create activities and units, students build Vega-Lite charts from class datasets, and teachers review submissions, scores, and live class state.
 
-## Project Description
+## Project description
 
-VizCoach is a comprehensive educational platform designed to address two significant issues in visualization education:
+The app covers two jobs:
 
-1. **The need for software tools that help students learn visualization design theories and principles**
-2. **The lack of understanding of how classroom orchestration can improve visualization education**
+1. Give students a place to practice visualization design on real datasets.
+2. Give instructors a way to orchestrate that work in class: groups, activities, units, submissions, comments, chat, and an orchestration view.
 
-The platform enables instructors to create and moderate visualization-related classroom activities, providing real-time feedback to students while offering immediate feedback on student submissions. This promotes active learning and helps prepare students for the workforce by developing essential data analysis and visualization skills.
+Accounts have one of three roles: `Student`, `Teacher`, or `Admin`. Public signup offers Student and Teacher. Admin is assigned in PocketBase or by an existing Admin.
 
-## Getting Started
+## Documentation
+
+| Doc | What it is |
+| --- | --- |
+| [docs/README.md](docs/README.md) | Index of the deeper docs |
+| [docs/tutorial-first-class.md](docs/tutorial-first-class.md) | Local setup through a first class |
+| [docs/howto-import-students.md](docs/howto-import-students.md) | CSV student import |
+| [docs/howto-deploy-netlify-jetstream.md](docs/howto-deploy-netlify-jetstream.md) | Public demo deploy |
+| [docs/reference-routes.md](docs/reference-routes.md) | Routes and who can open them |
+| [docs/reference-collections.md](docs/reference-collections.md) | PocketBase collections |
+| [docs/reference-env-and-scripts.md](docs/reference-env-and-scripts.md) | Env vars and scripts |
+| [docs/explanation-architecture.md](docs/explanation-architecture.md) | How the pieces fit |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Hosting options |
+| [deployment/NETLIFY.md](deployment/NETLIFY.md) | Netlify frontend and Jetstream API |
+| [pocketbase/README.md](pocketbase/README.md) | Backend setup, SMTP, and CSV format |
+
+## Getting started
 
 ### Prerequisites
 
-Before running VizCoach, ensure you have the following installed on your system:
+- Node.js 20 (the Netlify build pins 20 in `netlify.toml`)
+- npm
+- Go 1.24.4 or newer (see `pocketbase/go.mod`)
+- Git
 
-- **Node.js** (version 16 or higher)
-- **npm** (comes with Node.js)
-- **Go** (version 1.19 or higher) - for PocketBase backend
-- **Git** - for cloning the repository
+### Installation and setup
 
-### Installation and Setup
-
-Follow these step-by-step instructions to get VizCoach running on your computer:
-
-#### 1. Clone the Repository
+#### 1. Clone the repository
 
 ```bash
-git clone https://github.com/svl-at-asu/viz-coach.git
-cd viz-coach
+git clone https://github.com/Sakshikhade/vizcoach.git
+cd vizcoach
 ```
 
-#### 2. Install Frontend Dependencies
+#### 2. Install frontend dependencies
 
 ```bash
+cp .env.example .env
 npm install
 ```
 
-#### 3. Set Up the Backend (PocketBase)
+Leave `REACT_APP_POCKETBASE_URL=http://127.0.0.1:8090` for local development.
 
-Navigate to the PocketBase directory and set up the backend:
+#### 3. Set up PocketBase
 
-**For Windows:**
-
-```cmd
-cd pocketbase
-chmod +x *.sh
-./install.sh
-```
-
-**For Mac/Linux:**
+`pocketbase/go.mod` is already in the repo. Do not run `pocketbase/install.sh` on a fresh clone: that script runs `go mod init backend` and fights the existing module name.
 
 ```bash
 cd pocketbase
+go mod tidy
 chmod +x *.sh
-./install.sh
-```
-
-#### 4. Start the Development Servers
-
-**Terminal 1 - Start PocketBase Backend:**
-
-```bash
-cd pocketbase
 ./dev.sh
 ```
 
-**Terminal 2 - Start React Frontend:**
+The dev server listens on port 8090. On first start, open [http://127.0.0.1:8090/_/](http://127.0.0.1:8090/_/) and create the superuser. Migrations in `pocketbase/pb_migrations/` create the collections. Set the application name to `VizCoach`. SMTP setup is in [pocketbase/README.md](pocketbase/README.md).
+
+#### 4. Start the React app
+
+In a second terminal, from the repo root:
 
 ```bash
 npm start
 ```
 
-#### 5. Access the Application
+- Frontend: [http://localhost:3000](http://localhost:3000)
+- PocketBase admin: [http://127.0.0.1:8090/_/](http://127.0.0.1:8090/_/)
 
-- **Frontend**: Open [http://localhost:3000](http://localhost:3000) in your browser
-- **PocketBase Admin**: Open [http://localhost:8090/\_/](http://localhost:8090/_/) in your browser
+Sign up at `/signup` as a Teacher, then follow [docs/tutorial-first-class.md](docs/tutorial-first-class.md).
 
-#### 6. Configure PocketBase
-
-1. Set the application name to `VizCoach` in the PocketBase admin panel
-2. Follow the detailed setup instructions in `pocketbase/README.md` to configure:
-   - User authentication and roles
-   - Database collections (groups, activities, units, submissions, comments)
-   - SMTP settings for email functionality
-
-### Production Deployment
-
-To build and serve the production version:
+### Production build
 
 ```bash
-# Build the React application
 npm run build
-
-# Build and serve PocketBase
 cd pocketbase
-./build.sh
-./serve.sh
+CGO_ENABLED=0 go build -o backend
+./backend serve --http=0.0.0.0:8090
 ```
+
+`pocketbase/build.sh` and `pocketbase/serve.sh` wrap those last two commands. `serve.sh` also sets the CORS origins used by the public demo. Hosting steps are in [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Features
 
-VizCoach provides a comprehensive set of features for visualization education:
+### Teachers
 
-### For Educators (Teachers)
+- Create classes (groups) for a course, semester, and year, and import students from CSV
+- Create activities and ordered units with CSV datasets and reference files
+- Review submissions, including multiple attempts, scores, and comments
+- Watch class state in the orchestration view
+- Chat with students
+- Share class materials (syllabus, slides, documents, video, other)
 
-- **Activity Management**: Create, schedule, and manage visualization activities
-- **Group Management**: Organize students into groups by semester, year, and course
-- **Unit Creation**: Design structured learning units with datasets and descriptions
-- **Real-time Monitoring**: Track student progress and submissions in real-time
-- **Feedback System**: Provide immediate feedback and comments on student work
-- **Student Management**: Import students via CSV and manage user accounts
-- **Reference Materials**: Upload and share reference images and materials
+### Students
 
-### For Students
+- Build Vega-Lite specs in the visual builder or the JSON editor
+- Browse the unit's CSV datasets
+- Save in-progress work, raise a hand (`help`), and submit
+- Read teacher comments
+- Chat with classmates and the teacher
 
-- **Interactive Visualization Builder**: Create visualizations using Vega-Lite with an intuitive interface
-- **JSON Editor**: Direct JSON editing for advanced users with syntax validation
-- **Dataset Exploration**: Browse and analyze provided datasets through interactive tables
-- **Real-time Feedback**: Receive immediate feedback on visualization submissions
-- **Help System**: Raise hand for assistance and receive teacher support
-- **Progress Tracking**: Monitor submission status and save work in progress
-- **Comment System**: Engage in discussions with teachers and peers
+### Admins
 
-### Core Functionality
+- Open `/admin` to create users, bulk-add users, and manage classes
+- See records across teachers. Teachers only see classes where `groups.teacherId` is their user id
 
-- **Vega-Lite Integration**: Built-in support for creating and editing Vega-Lite visualizations
-- **Multi-dataset Support**: Work with multiple CSV datasets simultaneously
-- **Responsive Design**: Modern, mobile-friendly interface
-- **Real-time Collaboration**: Live updates and feedback system
-- **Role-based Access Control**: Secure authentication and authorization
-- **Data Visualization Tools**: Comprehensive toolkit for creating effective visualizations
+### Shared
 
-## Technology Stack
+- Email and password login, password reset, and Google OAuth (configured in PocketBase, not in the React env)
+- Role checks on routes: Student, Teacher, Admin
+- PocketBase realtime for live updates. Chat and live submission updates need a direct API connection, not an HTTP-only proxy
+
+## Technology stack
 
 ### Frontend
 
-- **React 18.3.1** - Modern React with hooks and functional components
-- **TypeScript 4.9.4** - Type-safe JavaScript development
-- **Material-UI (MUI) 5.16.0** - Modern React component library
-- **React Router 6.23.1** - Client-side routing
-- **Vega-Lite 5.17.0** - Grammar of graphics for data visualization
-- **D3.js 7.9.0** - Data visualization library
-- **Monaco Editor** - Code editor for JSON editing
-- **TipTap** - Rich text editor for content creation
+- React 18.3 and TypeScript 4.9
+- Create React App (`react-scripts` 5)
+- Material UI 5
+- React Router 6
+- Vega, Vega-Lite 5, and react-vega
+- D3 7
+- Monaco Editor
+- TipTap (`mui-tiptap`)
+- PocketBase JavaScript SDK 0.26
 
 ### Backend
 
-- **PocketBase 0.26.1** - Backend-as-a-Service with Go
-- **Go 1.19+** - Backend runtime
-- **SQLite** - Embedded database
-- **RESTful API** - REST API for data operations
+- PocketBase server v0.28.3 (Go module in `pocketbase/go.mod`)
+- Go 1.24.4
+- SQLite (PocketBase's embedded database)
+- Custom hooks in `pocketbase/main.go` for CSV student import and OAuth username defaults
 
-### Development Tools
+The JavaScript SDK and the Go server are different versions. The SDK talks to the HTTP API. Schema changes ship as JavaScript migrations under `pocketbase/pb_migrations/`.
 
-- **Create React App** - React application boilerplate
-- **Prettier** - Code formatting
-- **Husky** - Git hooks
-- **Sass** - CSS preprocessing
-- **Jest** - Testing framework
-- **Testing Library** - React component testing
+### Development tools
 
-## References
-
-### Tools, Frameworks, and Libraries
-
-- [React](https://reactjs.org/) - JavaScript library for building user interfaces
-- [Material-UI](https://mui.com/) - React component library implementing Material Design
-- [Vega-Lite](https://vega.github.io/vega-lite/) - Grammar of graphics for data visualization
-- [D3.js](https://d3js.org/) - Data-driven document manipulation
-- [PocketBase](https://pocketbase.io/) - Backend-as-a-Service with Go
-- [TypeScript](https://www.typescriptlang.org/) - Typed superset of JavaScript
-- [Monaco Editor](https://microsoft.github.io/monaco-editor/) - Code editor for the web
-- [TipTap](https://tiptap.dev/) - Headless rich text editor
+- Prettier, Husky, Sass
+- Jest and Testing Library (Create React App defaults)
+- Netlify CLI for the frontend host
 
 ## Contributing
 
-This project follows a participatory design approach, utilizing community feedback to create a flexible tool for education. Contributions are welcome and should align with the project's educational goals.
+Changes should stay aligned with classroom use: a teacher can run an activity, a student can submit a chart, and an admin can manage accounts. Schema changes belong in a new file under `pocketbase/pb_migrations/`.
 
-**Repository**: [https://github.com/svl-at-asu/viz-coach.git](https://github.com/svl-at-asu/viz-coach.git)
+**Repository:** [https://github.com/Sakshikhade/vizcoach](https://github.com/Sakshikhade/vizcoach)
 
 ## Support
 
-For technical support or questions about VizCoach, please refer to the documentation in the `pocketbase/README.md` file or contact the development team.
+Start with [docs/README.md](docs/README.md). Backend setup details are in [pocketbase/README.md](pocketbase/README.md). Deploy details are in [DEPLOYMENT.md](DEPLOYMENT.md).

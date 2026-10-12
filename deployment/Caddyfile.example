@@ -5,6 +5,6 @@
 # 4. Edit domain, then: sudo systemctl reload caddy
 # 5. PocketBase stays on 127.0.0.1:8090 (vizcoach systemd service)
 
-api-vizcoach.duckdns.org {
+vizcoach-api.duckdns.org {
 	reverse_proxy 127.0.0.1:8090
 }
